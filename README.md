@@ -28,3 +28,9 @@ You can run the command line through bundle:
         
         # example
         bundle exec mortar help
+
+# Testing
+
+To run the tests, do:
+
+        rake spec

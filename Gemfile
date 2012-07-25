@@ -7,6 +7,12 @@ group :development do
 end
 
 group :test do
-  gem "rake"
+  gem "excon"
   gem "fakefs"
+  gem "json"
+  gem "rake"
+  gem "rr"
+  gem "rspec"
+  gem "taps"
+  gem "webmock"  
 end

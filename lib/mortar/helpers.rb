@@ -1,3 +1,5 @@
+require "vendor/mortar/okjson"
+
 module Mortar
   module Helpers
 

@@ -1,4 +1,5 @@
 require "mortar"
+require "mortar/command"
 require "mortar/helpers"
 
 # workaround for rescue/reraise to define errors in command.rb failing in 1.8.6
@@ -20,9 +21,8 @@ class Mortar::CLI
         $stdout.sync = true
       end
       command = args.shift.strip rescue "help"
-      display("Hello, world!")
-      #Mortar::Command.load
-      #Mortar::Command.run(command, args)
+      Mortar::Command.load
+      Mortar::Command.run(command, args)
     rescue Interrupt
       `stty icanon echo`
       error("Command cancelled.")
