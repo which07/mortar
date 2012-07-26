@@ -17,6 +17,26 @@ class Mortar::Command::Base
     @options = options
   end
 
+  def project
+    @project ||= if options[:project].is_a?(String)
+      options[:project]
+    elsif ENV.has_key?('MORTAR_PROJECT')
+      ENV['MORTAR_PROJECT']
+    elsif project_from_dir = extract_project_in_dir(Dir.pwd)
+      project_from_dir
+    else
+      raise Mortar::Command::CommandFailed, "No project specified.\nRun this command from a project folder or specify which project to use with --project <project name>"
+    end
+  end
+  
+  def api
+    raise NotImplementedError
+  end
+  
+  def mortar
+    Mortar::Auth.client
+  end
+
 protected
 
   def self.inherited(klass)
@@ -143,8 +163,30 @@ protected
     Mortar::Command.validate_arguments!
   end
 
-  def confirm_mismatch?
-    options[:confirm] && (options[:confirm] != options[:app])
+  def extract_project_in_dir(dir)
+    return unless remotes = git_remotes(dir)
+
+    if remote = options[:remote]
+      remotes[remote]
+    elsif remote = extract_project_from_git_config
+      remotes[remote]
+    else
+      projects = remotes.values.uniq
+      if projects.size == 1
+        projects.first
+      else
+        raise(Mortar::Command::CommandFailed, "Multiple projects in folder and no project specified.\nSpecify which project to use with --project <project name>")
+      end
+    end
+  end
+
+  def extract_project_from_git_config
+    remote = git("config mortar.remote")
+    remote == "" ? nil : remote
+  end
+
+  def git_organization
+    "mortarcode"
   end
 
   def git_remotes(base_dir=Dir.pwd)
@@ -155,8 +197,8 @@ protected
     return unless File.exists?(".git")
     git("remote -v").split("\n").each do |remote|
       name, url, method = remote.split(/\s/)
-      if url =~ /^git@#{mortar.host}:([\w\d-]+)\.git$/
-        remotes[name] = $1
+      if url =~ /^git@([\w\d\.]+):#{git_organization}\/([\w\d-]+)\.git$/
+        remotes[name] = $2
       end
     end
 
@@ -166,10 +208,6 @@ protected
     else
       remotes
     end
-  end
-
-  def escape(value)
-    heroku.escape(value)
   end
 end
 
