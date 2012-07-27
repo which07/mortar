@@ -121,7 +121,7 @@ returns void {
 DATASET
           pigscript_contents = <<-PIGSCRIPT
 -- My pigscript
-<%= datasets.songs.code -%>
+<%= datasets.songs -%>
 
 x = SONGS_LOADER();
 PIGSCRIPT

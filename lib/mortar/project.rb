@@ -115,6 +115,10 @@ module Mortar
         script_file.close
         script_contents
       end
+      
+      def to_s
+        code
+      end
     end
     
   end
