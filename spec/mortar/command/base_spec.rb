@@ -12,21 +12,21 @@ module Mortar::Command
     context "detecting the project" do
       it "attempts to find the project via the --project option" do
         @base.stub!(:options).and_return(:project => "myproject")
-        @base.project.should == "myproject"
+        @base.project.name.should == "myproject"
       end
 
       it "attempts to find the project via MORTAR_PROJECT when not explicitly specified" do
         ENV['MORTAR_PROJECT'] = "myenvproject"
-        @base.project.should == "myenvproject"
+        @base.project.name.should == "myenvproject"
         @base.stub!(:options).and_return([])
-        @base.project.should == "myenvproject"
+        @base.project.name.should == "myenvproject"
         ENV.delete('MORTAR_PROJECT')
       end
 
       it "overrides MORTAR_PROJECT when explicitly specified" do
         ENV['MORTAR_PROJECT'] = "myenvproject"
         @base.stub!(:options).and_return(:project => "myproject")
-        @base.project.should == "myproject"
+        @base.project.name.should == "myproject"
         ENV.delete('MORTAR_PROJECT')
       end
 
@@ -53,13 +53,13 @@ other\tgit@github.com:other.git (push)
       it "gets the project from remotes when there's only one project" do
         @base.stub!(:git_remotes).and_return({ 'mortar' => 'myproject' })
         @base.stub!(:git).with("config mortar.remote").and_return("")
-        @base.project.should == 'myproject'
+        @base.project.name.should == 'myproject'
       end
 
       it "accepts a --remote argument to choose the project from the remote name" do
         @base.stub!(:git_remotes).and_return({ 'staging' => 'myproject-staging', 'production' => 'myproject' })
         @base.stub!(:options).and_return(:remote => "staging")
-        @base.project.should == 'myproject-staging'
+        @base.project.name.should == 'myproject-staging'
       end
 
       it "raises when cannot determine which project is it" do

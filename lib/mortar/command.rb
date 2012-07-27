@@ -8,7 +8,6 @@ module Mortar
     class CommandFailed  < RuntimeError; end
 
     extend Mortar::Helpers
-    extend Mortar::Project
 
     def self.load
       Dir[File.join(File.dirname(__FILE__), "command", "*.rb")].each do |file|

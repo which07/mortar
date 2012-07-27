@@ -2,21 +2,120 @@ module Mortar
   module Project
     class ProjectError < RuntimeError; end
     
-    extend self
-    
-    def pigscripts_dir
-      File.join(Dir.pwd, "pigscripts")
-    end
-    
-    def pigscripts
-      unless Dir.exists?(pigscripts_dir)
-        raise ProjectError, "Unable to find pigscripts directory in project"
+    class Project
+      attr_reader :name
+      
+      def initialize(name, root_path)
+        @name = name
+        @root_path = root_path
       end
       
-      # get {script_name => full_path}
-      pigscripts_paths = Dir[File.join(pigscripts_dir, "**", "*.pig")]
-      pigscripts_paths_hsh = pigscripts_paths.collect{|path| [File.basename(path, ".pig"), path]}.flatten
-      Hash[*pigscripts_paths_hsh]
-    end    
+      def pigscripts_path
+        File.join(@root_path, "pigscripts")
+      end
+
+      def pigscripts
+        @pigscripts ||= PigScripts.new(
+          pigscripts_path,
+          "pigscripts",
+          ".pig")
+        @pigscripts
+      end
+
+      
+      def datasets_path
+        File.join(@root_path, "datasets")
+      end
+            
+      def datasets
+        @datasets ||= DataSets.new(
+          datasets_path,
+          "datasets",
+          ".pig")
+        @datasets
+      end      
+    end
+    
+    class ProjectEntity
+      
+      include Enumerable
+      
+      def initialize(path, name, filename_extension)
+        @path = path
+        @name = name
+        @filename_extension = filename_extension
+        @elements = elements
+      end
+      
+      def method_missing(method, *args)
+        method_name = method.to_s
+        return @elements[method_name] if @elements[method_name]
+        super
+      end
+      
+      def each
+        @elements.each {|key, value| yield [key, value]}
+      end
+      
+      def [](key)
+        @elements[key]
+      end
+      
+      def keys
+        @elements.keys
+      end
+      
+      protected
+      
+      def element_name(element_path)
+        File.basename(element_path, @filename_extension)
+      end
+
+      def elements
+        unless Dir.exists? @path
+          raise ProjectError, "Unable to find #{@name} directory in project"
+        end
+
+        # get {script_name => full_path}
+        file_paths = Dir[File.join(@path, "**", "*#{@filename_extension}")]
+        file_paths_hsh = file_paths.collect{|element_path| [element_name(element_path), element(element_name(element_path), element_path)]}.flatten
+        Hash[*file_paths_hsh]
+      end
+      
+      def element(path)
+        raise NotImplementedError, "Implement in subclass"
+      end
+    end
+    
+    class PigScripts < ProjectEntity
+      def element(name, path)
+        Script.new(name, path)
+      end
+    end
+    
+    class DataSets < ProjectEntity
+      def element(name, path)
+        Script.new(name, path)
+      end
+    end
+    
+    class Script
+      
+      attr_reader :name
+      attr_reader :path
+      
+      def initialize(name, path)
+        @name = name
+        @path = path
+      end
+
+      def code
+        script_file = File.open(@path, "r")
+        script_contents = script_file.read
+        script_file.close
+        script_contents
+      end
+    end
+    
   end
 end

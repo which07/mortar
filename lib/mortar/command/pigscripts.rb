@@ -1,3 +1,5 @@
+require 'erb'
+
 require "mortar/project"
 require "mortar/command/base"
 
@@ -5,8 +7,6 @@ require "mortar/command/base"
 #
 class Mortar::Command::PigScripts < Mortar::Command::Base
   
-  include Mortar::Project
-
   # pigscripts
   #
   # display the available set of pigscripts
@@ -21,13 +21,12 @@ class Mortar::Command::PigScripts < Mortar::Command::Base
   def index
     # validation
     validate_arguments!
-    all_pigscripts = pigscripts
-    unless all_pigscripts.empty?
+    if project.pigscripts.any?
       styled_header("pigscripts")
-      styled_array(all_pigscripts.keys)
+      styled_array(project.pigscripts.keys)
     else
       display("You have no pigscripts.")
-    end 
+    end
   end
 
   # pigscripts:expand SCRIPT
@@ -46,11 +45,22 @@ class Mortar::Command::PigScripts < Mortar::Command::Base
     end
     validate_arguments!
     
-    all_pigscripts = pigscripts
-    unless pigscript_path = all_pigscripts[name]
-      available_scripts = all_pigscripts.empty? ? "No pigscripts found" : "Available scripts:\n#{pigscripts.keys.join("\n")}"
+    
+    unless pigscript = project.pigscripts[name]
+      available_scripts = project.pigscripts.none? ? "No pigscripts found" : "Available scripts:\n#{project.pigscripts.keys.sort.join("\n")}"
       error("Unable to find pigscript #{name}\n#{available_scripts}")
     end
+    
+    template = ERB.new(pigscript.code, nil, "-")
+    result = template.result(erb_binding(project))
+    display(result)
   end
-
+  
+  protected
+  
+  def erb_binding(project)
+    pigscripts = project.pigscripts
+    datasets = project.datasets
+    binding
+  end
 end

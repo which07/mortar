@@ -1,6 +1,7 @@
 require "fileutils"
 require "mortar/auth"
 require "mortar/command"
+require "mortar/project"
 
 class Mortar::Command::Base
   include Mortar::Helpers
@@ -18,15 +19,21 @@ class Mortar::Command::Base
   end
 
   def project
-    @project ||= if options[:project].is_a?(String)
-      options[:project]
-    elsif ENV.has_key?('MORTAR_PROJECT')
-      ENV['MORTAR_PROJECT']
-    elsif project_from_dir = extract_project_in_dir(Dir.pwd)
-      project_from_dir
-    else
-      raise Mortar::Command::CommandFailed, "No project specified.\nRun this command from a project folder or specify which project to use with --project <project name>"
+    unless @project
+      project_dir = Dir.pwd
+      project_name = if options[:project].is_a?(String)
+        options[:project]
+      elsif ENV.has_key?('MORTAR_PROJECT')
+        ENV['MORTAR_PROJECT']
+      elsif project_from_dir = extract_project_in_dir(project_dir)
+        project_from_dir
+      else
+        raise Mortar::Command::CommandFailed, "No project specified.\nRun this command from a project folder or specify which project to use with --project <project name>"
+      end
+      
+      @project = Mortar::Project::Project.new(project_name, project_dir)
     end
+    @project
   end
   
   def api

@@ -17,7 +17,7 @@ require "fakefs/safe"
 require 'tmpdir'
 require "webmock/rspec"
 
-def execute(command_line)
+def execute(command_line, project=nil)
   extend RR::Adapters::RRMethods
 
   args = command_line.split(" ")
@@ -26,9 +26,12 @@ def execute(command_line)
   Mortar::Command.load
   object, method = Mortar::Command.prepare_run(command, args)
 
-  #any_instance_of(Mortar::Command::Base) do |base|
-  #  stub(base).app.returns("myapp")
-  #end
+  # stub the project
+  if project
+    any_instance_of(Mortar::Command::Base) do |base|
+      stub(base).project.returns(project)
+    end
+  end
 
   original_stdin, original_stderr, original_stdout = $stdin, $stderr, $stdout
 
@@ -103,13 +106,24 @@ def stub_core
 end
 
 def with_blank_project(&block)
+  # setup a sandbox directory
   sandbox = File.join(Dir.tmpdir, "mortar", Process.pid.to_s)
   FileUtils.mkdir_p(sandbox)
   
-  Dir.chdir(sandbox)
-  FileUtils.mkdir_p(File.join(sandbox, "pigscripts"))
+  # setup project directory
+  project_name = "myproject"
+  project_path = File.join(sandbox, project_name)
+  FileUtils.mkdir_p(project_path)
+  
+  # setup project subdirectories
+  FileUtils.mkdir_p(File.join(project_path, "datasets"))
+  FileUtils.mkdir_p(File.join(project_path, "pigscripts"))
 
-  block.call
+  Dir.chdir(project_path)
+  
+  project = Mortar::Project::Project.new(project_name, project_path)
+  
+  block.call(project)
 
   FileUtils.rm_rf(sandbox)
 end
