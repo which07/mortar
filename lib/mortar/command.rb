@@ -1,4 +1,5 @@
 require 'mortar/helpers'
+require 'mortar/project'
 require 'mortar/version'
 require "optparse"
 
@@ -7,6 +8,7 @@ module Mortar
     class CommandFailed  < RuntimeError; end
 
     extend Mortar::Helpers
+    extend Mortar::Project
 
     def self.load
       Dir[File.join(File.dirname(__FILE__), "command", "*.rb")].each do |file|
@@ -192,6 +194,8 @@ module Mortar
       error extract_error(e.http_body) {
         e.http_body =~ /^([\w\s]+ not found).?$/ ? $1 : "Resource not found"
       }
+    rescue Mortar::Project::ProjectError => e
+      error e.message
     #rescue Mortar::API::Errors::Locked => e
     #  app = e.response.headers[:x_confirmation_required]
     #  if confirm_command(app, extract_error(e.response.body))

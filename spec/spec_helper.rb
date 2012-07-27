@@ -102,6 +102,23 @@ def stub_core
   end
 end
 
+def with_blank_project(&block)
+  sandbox = File.join(Dir.tmpdir, "mortar", Process.pid.to_s)
+  FileUtils.mkdir_p(sandbox)
+  
+  Dir.chdir(sandbox)
+  FileUtils.mkdir_p(File.join(sandbox, "pigscripts"))
+
+  block.call
+
+  FileUtils.rm_rf(sandbox)
+end
+
+def write_file(path, contents="")
+  FileUtils.mkdir_p File.dirname(path)
+  File.open(path, 'w') {|f| f.write(contents)}
+end
+
 require "mortar/helpers"
 module Mortar::Helpers
   @home_directory = Dir.mktmpdir
