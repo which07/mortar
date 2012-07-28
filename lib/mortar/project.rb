@@ -4,6 +4,7 @@ module Mortar
     
     class Project
       attr_reader :name
+      attr_reader :root_path
       
       def initialize(name, root_path)
         @name = name

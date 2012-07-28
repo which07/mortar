@@ -64,17 +64,6 @@ module Mortar
       end
     end
 
-    def has_git?
-      %x{ git --version }
-      $?.success?
-    end
-
-    def git(args)
-      return "" unless has_git?
-      flattened_args = [args].flatten.compact.join(" ")
-      %x{ git #{flattened_args} 2>&1 }.strip
-    end
-
     def time_ago(elapsed)
       if elapsed <= 60
         "#{elapsed.floor}s ago"
@@ -109,13 +98,6 @@ module Mortar
 
     def quantify(string, num)
       "%d %s" % [ num, num.to_i == 1 ? string : "#{string}s" ]
-    end
-
-    def create_git_remote(remote, url)
-      return if git('remote').split("\n").include?(remote)
-      return unless File.exists?(".git")
-      git "remote add #{remote} #{url}"
-      display "Git remote #{remote} added"
     end
 
     def longest(items)

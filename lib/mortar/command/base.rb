@@ -2,6 +2,7 @@ require "fileutils"
 require "mortar/auth"
 require "mortar/command"
 require "mortar/project"
+require "mortar/git"
 
 class Mortar::Command::Base
   include Mortar::Helpers
@@ -25,7 +26,7 @@ class Mortar::Command::Base
         options[:project]
       elsif ENV.has_key?('MORTAR_PROJECT')
         ENV['MORTAR_PROJECT']
-      elsif project_from_dir = extract_project_in_dir(project_dir)
+      elsif project_from_dir = extract_project_in_dir()
         project_from_dir
       else
         raise Mortar::Command::CommandFailed, "No project specified.\nRun this command from a project folder or specify which project to use with --project <project name>"
@@ -42,6 +43,10 @@ class Mortar::Command::Base
   
   def mortar
     Mortar::Auth.client
+  end
+  
+  def git
+    @git ||= Mortar::Git::Git.new
   end
 
 protected
@@ -170,8 +175,8 @@ protected
     Mortar::Command.validate_arguments!
   end
 
-  def extract_project_in_dir(dir)
-    return unless remotes = git_remotes(dir)
+  def extract_project_in_dir()
+    return unless (git.has_dot_git? and remotes = git.remotes(git_organization))
 
     if remote = options[:remote]
       remotes[remote]
@@ -188,7 +193,7 @@ protected
   end
 
   def extract_project_from_git_config
-    remote = git("config mortar.remote")
+    remote = git.git("config mortar.remote")
     remote == "" ? nil : remote
   end
 
@@ -196,26 +201,6 @@ protected
     "mortarcode"
   end
 
-  def git_remotes(base_dir=Dir.pwd)
-    remotes = {}
-    original_dir = Dir.pwd
-    Dir.chdir(base_dir)
-
-    return unless File.exists?(".git")
-    git("remote -v").split("\n").each do |remote|
-      name, url, method = remote.split(/\s/)
-      if url =~ /^git@([\w\d\.]+):#{git_organization}\/([\w\d-]+)\.git$/
-        remotes[name] = $2
-      end
-    end
-
-    Dir.chdir(original_dir)
-    if remotes.empty?
-      nil
-    else
-      remotes
-    end
-  end
 end
 
 module Mortar::Command

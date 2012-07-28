@@ -32,8 +32,8 @@ module Mortar::Command
 
       it "read remotes from git config" do
         Dir.stub(:chdir)
-        File.should_receive(:exists?).with(".git").and_return(true)
-        @base.should_receive(:git).with('remote -v').and_return(<<-REMOTES)
+        @base.git.stub!(:has_dot_git?).and_return(true)
+        @base.git.should_receive(:git).with('remote -v').and_return(<<-REMOTES)
 staging\tgit@github.com:mortarcode/myproject-staging.git (fetch)
 staging\tgit@github.com:mortarcode/myproject-staging.git (push)
 production\tgit@github.com:mortarcode/myproject.git (fetch)
@@ -47,17 +47,19 @@ other\tgit@github.com:other.git (push)
         @base.stub(:mortar).and_return(@mortar)
 
         # need a better way to test internal functionality
-        @base.send(:git_remotes, '/home/dev/myproject').should == { 'staging' => 'myproject-staging', 'production' => 'myproject' }
+        @base.git.send(:remotes, 'mortarcode').should == { 'staging' => 'myproject-staging', 'production' => 'myproject' }
       end
 
       it "gets the project from remotes when there's only one project" do
-        @base.stub!(:git_remotes).and_return({ 'mortar' => 'myproject' })
-        @base.stub!(:git).with("config mortar.remote").and_return("")
+        @base.git.stub!(:has_dot_git?).and_return(true)
+        @base.git.stub!(:remotes).and_return({ 'mortar' => 'myproject' })
+        @base.git.stub!(:git).with("config mortar.remote").and_return("")
         @base.project.name.should == 'myproject'
       end
 
       it "accepts a --remote argument to choose the project from the remote name" do
-        @base.stub!(:git_remotes).and_return({ 'staging' => 'myproject-staging', 'production' => 'myproject' })
+        @base.git.stub!(:has_dot_git?).and_return(true)
+        @base.git.stub!(:remotes).and_return({ 'staging' => 'myproject-staging', 'production' => 'myproject' })
         @base.stub!(:options).and_return(:remote => "staging")
         @base.project.name.should == 'myproject-staging'
       end

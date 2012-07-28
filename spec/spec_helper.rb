@@ -1,6 +1,7 @@
 $stdin = File.new("/dev/null")
 
 require "rubygems"
+require "vendor/mortar/uuid"
 
 require "excon"
 Excon.defaults[:mock] = true
@@ -107,7 +108,8 @@ end
 
 def with_blank_project(&block)
   # setup a sandbox directory
-  sandbox = File.join(Dir.tmpdir, "mortar", Process.pid.to_s)
+  starting_dir = Dir.pwd
+  sandbox = File.join(Dir.tmpdir, "mortar", Mortar::UUID.create_random.to_s)
   FileUtils.mkdir_p(sandbox)
   
   # setup project directory
@@ -121,16 +123,94 @@ def with_blank_project(&block)
 
   Dir.chdir(project_path)
   
+  # initialize git repo
+  `git init`
+  
   project = Mortar::Project::Project.new(project_name, project_path)
   
-  block.call(project)
+  begin
+    block.call(project)
+  ensure
+    # return to the original starting dir,
+    # if one is defined.  If using FakeFS, it will not
+    # be defined
+    if starting_dir && (! starting_dir.empty?)
+      Dir.chdir(starting_dir)
+    end
 
-  FileUtils.rm_rf(sandbox)
+    FileUtils.rm_rf(sandbox)
+  end
+end
+
+def with_first_commit_project(&block)
+  # wrap block in a proc that does a commit
+  commit_proc = Proc.new do |project|
+    write_file(File.join(project.root_path, "README.txt"), "Some README text")
+    `git add README.txt`
+    `git commit -a -m "First commit"`
+    block.call(project)
+  end
+  
+  with_blank_project(&commit_proc)
 end
 
 def write_file(path, contents="")
   FileUtils.mkdir_p File.dirname(path)
   File.open(path, 'w') {|f| f.write(contents)}
+end
+
+def git_create_conflict(git, project)
+  filename = "conflict_file.txt"
+  
+  # add to master
+  git.git("checkout master")
+  write_file(File.join(project.root_path, filename), Mortar::UUID.create_random.to_s)
+  git.add(filename)
+  git.git("commit -a -m \"initial\"")
+  
+  # checkin change on branch
+  git.git("checkout -b conflict_branch")
+  write_file(File.join(project.root_path, filename), Mortar::UUID.create_random.to_s)
+  git.add(filename)
+  git.git("commit -a -m \"conflict from branch\"")
+  
+  # checkin change on master
+  git.git("checkout master")
+  write_file(File.join(project.root_path, filename), Mortar::UUID.create_random.to_s)
+  git.add(filename)
+  git.git("commit -a -m \"conflict from master\"")
+  
+  # merge
+  git.git("merge conflict_branch", check_success=false)
+  
+  filename
+end
+
+
+def git_add_file(git, project)
+  # add a new file
+  added_file = "added_file.txt"
+  write_file(File.join(project.root_path, added_file))
+  git.add(added_file)
+  added_file
+end
+
+def git_create_untracked_file(project)
+  # add an untracked file
+  untracked_file = "untracked_file.txt"
+  write_file(File.join(project.root_path, untracked_file))
+  untracked_file
+end
+
+def post_validate_git_snapshot(git, starting_status, snapshot_branch)
+  snapshot_branch.should_not be_nil
+  snapshot_branch.should_not == "master"
+  git.current_branch.should == "master"
+  git.status.should == starting_status
+  git.has_conflicts?.should be_false
+  
+  # ensure the snapshot branch exists
+  git.git("branch").include?(snapshot_branch).should be_true
 end
 
 require "mortar/helpers"
