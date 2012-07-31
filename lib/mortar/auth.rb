@@ -109,7 +109,9 @@ class Mortar::Auth
       if ENV['MORTAR_API_KEY']
         ['', ENV['MORTAR_API_KEY']]
       else
-        netrc["api.#{host}"]
+        if netrc
+          netrc["api.#{host}"]
+        end
       end
     end
 
