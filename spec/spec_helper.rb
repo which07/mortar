@@ -18,7 +18,7 @@ require "fakefs/safe"
 require 'tmpdir'
 require "webmock/rspec"
 
-def execute(command_line, project=nil)
+def execute(command_line, project=nil, git=nil)
   extend RR::Adapters::RRMethods
 
   args = command_line.split(" ")
@@ -31,6 +31,16 @@ def execute(command_line, project=nil)
   if project
     any_instance_of(Mortar::Command::Base) do |base|
       stub(base).project.returns(project)
+    end
+  end
+  
+  # stub git
+  if git
+    # stub out any operations that affect remote resources
+    git.stub(:push)
+    
+    any_instance_of(Mortar::Command::Base) do |base|
+      stub(base).git.returns(git)
     end
   end
 
@@ -126,7 +136,7 @@ def with_blank_project(&block)
   # initialize git repo
   `git init`
   
-  project = Mortar::Project::Project.new(project_name, project_path)
+  project = Mortar::Project::Project.new(project_name, project_path, nil)
   
   begin
     block.call(project)
@@ -142,12 +152,15 @@ def with_blank_project(&block)
   end
 end
 
-def with_first_commit_project(&block)
+def with_git_initialized_project(&block)
   # wrap block in a proc that does a commit
   commit_proc = Proc.new do |project|
     write_file(File.join(project.root_path, "README.txt"), "Some README text")
+    remote = "mortar"
     `git add README.txt`
     `git commit -a -m "First commit"`
+    `git remote add #{remote} git@github.com:mortarcode/#{project.name}.git`
+    project.remote = remote
     block.call(project)
   end
   

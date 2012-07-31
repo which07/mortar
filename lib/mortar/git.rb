@@ -116,11 +116,22 @@ module Mortar
         raise GitError, "Unable to find current branch in list #{branches}"
       end
 
+
+      #
+      # push
+      #
+      
+      def push(remote_name, ref)
+        git("push #{remote_name} #{ref}")
+      end
+
+
       #
       # remotes
       #
 
       def remotes(git_organization)
+        # returns {git_remote_name => project_name}
         remotes = {}
         git("remote -v").split("\n").each do |remote|
           name, url, method = remote.split(/\s/)
@@ -128,12 +139,12 @@ module Mortar
             remotes[name] = $2
           end
         end
-
-        if remotes.empty?
-          nil
-        else
-          remotes
-        end
+        
+        remotes
+      end
+      
+      def remote_add(name, url)
+        git("remote add #{name} #{url}")
       end
 
       #

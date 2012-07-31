@@ -1,14 +1,30 @@
+require 'fileutils'
+
 module Mortar
   module Project
     class ProjectError < RuntimeError; end
     
     class Project
-      attr_reader :name
-      attr_reader :root_path
+      attr_accessor :name
+      attr_accessor :remote
+      attr_accessor :root_path
       
-      def initialize(name, root_path)
+      def initialize(name, root_path, remote)
         @name = name
         @root_path = root_path
+        @remote = remote
+      end
+      
+      def datasets_path
+        File.join(@root_path, "datasets")
+      end
+            
+      def datasets
+        @datasets ||= DataSets.new(
+          datasets_path,
+          "datasets",
+          ".pig")
+        @datasets
       end
       
       def pigscripts_path
@@ -22,19 +38,14 @@ module Mortar
           ".pig")
         @pigscripts
       end
-
       
-      def datasets_path
-        File.join(@root_path, "datasets")
+      def tmp_path
+        path = File.join(@root_path, "tmp")
+        unless Dir.exists? path
+          FileUtils.mkdir_p path
+        end
+        path
       end
-            
-      def datasets
-        @datasets ||= DataSets.new(
-          datasets_path,
-          "datasets",
-          ".pig")
-        @datasets
-      end      
     end
     
     class ProjectEntity

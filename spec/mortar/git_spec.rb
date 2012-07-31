@@ -18,7 +18,7 @@ module Mortar
       end
       
       it "finds commits when a project has them" do
-        with_first_commit_project do |p|
+        with_git_initialized_project do |p|
           @git.has_commits?.should be_true
         end
       end
@@ -42,7 +42,7 @@ module Mortar
     
     context "working directory" do
       it "finds clean and dirty working directories" do
-        with_first_commit_project do |p|
+        with_git_initialized_project do |p|
           @git.is_clean_working_directory?.should be_true
           write_file(File.join(p.root_path, "new_file.txt"))
           @git.is_clean_working_directory?.should be_false
@@ -53,7 +53,7 @@ module Mortar
     context "stash" do
       context "did_stash_changes" do
         it "finds that no changes were stashed" do
-          with_first_commit_project do |p|
+          with_git_initialized_project do |p|
             @git.did_stash_changes?("No local changes to save").should be_false
           end
         end
@@ -69,13 +69,13 @@ STASH
       
       context "stash_working_dir" do
         it "does not error on a clean working directory" do
-          with_first_commit_project do |p|
+          with_git_initialized_project do |p|
             @git.stash_working_dir("my_description").should be_false
           end
         end
         
         it "stashes an added file" do
-          with_first_commit_project do |p|
+          with_git_initialized_project do |p|
             git_add_file(@git, p)
             @git.is_clean_working_directory?.should be_false
             
@@ -86,7 +86,7 @@ STASH
         end
         
         it "stashes an untracked file" do
-          with_first_commit_project do |p|
+          with_git_initialized_project do |p|
             git_create_untracked_file(p)
             @git.is_clean_working_directory?.should be_false
             
@@ -101,13 +101,13 @@ STASH
     context "branch" do
       
       it "fetches current branch with one branch" do
-        with_first_commit_project do |p|
+        with_git_initialized_project do |p|
           @git.current_branch.should == "master"
         end
       end
       
       it "fetches current branch with multiple branches" do
-        with_first_commit_project do |p|
+        with_git_initialized_project do |p|
           @git.git("checkout -b branch_01")
           @git.git("checkout -b branch_02")
           @git.current_branch.should == "branch_02"
@@ -121,9 +121,26 @@ STASH
       end
     end
     
+    context "remotes" do
+      it "handles when no remotes are defined" do
+        with_git_initialized_project do |p|
+          @git.git("remote rm mortar")
+          @git.remotes("mortarcode").empty?.should be_true
+        end
+      end
+      
+      it "finds a single remote" do
+        with_git_initialized_project do |p|
+          remotes = @git.remotes("mortarcode")
+          remotes["mortar"].should == p.name
+        end
+      end
+      
+    end
+    
     context "status" do
       it "detects conflicts" do
-        with_first_commit_project do |p|
+        with_git_initialized_project do |p|
           
           @git.is_clean_working_directory?.should be_true
           @git.has_conflicts?.should be_false
@@ -134,7 +151,7 @@ STASH
       end
       
       it "detects no conflicts" do
-        with_first_commit_project do |p|
+        with_git_initialized_project do |p|
           @git.has_conflicts?.should be_false
         end
       end
@@ -148,14 +165,14 @@ STASH
       end
       
       it "raises when a conflict exists in working directory" do
-         with_first_commit_project do |p|
+         with_git_initialized_project do |p|
            git_create_conflict(@git, p)
            lambda { @git.create_snapshot_branch }.should raise_error(Mortar::Git::GitError)
          end
       end
       
       it "creates a snapshot branch for a clean working directory" do
-        with_first_commit_project do |p|
+        with_git_initialized_project do |p|
           starting_status = @git.status
           snapshot_branch = @git.create_snapshot_branch
           post_validate_git_snapshot(@git, starting_status, snapshot_branch)
@@ -163,7 +180,7 @@ STASH
       end
       
       it "creates a snapshot branch for an added file" do
-        with_first_commit_project do |p|
+        with_git_initialized_project do |p|
           git_add_file(@git, p)
           starting_status = @git.status
           snapshot_branch = @git.create_snapshot_branch
@@ -172,7 +189,7 @@ STASH
       end
       
       it "creates a snapshot branch for an untracked file" do
-        with_first_commit_project do |p|
+        with_git_initialized_project do |p|
           git_create_untracked_file(p)
           starting_status = @git.status
           snapshot_branch = @git.create_snapshot_branch

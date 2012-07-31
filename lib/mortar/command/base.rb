@@ -21,18 +21,26 @@ class Mortar::Command::Base
 
   def project
     unless @project
-      project_dir = Dir.pwd
-      project_name = if options[:project].is_a?(String)
-        options[:project]
+      project_name, project_dir, remote = 
+      if options[:project].is_a?(String)
+        [options[:project], nil, nil]
       elsif ENV.has_key?('MORTAR_PROJECT')
-        ENV['MORTAR_PROJECT']
+        [ENV['MORTAR_PROJECT'], nil, nil]
       elsif project_from_dir = extract_project_in_dir()
-        project_from_dir
+        [project_from_dir[0], Dir.pwd, project_from_dir[1]]
       else
         raise Mortar::Command::CommandFailed, "No project specified.\nRun this command from a project folder or specify which project to use with --project <project name>"
       end
       
-      @project = Mortar::Project::Project.new(project_name, project_dir)
+      # if we only have a project name, look for the remote in the current dir
+      unless remote
+        if project_from_dir = extract_project_in_dir(project_name)
+          project_dir = Dir.pwd
+          remote = project_from_dir[1]
+        end
+      end
+      
+      @project = Mortar::Project::Project.new(project_name, project_dir, remote)
     end
     @project
   end
@@ -175,17 +183,32 @@ protected
     Mortar::Command.validate_arguments!
   end
 
-  def extract_project_in_dir()
-    return unless (git.has_dot_git? and remotes = git.remotes(git_organization))
+  def extract_project_in_dir(project_name=nil)
+    # returns [project_name, remote_name]
+    # TODO refactor this very messy method
+    # when we have a more full sense of which options are supported when
+    return unless git.has_dot_git?
+    
+    remotes = git.remotes(git_organization)
+    return if remotes.empty?
 
     if remote = options[:remote]
-      remotes[remote]
+      # extract the project whose remote was provided
+      [remotes[remote], remote]
     elsif remote = extract_project_from_git_config
-      remotes[remote]
+      # extract the project setup in git config
+      [remotes[remote], remote]
     else
-      projects = remotes.values.uniq
-      if projects.size == 1
-        projects.first
+      if project_name
+        # search for project by name
+        if project_remote = remotes.find {|r_name, p_name| p_name == project_name}
+          [project_name, project_remote.first[0]]
+        else
+          [project_name, nil]
+        end
+      elsif remotes.values.uniq.size == 1
+        # take the only project in the remotes
+        [remotes.first[1], remotes.first[0]]
       else
         raise(Mortar::Command::CommandFailed, "Multiple projects in folder and no project specified.\nSpecify which project to use with --project <project name>")
       end

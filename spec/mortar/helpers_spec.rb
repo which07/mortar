@@ -43,6 +43,21 @@ OUT
       end
 
     end
-
+    
+    context "write_to_file" do
+      it "should write data to a directory that does not yet exist" do
+        
+        # use FakeFS file system
+        include FakeFS::SpecHelpers
+        
+        filepath = File.join(Dir.tmpdir, "my_new_dir", "my_new_file.txt")
+        data = "foo\nbar"
+        write_to_file(data, filepath)
+        File.exists?(filepath).should be_true
+        infile = File.open(filepath, "r")
+        infile.read.should == data
+        infile.close()
+      end
+    end
   end
 end

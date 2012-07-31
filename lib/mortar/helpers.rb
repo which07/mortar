@@ -1,3 +1,4 @@
+require 'fileutils'
 require "vendor/mortar/okjson"
 
 module Mortar
@@ -15,6 +16,13 @@ module Mortar
 
     def running_on_a_mac?
       RUBY_PLATFORM =~ /-darwin\d/
+    end
+
+    def write_to_file(str_data, path, mkdir_p=true)
+      if mkdir_p
+        FileUtils.mkdir_p File.dirname(path)
+      end
+      File.open(path, "w"){|f| f.write(str_data)}
     end
 
     def display(msg="", new_line=true)

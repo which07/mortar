@@ -1,11 +1,11 @@
-require 'erb'
-
-require "mortar/project"
 require "mortar/command/base"
+require "mortar/script_template"
 
 # manage pig scripts
 #
 class Mortar::Command::PigScripts < Mortar::Command::Base
+  
+  include Mortar::ScriptTemplate
   
   # pigscripts
   #
@@ -51,16 +51,7 @@ class Mortar::Command::PigScripts < Mortar::Command::Base
       error("Unable to find pigscript #{name}\n#{available_scripts}")
     end
     
-    template = ERB.new(pigscript.code, nil, "-")
-    result = template.result(erb_binding(project))
+    result = expand_script_template(project, pigscript)
     display(result)
-  end
-  
-  protected
-  
-  def erb_binding(project)
-    pigscripts = project.pigscripts
-    datasets = project.datasets
-    binding
   end
 end

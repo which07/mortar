@@ -6,7 +6,20 @@ module Mortar
   describe Project do
     # use FakeFS file system
     include FakeFS::SpecHelpers    
-        
+    
+    context "tmp" do
+      it "creates a tmp dir if one does not exist" do
+        with_blank_project do |p|
+          # create it
+          tmp_path_0 = p.tmp_path
+          Dir.exists?(tmp_path_0).should be_true
+          
+          # reuse it
+          p.tmp_path.should == tmp_path_0
+        end
+      end
+    end
+    
     context "pigscripts" do
 
       it "raise when unable to find pigscripts dir" do
