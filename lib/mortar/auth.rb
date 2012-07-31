@@ -1,17 +1,222 @@
 require "mortar"
 require "mortar/helpers"
 
+require "netrc"
 
 class Mortar::Auth
   class << self
     include Mortar::Helpers
 
-    def default_host
-      "mortar.com"
+    attr_accessor :credentials
+    
+    def api
+      @api ||= begin
+        require("mortar-api-ruby")
+        #api = Mortar::API.new(default_params.merge(:api_key => password))
+        api = Mortar::API.new(default_params.merge(:user => user, :password => password))
+
+        def api.request(params, &block)
+          response = super
+          if response.headers.has_key?('X-Mortar-Warning')
+            Mortar::Command.warnings.concat(response.headers['X-Mortar-Warning'].split("\n"))
+          end
+          response
+        end
+
+        api
+      end
     end
 
+    def login
+      delete_credentials
+      get_credentials
+    end
+    
+    def logout
+      delete_credentials
+    end
+    
+    # just a stub; will raise if not authenticated
+    def check
+      # FIXME: ddaniels stubbed, replace this with an actual call to check authenticated
+      #api.get_user
+      true
+    end
+    
+    def default_host
+      "mortardata.com"
+    end
+    
     def host
       ENV['MORTAR_HOST'] || default_host
+    end
+  
+    def reauthorize
+      @credentials = ask_for_and_save_credentials
+    end
+
+    def user    # :nodoc:
+      get_credentials[0]
+    end
+
+    def password    # :nodoc:
+      get_credentials[1]
+    end
+
+    #def api_key(user = get_credentials[0], password = get_credentials[1])
+    #  require("mortar-api-ruby")
+    #  api = Mortar::API.new(default_params)
+    #  api.post_login(user, password).body["api_key"]
+    #end
+
+    def get_credentials    # :nodoc:
+      @credentials ||= (read_credentials || ask_for_and_save_credentials)
+    end
+
+    def delete_credentials
+      if netrc
+        netrc.delete("api.#{host}")
+        netrc.delete("code.#{host}")
+        netrc.save
+      end
+      @api, @client, @credentials = nil, nil
+    end
+
+    def netrc_path
+      default = Netrc.default_path
+      encrypted = default + ".gpg"
+      if File.exists?(encrypted)
+        encrypted
+      else
+        default
+      end
+    end
+
+    def netrc   # :nodoc:
+      @netrc ||= begin
+        File.exists?(netrc_path) && Netrc.read(netrc_path)
+      rescue => error
+        if error.message =~ /^Permission bits for/
+          perm = File.stat(netrc_path).mode & 0777
+          abort("Permissions #{perm} for '#{netrc_path}' are too open. You should run `chmod 0600 #{netrc_path}` so that your credentials are NOT accessible by others.")
+        else
+          raise error
+        end
+      end
+    end
+
+    def read_credentials
+      if ENV['MORTAR_API_KEY']
+        ['', ENV['MORTAR_API_KEY']]
+      else
+        netrc["api.#{host}"]
+      end
+    end
+
+    def write_credentials
+      FileUtils.mkdir_p(File.dirname(netrc_path))
+      FileUtils.touch(netrc_path)
+      unless running_on_windows?
+        FileUtils.chmod(0600, netrc_path)
+      end
+      netrc["api.#{host}"] = self.credentials
+      netrc.save
+    end
+
+    def echo_off
+      with_tty do
+        system "stty -echo"
+      end
+    end
+
+    def echo_on
+      with_tty do
+        system "stty echo"
+      end
+    end
+
+    def ask_for_credentials
+      puts "Enter your Mortar credentials."
+
+      print "Email: "
+      user = ask
+
+      print "Password (typing will be hidden): "
+      password = running_on_windows? ? ask_for_password_on_windows : ask_for_password
+
+      # TODO: convert to using api_key instead of password
+      #[user, api_key(user, password)]
+      [user, password]
+    end
+
+    def ask_for_password_on_windows
+      require "Win32API"
+      char = nil
+      password = ''
+
+      while char = Win32API.new("crtdll", "_getch", [ ], "L").Call do
+        break if char == 10 || char == 13 # received carriage return or newline
+        if char == 127 || char == 8 # backspace and delete
+          password.slice!(-1, 1)
+        else
+          # windows might throw a -1 at us so make sure to handle RangeError
+          (password << char.chr) rescue RangeError
+        end
+      end
+      puts
+      return password
+    end
+
+    def ask_for_password
+      echo_off
+      password = ask
+      puts
+      echo_on
+      return password
+    end
+
+    def ask_for_and_save_credentials
+      require("mortar-api-ruby") # for the errors
+      begin
+        @credentials = ask_for_credentials
+        write_credentials
+        check
+      rescue Mortar::API::Errors::NotFound, Mortar::API::Errors::Unauthorized => e
+        delete_credentials
+        display "Authentication failed."
+        retry if retry_login?
+        exit 1
+      rescue Exception => e
+        delete_credentials
+        raise e
+      end
+      # TODO: ensure that keys exist
+      #check_for_associated_ssh_key unless Mortar::Command.current_command == "keys:add"
+      @credentials
+    end
+    
+    def retry_login?
+      @login_attempts ||= 0
+      @login_attempts += 1
+      @login_attempts < 3
+    end
+    
+
+    protected
+
+    def default_params
+      full_host  = (host =~ /^http/) ? host : "https://api.#{host}"
+      verify_ssl = ENV['MORTAR_SSL_VERIFY'] != 'disable' && full_host =~ %r|^https://api.mortardata.com|
+      uri = URI(full_host)
+      {
+        :headers          => {
+          'User-Agent'    => Mortar::USER_AGENT
+        },
+        :host             => uri.host,
+        :port             => uri.port.to_s,
+        :scheme           => uri.scheme,
+        :ssl_verify_peer  => verify_ssl
+      }
     end
   end
 end
