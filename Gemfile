@@ -1,18 +1,6 @@
 source "http://rubygems.org"
 
+# Uncomment for local development
+#gem "mortar-api-ruby", :path => "/Users/ddaniels/code/mortar-api-ruby"
+
 gemspec
-
-group :development do
-  gem "rake"
-end
-
-group :test do
-  gem "excon"
-  gem "fakefs"
-  gem "json"
-  gem "rake"
-  gem "rr"
-  gem "rspec"
-  gem "taps"
-  gem "webmock"  
-end

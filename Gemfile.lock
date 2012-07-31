@@ -2,10 +2,14 @@ PATH
   remote: .
   specs:
     mortar (0.1.0)
-      launchy (>= 0.3.2)
+      mortar-api-ruby (~> 0.1.0)
       netrc (~> 0.7.5)
-      rest-client (~> 1.6.1)
-      rubyzip
+
+PATH
+  remote: ../mortar-api-ruby
+  specs:
+    mortar-api-ruby (0.1.0)
+      excon (~> 0.15.4)
 
 GEM
   remote: http://rubygems.org/
@@ -16,8 +20,6 @@ GEM
     excon (0.15.4)
     fakefs (0.4.0)
     json (1.7.3)
-    launchy (2.1.0)
-      addressable (~> 2.2.6)
     mime-types (1.19)
     netrc (0.7.5)
     rack (1.4.1)
@@ -33,7 +35,6 @@ GEM
     rspec-expectations (2.11.1)
       diff-lcs (~> 1.1.3)
     rspec-mocks (2.11.1)
-    rubyzip (0.9.9)
     sequel (3.20.0)
     sinatra (1.0)
       rack (>= 1.0)
@@ -54,6 +55,7 @@ DEPENDENCIES
   fakefs
   json
   mortar!
+  mortar-api-ruby!
   rake
   rr
   rspec

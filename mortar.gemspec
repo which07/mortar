@@ -16,8 +16,16 @@ Gem::Specification.new do |gem|
   
   gem.files = %x{ git ls-files }.split("\n").select { |d| d =~ %r{^(License|README|bin/|data/|ext/|lib/|spec/|test/)} }
   
-  gem.add_dependency "netrc",       "~> 0.7.5"
-  gem.add_dependency "rest-client", "~> 1.6.1"
-  gem.add_dependency "launchy",     ">= 0.3.2"
-  gem.add_dependency "rubyzip"
+  gem.add_runtime_dependency  "mortar-api-ruby", "~> 0.1.0"
+  gem.add_runtime_dependency  "netrc",           "~> 0.7.5"
+
+  gem.add_development_dependency "excon"
+  gem.add_development_dependency "fakefs"
+  gem.add_development_dependency "json"
+  gem.add_development_dependency "rake"
+  gem.add_development_dependency "rr"
+  gem.add_development_dependency "rspec"
+  gem.add_development_dependency "taps"
+  gem.add_development_dependency "webmock"  
+
 end
