@@ -5,35 +5,36 @@ module Mortar::Command
   describe Base do
     before do
       @base = Base.new
-      @base.stub!(:display)
-      @client = mock('mortar client', :host => 'mortar.com')
+      stub(@base).display
+      @client = Object.new
+      mock(@client).host {'mortar.com'}
     end
 
     context "detecting the project" do
       it "attempts to find the project via the --project option" do
-        @base.stub!(:options).and_return(:project => "myproject")
+        stub(@base).options.returns(:project => "myproject")
         @base.project.name.should == "myproject"
       end
 
       it "attempts to find the project via MORTAR_PROJECT when not explicitly specified" do
         ENV['MORTAR_PROJECT'] = "myenvproject"
         @base.project.name.should == "myenvproject"
-        @base.stub!(:options).and_return([])
+        stub(@base).options {[]}
         @base.project.name.should == "myenvproject"
         ENV.delete('MORTAR_PROJECT')
       end
 
       it "overrides MORTAR_PROJECT when explicitly specified" do
         ENV['MORTAR_PROJECT'] = "myenvproject"
-        @base.stub!(:options).and_return(:project => "myproject")
+        stub(@base).options.returns(:project => "myproject")
         @base.project.name.should == "myproject"
         ENV.delete('MORTAR_PROJECT')
       end
 
       it "read remotes from git config" do
-        Dir.stub(:chdir)
-        @base.git.stub!(:has_dot_git?).and_return(true)
-        @base.git.should_receive(:git).with('remote -v').and_return(<<-REMOTES)
+        stub(Dir).chdir
+        stub(@base.git).has_dot_git? {true}
+        mock(@base.git).git("remote -v").returns(<<-REMOTES)
 staging\tgit@github.com:mortarcode/myproject-staging.git (fetch)
 staging\tgit@github.com:mortarcode/myproject-staging.git (push)
 production\tgit@github.com:mortarcode/myproject.git (fetch)
@@ -42,30 +43,30 @@ other\tgit@github.com:other.git (fetch)
 other\tgit@github.com:other.git (push)
         REMOTES
 
-        @mortar = mock
-        @mortar.stub(:host).and_return('mortar.com')
-        @base.stub(:mortar).and_return(@mortar)
+        @mortar = Object.new
+        stub(@mortar).host {'mortar.com'}
+        stub(@base).mortar { @mortar }
 
         # need a better way to test internal functionality
         @base.git.send(:remotes, 'mortarcode').should == { 'staging' => 'myproject-staging', 'production' => 'myproject' }
       end
 
       it "gets the project from remotes when there's only one project" do
-        @base.git.stub!(:has_dot_git?).and_return(true)
-        @base.git.stub!(:remotes).and_return({ 'mortar' => 'myproject' })
-        @base.git.stub!(:git).with("config mortar.remote").and_return("")
+        stub(@base.git).has_dot_git? {true}
+        stub(@base.git).remotes {{ 'mortar' => 'myproject' }}
+        mock(@base.git).git("config mortar.remote").returns("")
         @base.project.name.should == 'myproject'
       end
 
       it "accepts a --remote argument to choose the project from the remote name" do
-        @base.git.stub!(:has_dot_git?).and_return(true)
-        @base.git.stub!(:remotes).and_return({ 'staging' => 'myproject-staging', 'production' => 'myproject' })
-        @base.stub!(:options).and_return(:remote => "staging")
+        stub(@base.git).has_dot_git?.returns(true)
+        stub(@base.git).remotes.returns({ 'staging' => 'myproject-staging', 'production' => 'myproject' })
+        stub(@base).options.returns(:remote => "staging")
         @base.project.name.should == 'myproject-staging'
       end
 
       it "raises when cannot determine which project is it" do
-        @base.stub!(:git_remotes).and_return({ 'staging' => 'myproject-staging', 'production' => 'myproject' })
+        stub(@base).git_remotes {{ 'staging' => 'myproject-staging', 'production' => 'myproject' }}
         lambda { @base.project }.should raise_error(Mortar::Command::CommandFailed)
       end
     end

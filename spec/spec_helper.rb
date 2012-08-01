@@ -19,7 +19,6 @@ require 'tmpdir'
 require "webmock/rspec"
 
 def execute(command_line, project=nil, git=nil)
-  extend RR::Adapters::RRMethods
 
   args = command_line.split(" ")
   command = args.shift
@@ -37,7 +36,7 @@ def execute(command_line, project=nil, git=nil)
   # stub git
   if git
     # stub out any operations that affect remote resources
-    git.stub(:push)
+    stub(git).push
     
     any_instance_of(Mortar::Command::Base) do |base|
       stub(base).git.returns(git)
@@ -62,7 +61,6 @@ def execute(command_line, project=nil, git=nil)
 end
 
 def any_instance_of(klass, &block)
-  extend RR::Adapters::RRMethods
   any_instance_of(klass, &block)
 end
 
@@ -238,6 +236,7 @@ end
 require "support/display_message_matcher"
 
 RSpec.configure do |config|
+  config.mock_with :rr
   config.color_enabled = true
   config.include DisplayMessageMatcher
   config.order = 'rand'
