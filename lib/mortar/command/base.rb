@@ -46,7 +46,7 @@ class Mortar::Command::Base
   end
   
   def api
-    raise NotImplementedError
+    Mortar::Auth.api
   end
   
   def mortar
