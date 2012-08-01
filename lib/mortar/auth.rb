@@ -76,7 +76,6 @@ class Mortar::Auth
     def delete_credentials
       if netrc
         netrc.delete("api.#{host}")
-        netrc.delete("code.#{host}")
         netrc.save
       end
       @api, @client, @credentials = nil, nil
