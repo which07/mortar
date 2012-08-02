@@ -223,6 +223,10 @@ protected
   def git_organization
     "mortarcode"
   end
+  
+  def polling_interval
+    (options[:polling_interval] || 2.0).to_f
+  end
 
 end
 

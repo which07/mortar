@@ -92,10 +92,4 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
       raise RuntimeError, "Unknown illustrate status: #{last_illustrate_result['status']} for illustrate_id: #{illustrate_id}"
     end
   end
-
-  protected 
-  
-  def polling_interval
-    options[:polling_interval] || 2.0
-  end
 end
