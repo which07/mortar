@@ -54,7 +54,7 @@ other\tgit@github.com:other.git (push)
       it "gets the project from remotes when there's only one project" do
         stub(@base.git).has_dot_git? {true}
         stub(@base.git).remotes {{ 'mortar' => 'myproject' }}
-        mock(@base.git).git("config mortar.remote").returns("")
+        mock(@base.git).git("config mortar.remote", false).returns("")
         @base.project.name.should == 'myproject'
       end
 

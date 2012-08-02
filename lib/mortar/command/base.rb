@@ -216,7 +216,7 @@ protected
   end
 
   def extract_project_from_git_config
-    remote = git.git("config mortar.remote")
+    remote = git.git("config mortar.remote", false)
     remote == "" ? nil : remote
   end
 
