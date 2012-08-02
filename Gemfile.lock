@@ -6,12 +6,6 @@ PATH
       mortar-api-ruby (~> 0.1.0)
       netrc (~> 0.7.5)
 
-PATH
-  remote: ../mortar-api-ruby
-  specs:
-    mortar-api-ruby (0.1.0)
-      excon (~> 0.15.4)
-
 GEM
   remote: http://rubygems.org/
   specs:
@@ -24,6 +18,8 @@ GEM
     launchy (2.1.1)
       addressable (~> 2.3)
     mime-types (1.19)
+    mortar-api-ruby (0.1.0)
+      excon (~> 0.15.4)
     netrc (0.7.5)
     rack (1.4.1)
     rake (0.9.2.2)
@@ -58,7 +54,6 @@ DEPENDENCIES
   fakefs
   json
   mortar!
-  mortar-api-ruby!
   rake
   rr
   rspec
