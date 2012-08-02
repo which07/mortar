@@ -1,0 +1,13 @@
+*.gem
+*.rbc
+.bundle
+.config
+coverage
+doc/
+lib/bundler/man
+pkg
+rdoc
+spec/reports
+test/tmp
+test/version_tmp
+tmp

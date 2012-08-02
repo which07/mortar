@@ -1,4 +1,5 @@
 require "rubygems"
+require "bundler/gem_tasks"
 
 PROJECT_ROOT = File.expand_path("..", __FILE__)
 $:.unshift "#{PROJECT_ROOT}/lib"
