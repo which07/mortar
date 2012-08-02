@@ -174,46 +174,25 @@ module Mortar
         object.send(method)
       rescue Interrupt, StandardError, SystemExit => error
         # load likely error classes, as they may not be loaded yet due to defered loads
-        #require 'mortar-api'
-        require 'rest_client'
+        require 'mortar-api-ruby'
         raise(error)
       end
-    #rescue Mortar::API::Errors::Unauthorized, RestClient::Unauthorized
-    #  puts "Authentication failure"
-    #  unless ENV['MORTAR_API_KEY']
-    #    run "login"
-    #    retry
-    #  end
-    #rescue Mortar::API::Errors::VerificationRequired, RestClient::PaymentRequired => e
-    #  retry if run('account:confirm_billing', arguments.dup)
-    #rescue Mortar::API::Errors::NotFound => e
-    #  error extract_error(e.response.body) {
-    #    e.response.body =~ /^([\w\s]+ not found).?$/ ? $1 : "Resource not found"
-    #  }
-    rescue RestClient::ResourceNotFound => e
-      error extract_error(e.http_body) {
-        e.http_body =~ /^([\w\s]+ not found).?$/ ? $1 : "Resource not found"
+    rescue Mortar::API::Errors::Unauthorized
+      puts "Authentication failure"
+      unless ENV['MORTAR_API_KEY']
+        run "login"
+        retry
+      end
+    rescue Mortar::API::Errors::NotFound => e
+      error extract_error(e.response.body) {
+        e.response.body =~ /^([\w\s]+ not found).?$/ ? $1 : e.message # "Resource not found"
       }
     rescue Mortar::Project::ProjectError => e
       error e.message
-    #rescue Mortar::API::Errors::Locked => e
-    #  app = e.response.headers[:x_confirmation_required]
-    #  if confirm_command(app, extract_error(e.response.body))
-    #    arguments << '--confirm' << app
-    #    retry
-    #  end
-    #rescue RestClient::Locked => e
-    #  app = e.response.headers[:x_confirmation_required]
-    #  if confirm_command(app, extract_error(e.http_body))
-    #    arguments << '--confirm' << app
-    #    retry
-    #  end
-    #rescue Mortar::API::Errors::Timeout, RestClient::RequestTimeout
-    #  error "API request timed out. Please try again, or contact support@mortardata.com if this issue persists."
-    #rescue Mortar::API::Errors::ErrorWithResponse => e
-    #  error extract_error(e.response.body)
-    rescue RestClient::RequestFailed => e
-      error extract_error(e.http_body)
+    rescue Mortar::API::Errors::Timeout
+      error "API request timed out. Please try again, or contact support@mortardata.com if this issue persists."
+    rescue Mortar::API::Errors::ErrorWithResponse => e
+      error extract_error(e.response.body)
     rescue CommandFailed => e
       error e.message
     rescue OptionParser::ParseError
