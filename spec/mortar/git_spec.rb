@@ -24,6 +24,14 @@ module Mortar
       end
     end
     
+    context "git-rev" do
+      it "looks up a revision" do
+        with_git_initialized_project do |p|
+          @git.git_rev("master").nil?.should be_false
+        end
+      end
+    end
+    
     context "git" do
       
       it "raises on git failure" do

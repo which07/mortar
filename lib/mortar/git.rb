@@ -153,6 +153,13 @@ module Mortar
       end
 
       #
+      # rev-parse
+      #
+      def git_rev(refname)
+        git("rev-parse --verify --quiet #{refname}")
+      end
+
+      #
       # stash
       #
 
