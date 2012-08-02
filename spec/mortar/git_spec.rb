@@ -50,6 +50,20 @@ module Mortar
       end
     end
     
+    context "untracked_files" do
+      it "does not find ignored files" do
+        with_git_initialized_project do |p|
+          write_file(File.join(p.root_path, ".gitignore"), "tmp\n")
+          write_file(File.join(p.root_path, "tmp", "ignored_file.txt"), "some text")
+          write_file(File.join(p.root_path, "included_file.txt"), "some text")
+          untracked_files = @git.untracked_files
+          untracked_files.include?(".gitignore").should be_true
+          untracked_files.include?("included_file.txt").should be_true
+          untracked_files.include?("tmp/ignored_file.txt").should be_false
+        end
+      end
+    end
+    
     context "stash" do
       context "did_stash_changes" do
         it "finds that no changes were stashed" do

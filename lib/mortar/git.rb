@@ -62,7 +62,7 @@ module Mortar
             git("stash apply stash@{0}")
           end
         
-          add_untracked_files
+          add_untracked_files()
 
           # commit the changes if there are any
           if ! is_clean_working_directory?
@@ -90,11 +90,10 @@ module Mortar
       def add(path)
         git("add #{path}")
       end
-
+      
       def add_untracked_files
-        # TODO: Refine this to only add untracked files in specific directories
-        git("ls-files -o").split("\n").each do |untracked_path|
-          add untracked_path
+        untracked_files.each do |untracked_file|
+          add untracked_file
         end
       end
 
@@ -195,6 +194,11 @@ module Mortar
         status_codes = status.split("\n").collect{|s| status_code(s)}
         ! GIT_STATUS_CODES__CONFLICT.intersection(status_codes).empty?
       end
+      
+      def untracked_files
+        git("ls-files -o --exclude-standard").split("\n")
+      end
+      
     end
   end
 end
