@@ -86,16 +86,17 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
     
     case last_illustrate_result['status']
     when Mortar::API::Illustrate::STATUS_FAILURE
-      error("Illustrate failed.\nError message: #{last_illustrate_result['error']}")
+      error("Illustrate failed.\nError message: #{last_illustrate_result['error_message']}")
     when Mortar::API::Illustrate::STATUS_KILLED
       error("Illustrate killed by user.")
     when Mortar::API::Illustrate::STATUS_SUCCESS
-      result_url = last_illustrate_result['result_url']
-      display("Illustrate results available at #{result_url}")
-      action("Opening web browser to show results...") do
-        require "launchy"
-        Launchy.open(result_url).join
-      end
+      display("Illustrate results: #{last_illustrate_result}")
+      #result_url = last_illustrate_result['result_url']
+      #display("Illustrate results available at #{result_url}")
+      #action("Opening web browser to show results...") do
+      #  require "launchy"
+      #  Launchy.open(result_url).join
+      #end
     else
       raise RuntimeError, "Unknown illustrate status: #{last_illustrate_result['status']} for illustrate_id: #{illustrate_id}"
     end
