@@ -1,3 +1,4 @@
+require 'rexml/document'
 require 'mortar/helpers'
 require 'mortar/project'
 require 'mortar/version'

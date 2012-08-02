@@ -1,4 +1,3 @@
-require "mortar/client"
 require "mortar/version"
 
 module Mortar

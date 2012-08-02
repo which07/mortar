@@ -104,12 +104,8 @@ end
 def stub_core
   @stubbed_core ||= begin
     stubbed_core = nil
-    any_instance_of(Mortar::Client) do |core|
-      stubbed_core = stub(core)
-    end
     stub(Mortar::Auth).user.returns("email@example.com")
     stub(Mortar::Auth).password.returns("pass")
-    stub(Mortar::Client).auth.returns("apikey01")
     stubbed_core
   end
 end
