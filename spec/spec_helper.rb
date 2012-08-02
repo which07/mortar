@@ -8,15 +8,13 @@ Excon.defaults[:mock] = true
 
 # ensure these are around for errors
 # as their require is generally deferred
-#require "mortar-api"
-require "rest_client"
+require "mortar-api-ruby"
 
 require "mortar/cli"
 require "rspec"
 require "rr"
 require "fakefs/safe"
 require 'tmpdir'
-require "webmock/rspec"
 
 def execute(command_line, project=nil, git=nil)
 

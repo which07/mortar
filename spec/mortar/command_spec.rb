@@ -1,6 +1,5 @@
 require "spec_helper"
 require "mortar/command"
-require 'json' #FOR WEBMOCK
 
 class FakeResponse
 

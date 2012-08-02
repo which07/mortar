@@ -20,13 +20,11 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency  "netrc",           "~> 0.7.5"
   gem.add_runtime_dependency  "launchy",         "~> 2.1.1"
 
-  gem.add_development_dependency "excon"
+  gem.add_development_dependency "excon", '~>0.15.4'
   gem.add_development_dependency "fakefs"
   gem.add_development_dependency "json"
   gem.add_development_dependency "rake"
   gem.add_development_dependency "rr"
   gem.add_development_dependency "rspec"
-  gem.add_development_dependency "taps"
-  gem.add_development_dependency "webmock"  
 
 end
