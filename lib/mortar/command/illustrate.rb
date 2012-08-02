@@ -58,15 +58,19 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
       git.create_snapshot_branch()
     end
     
-    action("Sending code snapshot to Mortar") do
+    git_rev = action("Sending code snapshot to Mortar") do
+      # push the code
       git.push(project.remote, snapshot_branch)
-      # clean out the branch from the local branches
+      
+      # grab the commit hash and clean out the branch from the local branches
+      rev = git.git_rev(snapshot_branch)
       git.branch_delete(snapshot_branch)
+      rev
     end
     
     illustrate_id = nil
     action("Starting illustrate", {:success => "started"}) do
-      illustrate_id = api.post_illustrate(project.name, pigscript.name, alias_name, snapshot_branch).body["illustrate_id"]
+      illustrate_id = api.post_illustrate(project.name, pigscript.name, alias_name, git_rev).body["illustrate_id"]
     end
     
     last_illustrate_result = nil
