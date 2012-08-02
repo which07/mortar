@@ -101,9 +101,12 @@ module Mortar
       #
       # branch
       #
-
+      
+      def branches
+        git("branch")
+      end
+      
       def current_branch
-        branches = git("branch")
         branches.split("\n").each do |branch_listing|
         
           # current branch will be the one that starts with *, e.g.
@@ -115,7 +118,10 @@ module Mortar
         end
         raise GitError, "Unable to find current branch in list #{branches}"
       end
-
+      
+      def branch_delete(branch_name)
+        git("branch -D #{branch_name}")
+      end
 
       #
       # push

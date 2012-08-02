@@ -7,7 +7,7 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
   
   include Mortar::ScriptTemplate
     
-  # illustrate
+  # illustrate [PIGSCRIPT] [ALIAS]
   #
   # Illustrate the effects and output of a pigscript.
   #
@@ -50,7 +50,7 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
       expanded_script_filename = "#{pigscript_name}.#{Time.now.strftime("%F-%T:%L")}.pig"
       expanded_script_path = File.join(project.tmp_path, expanded_script_filename)
       write_to_file(expanded_script, File.join(project.tmp_path, expanded_script_filename))
-      status("expanded to  #{expanded_script_path}")
+      #status("expanded to  #{expanded_script_path}")
     end
     
     # create / push a snapshot branch
@@ -60,6 +60,8 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
     
     action("Sending code snapshot to Mortar") do
       git.push(project.remote, snapshot_branch)
+      # clean out the branch from the local branches
+      git.branch_delete(snapshot_branch)
     end
     
     display("Starting illustrate...")

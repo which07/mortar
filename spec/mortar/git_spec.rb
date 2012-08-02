@@ -119,6 +119,19 @@ STASH
           lambda { @git.current_branch }.should raise_error(Mortar::Git::GitError)
         end
       end
+      
+      it "deletes a branch" do
+        with_git_initialized_project do |p|
+          new_branch_name = "new_branch_to_delete"
+          @git.current_branch.should == "master"
+          @git.git("checkout -b #{new_branch_name}")
+          @git.branches.include?(new_branch_name).should be_true
+          @git.git("checkout master")
+          @git.branch_delete(new_branch_name)
+          @git.branches.include?(new_branch_name).should be_false
+          @git.current_branch.should == "master"
+        end
+      end
     end
     
     context "remotes" do
