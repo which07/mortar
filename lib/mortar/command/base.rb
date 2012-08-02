@@ -49,10 +49,6 @@ class Mortar::Command::Base
     Mortar::Auth.api
   end
   
-  def mortar
-    Mortar::Auth.client
-  end
-  
   def git
     @git ||= Mortar::Git::Git.new
   end
