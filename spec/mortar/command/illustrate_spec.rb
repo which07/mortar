@@ -57,12 +57,12 @@ STDERR
           illustrate_url = "https://hawk.mortardata.com/illustrate/#{illustrate_id}"
           
           
-          mock(Mortar::Auth.api).post_illustrate("myproject", "my_script", "my_alias", is_a(String)) {{"illustrate_id" => illustrate_id}}
-          mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns({"status" => Mortar::API::Illustrate::STATUS_QUEUED}).ordered
-          mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns({"status" => Mortar::API::Illustrate::STATUS_PROGRESS}).ordered
-          mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns({"status" => Mortar::API::Illustrate::STATUS_READING_DATA}).ordered
-          mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns({"status" => Mortar::API::Illustrate::STATUS_PRUNING_DATA}).ordered
-          mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns({"status" => Mortar::API::Illustrate::STATUS_SUCCESS, "result_url" => illustrate_url}).ordered
+          mock(Mortar::Auth.api).post_illustrate("myproject", "my_script", "my_alias", is_a(String)) {Excon::Response.new(:body => {"illustrate_id" => illustrate_id})}
+          mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_QUEUED})).ordered
+          mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_PROGRESS})).ordered
+          mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_READING_DATA})).ordered
+          mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_PRUNING_DATA})).ordered
+          mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_SUCCESS, "result_url" => illustrate_url})).ordered
           
           # stub launchy
           mock(Launchy).open(illustrate_url) {Thread.new {}}
@@ -75,7 +75,7 @@ STDERR
 Expanding templates in pigscript my_script... done
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
-Starting illustrate...
+Starting illustrate... started
  ... QUEUED
  ... PROGRESS
  ... READING_DATA
