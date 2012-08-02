@@ -67,9 +67,11 @@ describe Mortar::Command do
     class Mortar::Command::Test::Multiple; end
 
     require "mortar/command/help"
+    require "mortar/command/illustrate"
 
     Mortar::Command.parse("unknown").should be_nil
     Mortar::Command.parse("help").should include(:klass => Mortar::Command::Help, :method => :index)
+    Mortar::Command.parse("illustrate").should include(:klass => Mortar::Command::Illustrate, :method => :index)
   end
   
   context "when no commands match" do
