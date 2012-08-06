@@ -151,7 +151,7 @@ def with_git_initialized_project(&block)
     remote = "mortar"
     `git add README.txt`
     `git commit -a -m "First commit"`
-    `git remote add #{remote} git@github.com:mortarcode/#{project.name}.git`
+    `git remote add #{remote} git@github.com:mortarcode/4dbbd83cae8d5bf8a4000000_#{project.name}.git`
     project.remote = remote
     block.call(project)
   end

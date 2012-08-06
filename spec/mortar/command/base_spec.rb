@@ -35,10 +35,10 @@ module Mortar::Command
         stub(Dir).chdir
         stub(@base.git).has_dot_git? {true}
         mock(@base.git).git("remote -v").returns(<<-REMOTES)
-staging\tgit@github.com:mortarcode/myproject-staging.git (fetch)
-staging\tgit@github.com:mortarcode/myproject-staging.git (push)
-production\tgit@github.com:mortarcode/myproject.git (fetch)
-production\tgit@github.com:mortarcode/myproject.git (push)
+staging\tgit@github.com:mortarcode/4dbbd83cae8d5bf8a4000000_myproject-staging.git (fetch)
+staging\tgit@github.com:mortarcode/4dbbd83cae8d5bf8a4000000_myproject-staging.git (push)
+production\tgit@github.com:mortarcode/4dbbd83cae8d5bf8a4000000_myproject.git (fetch)
+production\tgit@github.com:mortarcode/4dbbd83cae8d5bf8a4000000_myproject.git (push)
 other\tgit@github.com:other.git (fetch)
 other\tgit@github.com:other.git (push)
         REMOTES
