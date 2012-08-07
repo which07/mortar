@@ -54,7 +54,7 @@ STDERR
           
           # stub api requests
           illustrate_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
-          illustrate_url = "https://api.mortardata.com/illustrate/#{illustrate_id}"
+          illustrate_url = "https://api.mortardata.com/illustrates/#{illustrate_id}"
           
           
           mock(Mortar::Auth.api).post_illustrate("myproject", "my_script", "my_alias", is_a(String)) {Excon::Response.new(:body => {"illustrate_id" => illustrate_id})}
@@ -62,10 +62,10 @@ STDERR
           mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_PROGRESS})).ordered
           mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_READING_DATA})).ordered
           mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_PRUNING_DATA})).ordered
-          mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_SUCCESS, "result_url" => illustrate_url})).ordered
+          mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_SUCCESS, "web_result_url" => illustrate_url})).ordered
           
           # stub launchy
-          #mock(Launchy).open(illustrate_url) {Thread.new {}}
+          mock(Launchy).open(illustrate_url) {Thread.new {}}
           
           initial_git_branches = @git.branches
           
@@ -81,7 +81,8 @@ Starting illustrate... started
  ... READING_DATA
  ... PRUNING_DATA
  ... SUCCESS
-Illustrate results: {"status"=>"SUCCESS", "result_url"=>"https://api.mortardata.com/illustrate/c571a8c7f76a4fd4a67c103d753e2dd5"}
+Illustrate results available at https://api.mortardata.com/illustrates/c571a8c7f76a4fd4a67c103d753e2dd5
+Opening web browser to show results... done
 STDOUT
           
           # ensure that the expanded file was written
