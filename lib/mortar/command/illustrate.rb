@@ -65,7 +65,7 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
     last_illustrate_result = nil
     while last_illustrate_result.nil? || (! Mortar::API::Illustrate::STATUSES_COMPLETE.include?(last_illustrate_result["status"]))
       sleep polling_interval
-      current_illustrate_result = api.get_illustrate(illustrate_id).body
+      current_illustrate_result = api.get_illustrate(illustrate_id, :exclude_result => true).body
       if last_illustrate_result.nil? || (last_illustrate_result["status"] != current_illustrate_result["status"])
         display(" ... #{current_illustrate_result['status']}")
       end

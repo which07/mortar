@@ -58,11 +58,11 @@ STDERR
           
           
           mock(Mortar::Auth.api).post_illustrate("myproject", "my_script", "my_alias", is_a(String)) {Excon::Response.new(:body => {"illustrate_id" => illustrate_id})}
-          mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_QUEUED})).ordered
-          mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_PROGRESS})).ordered
-          mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_READING_DATA})).ordered
-          mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_PRUNING_DATA})).ordered
-          mock(Mortar::Auth.api).get_illustrate(illustrate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_SUCCESS, "web_result_url" => illustrate_url})).ordered
+          mock(Mortar::Auth.api).get_illustrate(illustrate_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_QUEUED})).ordered
+          mock(Mortar::Auth.api).get_illustrate(illustrate_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_PROGRESS})).ordered
+          mock(Mortar::Auth.api).get_illustrate(illustrate_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_READING_DATA})).ordered
+          mock(Mortar::Auth.api).get_illustrate(illustrate_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_PRUNING_DATA})).ordered
+          mock(Mortar::Auth.api).get_illustrate(illustrate_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_SUCCESS, "web_result_url" => illustrate_url})).ordered
           
           # stub launchy
           mock(Launchy).open(illustrate_url) {Thread.new {}}
