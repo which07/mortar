@@ -72,7 +72,6 @@ STDERR
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
           stderr, stdout = execute("illustrate my_script my_alias --polling_interval 0.05", p, @git)
           stdout.should == <<-STDOUT
-Expanding templates in pigscript my_script... done
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
 Starting illustrate... started
@@ -84,11 +83,7 @@ Starting illustrate... started
 Illustrate results available at https://api.mortardata.com/illustrates/c571a8c7f76a4fd4a67c103d753e2dd5
 Opening web browser to show results... done
 STDOUT
-          
-          # ensure that the expanded file was written
-          Dir.exists?(p.tmp_path).should be_true
-          Dir[p.tmp_path].size.should == 1
-          
+                    
           # ensure that no additional branches are left behind
           @git.branches.should == initial_git_branches
         end

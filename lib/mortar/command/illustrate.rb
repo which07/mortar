@@ -41,17 +41,6 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
       available_scripts = project.pigscripts.none? ? "No pigscripts found" : "Available scripts:\n#{project.pigscripts.keys.sort.join("\n")}"
       error("Unable to find pigscript #{pigscript_name}\n#{available_scripts}")
     end
-        
-    # expand the template
-    action("Expanding templates in pigscript #{pigscript_name}") do 
-      expanded_script = expand_script_template(project, pigscript)
-    
-      # write to tmp for later use
-      expanded_script_filename = "#{pigscript_name}.#{Time.now.strftime("%F-%T:%L")}.pig"
-      expanded_script_path = File.join(project.tmp_path, expanded_script_filename)
-      write_to_file(expanded_script, File.join(project.tmp_path, expanded_script_filename))
-      #status("expanded to  #{expanded_script_path}")
-    end
     
     # create / push a snapshot branch
     snapshot_branch = action("Taking code snapshot") do
