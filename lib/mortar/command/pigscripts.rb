@@ -44,12 +44,7 @@ class Mortar::Command::PigScripts < Mortar::Command::Base
       error("Usage: mortar pigscripts:expand SCRIPT\nMust specify SCRIPT.")
     end
     validate_arguments!
-    
-    
-    unless pigscript = project.pigscripts[name]
-      available_scripts = project.pigscripts.none? ? "No pigscripts found" : "Available scripts:\n#{project.pigscripts.keys.sort.join("\n")}"
-      error("Unable to find pigscript #{name}\n#{available_scripts}")
-    end
+    pigscript = validate_pigscript!(name)
     
     result = expand_script_template(project, pigscript)
     display(result)

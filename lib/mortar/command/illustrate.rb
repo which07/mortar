@@ -1,11 +1,11 @@
 require "mortar/command/base"
-require "mortar/script_template"
+require "mortar/snapshot"
 
 # manage pig scripts
 #
 class Mortar::Command::Illustrate < Mortar::Command::Base
   
-  include Mortar::ScriptTemplate
+  include Mortar::Snapshot
     
   # illustrate [PIGSCRIPT] [ALIAS]
   #
@@ -24,42 +24,13 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
       error("Usage: mortar illustrate PIGSCRIPT ALIAS\nMust specify PIGSCRIPT and ALIAS.")
     end
     validate_arguments!
-    
-    unless project.root_path
-      # TODO: make illustrate work if you pass in --project and are in the project directory
-      # TODO: make illustrate work if code not deployed locally
-      error("illustrate must be run from the project directory")
-    end
-    
-    unless project.remote
-      # TODO: better, more centralized error message
-      error("Unable to find git remote for project #{project.name}")
-    end
-    
-    unless pigscript = project.pigscripts[pigscript_name]
-      # FIXME ddaniels: duplicated in pigscripts -- extract to method in helpers
-      available_scripts = project.pigscripts.none? ? "No pigscripts found" : "Available scripts:\n#{project.pigscripts.keys.sort.join("\n")}"
-      error("Unable to find pigscript #{pigscript_name}\n#{available_scripts}")
-    end
-    
-    # create / push a snapshot branch
-    snapshot_branch = action("Taking code snapshot") do
-      git.create_snapshot_branch()
-    end
-    
-    git_rev = action("Sending code snapshot to Mortar") do
-      # push the code
-      git.push(project.remote, snapshot_branch)
-      
-      # grab the commit hash and clean out the branch from the local branches
-      rev = git.git_rev(snapshot_branch)
-      git.branch_delete(snapshot_branch)
-      rev
-    end
+    validate_git_based_project!
+    pigscript = validate_pigscript!(pigscript_name)
+    git_ref = create_and_push_snapshot_branch(git, project)
     
     illustrate_id = nil
     action("Starting illustrate", {:success => "started"}) do
-      illustrate_id = api.post_illustrate(project.name, pigscript.name, alias_name, git_rev).body["illustrate_id"]
+      illustrate_id = api.post_illustrate(project.name, pigscript.name, alias_name, git_ref).body["illustrate_id"]
     end
     
     last_illustrate_result = nil

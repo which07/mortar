@@ -179,6 +179,24 @@ protected
     Mortar::Command.validate_arguments!
   end
 
+  def validate_git_based_project!
+    unless project.root_path
+      error("#{current_command[:command]} must be run from the checked-out project directory")
+    end
+    
+    unless project.remote
+      error("Unable to find git remote for project #{project.name}")
+    end
+  end
+  
+  def validate_pigscript!(pigscript_name)
+    unless pigscript = project.pigscripts[pigscript_name]
+      available_scripts = project.pigscripts.none? ? "No pigscripts found" : "Available scripts:\n#{project.pigscripts.keys.sort.join("\n")}"
+      error("Unable to find pigscript #{pigscript_name}\n#{available_scripts}")
+    end
+    pigscript
+  end
+
   def extract_project_in_dir(project_name=nil)
     # returns [project_name, remote_name]
     # TODO refactor this very messy method

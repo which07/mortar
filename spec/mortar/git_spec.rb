@@ -27,7 +27,7 @@ module Mortar
     context "git-rev" do
       it "looks up a revision" do
         with_git_initialized_project do |p|
-          @git.git_rev("master").nil?.should be_false
+          @git.git_ref("master").nil?.should be_false
         end
       end
     end

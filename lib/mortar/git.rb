@@ -155,7 +155,7 @@ module Mortar
       #
       # rev-parse
       #
-      def git_rev(refname)
+      def git_ref(refname)
         git("rev-parse --verify --quiet #{refname}")
       end
 
