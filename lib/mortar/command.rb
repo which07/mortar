@@ -146,7 +146,16 @@ module Mortar
         end
         command[:options].each do |name, option|
           parser.on("-#{option[:short]}", "--#{option[:long]}", option[:desc]) do |value|
-            opts[name.gsub("-", "_").to_sym] = value
+            opt_name_sym = name.gsub("-", "_").to_sym
+            if opts[opt_name_sym]
+              # convert multiple instances of an option to an array
+              unless opts[opt_name_sym].is_a?(Array)
+                opts[opt_name_sym] = [opts[opt_name_sym]]
+              end
+              opts[opt_name_sym] << value
+            else
+              opts[opt_name_sym] = value
+            end
           end
         end
       end
