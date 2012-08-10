@@ -348,20 +348,27 @@ module Mortar
       display("=== #{header}")
     end
 
-    def styled_hash(hash, keys=nil)
+    def styled_hash(hash, keys=nil, indent=0)
+      def display_with_indent(indent, msg="", new_line=true)
+        display(msg.to_s.prepend("".ljust(indent)), new_line)
+      end
+      
       max_key_length = hash.keys.map {|key| key.to_s.length}.max + 2
       keys ||= hash.keys.sort {|x,y| x.to_s <=> y.to_s}
       keys.each do |key|
         case value = hash[key]
+        when Hash
+          display_with_indent(indent, "#{key}: ".ljust(max_key_length))
+          styled_hash(hash[key], nil, indent + 2)
         when Array
           if value.empty?
             next
           else
             elements = value.sort {|x,y| x.to_s <=> y.to_s}
-            display("#{key}: ".ljust(max_key_length), false)
-            display(elements[0])
+            display_with_indent(indent, "#{key}: ".ljust(max_key_length), false)
+            display_with_indent(indent, elements[0])
             elements[1..-1].each do |element|
-              display("#{' ' * max_key_length}#{element}")
+              display_with_indent(indent, "#{' ' * max_key_length}#{element}")
             end
             if elements.length > 1
               display
@@ -370,8 +377,8 @@ module Mortar
         when nil
           next
         else
-          display("#{key}: ".ljust(max_key_length), false)
-          display(value)
+          display_with_indent(indent, "#{key}: ".ljust(max_key_length), false)
+          display_with_indent(indent, value)
         end
       end
     end
