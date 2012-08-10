@@ -104,7 +104,31 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   #
   # TBD
   def status
-    raise NotImplementedError, "FIXME implement me"
+    job_id = shift_argument
+    unless job_id
+      error("Usage: mortar jobs:status JOB_ID\nMust specify JOB_ID.")
+    end
+    
+    job_status = api.get_job(job_id).body
+
+    job_display_entries = {
+      "status" => job_status["status"],
+      "progress" => "#{job_status["progress"]}%",
+      "cluster_id" => job_status["cluster_id"],
+      "job submitted at" => job_status["start_timestamp"],
+      "job began running at" => job_status["running_timestamp"],
+      "job finished at" => job_status["stop_timestamp"],
+      "job running for" => job_status["duration"],
+      "job run with parameters" => job_status["parameters"],
+      "error" => job_status["error"]
+    }
+    
+    if job_status["num_hadoop_jobs"] && job_status["num_hadoop_jobs_succeeded"]
+      job_display_entries["hadoop jobs complete"] = "#{job_status["num_hadoop_jobs_succeeded"]} / #{job_status["num_hadoop_jobs"]}"
+    end
+    
+    styled_header("#{job_status["project_name"]}: #{job_status["pigscript_name"]} (job_id: #{job_status["job_id"]})")
+    styled_hash(job_display_entries)
   end
   
   # jobs:stop JOB_ID
