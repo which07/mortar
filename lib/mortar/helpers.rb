@@ -350,7 +350,7 @@ module Mortar
 
     def styled_hash(hash, keys=nil, indent=0)
       def display_with_indent(indent, msg="", new_line=true)
-        display(msg.to_s.prepend("".ljust(indent)), new_line)
+        display("#{"".ljust(indent)}#{msg.to_s}", new_line)
       end
       
       max_key_length = hash.keys.map {|key| key.to_s.length}.max + 2

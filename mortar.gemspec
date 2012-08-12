@@ -12,7 +12,7 @@ Gem::Specification.new do |gem|
   gem.description = "Client library and command-line tool to interact with the Mortar service."
   gem.executables = "mortar"
   gem.platform    = Gem::Platform::RUBY
-  gem.required_ruby_version = '>=1.9'
+  gem.required_ruby_version = '>=1.8.7'
   
   gem.files = %x{ git ls-files }.split("\n").select { |d| d =~ %r{^(License|README|bin/|data/|ext/|lib/|spec/|test/)} }
   

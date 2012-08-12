@@ -12,7 +12,7 @@ module Mortar
         with_blank_project do |p|
           # create it
           tmp_path_0 = p.tmp_path
-          Dir.exists?(tmp_path_0).should be_true
+          File.directory?(tmp_path_0).should be_true
           
           # reuse it
           p.tmp_path.should == tmp_path_0

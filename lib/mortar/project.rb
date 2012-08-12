@@ -41,7 +41,7 @@ module Mortar
       
       def tmp_path
         path = File.join(@root_path, "tmp")
-        unless Dir.exists? path
+        unless File.directory? path
           FileUtils.mkdir_p path
         end
         path
@@ -84,7 +84,7 @@ module Mortar
       end
 
       def elements
-        unless Dir.exists? @path
+        unless File.directory? @path
           raise ProjectError, "Unable to find #{@name} directory in project"
         end
 

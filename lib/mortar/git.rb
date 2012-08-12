@@ -18,7 +18,7 @@ module Mortar
       end
       
       def has_dot_git?
-        Dir.exists?(".git")
+        File.directory?(".git")
       end
       
       def git(args, check_success=true)
