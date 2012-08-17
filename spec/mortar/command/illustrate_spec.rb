@@ -59,6 +59,7 @@ STDERR
           
           mock(Mortar::Auth.api).post_illustrate("myproject", "my_script", "my_alias", is_a(String)) {Excon::Response.new(:body => {"illustrate_id" => illustrate_id})}
           mock(Mortar::Auth.api).get_illustrate(illustrate_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_QUEUED})).ordered
+          mock(Mortar::Auth.api).get_illustrate(illustrate_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_GATEWAY_STARTING})).ordered
           mock(Mortar::Auth.api).get_illustrate(illustrate_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_PROGRESS})).ordered
           mock(Mortar::Auth.api).get_illustrate(illustrate_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_READING_DATA})).ordered
           mock(Mortar::Auth.api).get_illustrate(illustrate_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status" => Mortar::API::Illustrate::STATUS_PRUNING_DATA})).ordered
@@ -74,6 +75,7 @@ Taking code snapshot... done
 Sending code snapshot to Mortar... done
 Starting illustrate... started
  ... QUEUED
+ ... GATEWAY_STARTING
  ... PROGRESS
  ... READING_DATA
  ... PRUNING_DATA
