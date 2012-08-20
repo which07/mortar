@@ -120,7 +120,6 @@ def with_blank_project(&block)
   FileUtils.mkdir_p(project_path)
   
   # setup project subdirectories
-  FileUtils.mkdir_p(File.join(project_path, "datasets"))
   FileUtils.mkdir_p(File.join(project_path, "pigscripts"))
 
   Dir.chdir(project_path)
