@@ -46,7 +46,15 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
     
     case last_illustrate_result['status']
     when Mortar::API::Illustrate::STATUS_FAILURE
-      error("Illustrate failed.\nError message: #{last_illustrate_result['error_message']}")
+      error_message = "Illustrate failed with #{last_illustrate_result['error_type'] || 'error'}"
+      if line_number = last_illustrate_result["line_number"]
+        error_message += " at Line #{line_number}"
+        if column_number = last_illustrate_result["column_number"]
+          error_message += ", Column #{column_number}"
+        end
+      end
+      error_message += ":\n\n#{last_illustrate_result['error_message']}"
+      error(error_message)
     when Mortar::API::Illustrate::STATUS_KILLED
       error("Illustrate killed by user.")
     when Mortar::API::Illustrate::STATUS_SUCCESS
