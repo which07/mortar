@@ -2,7 +2,9 @@ require 'rexml/document'
 require 'mortar/helpers'
 require 'mortar/project'
 require 'mortar/version'
+require 'mortar/api'
 require "optparse"
+
 
 module Mortar
   module Command
