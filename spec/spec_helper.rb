@@ -233,7 +233,6 @@ RSpec.configure do |config|
   config.mock_with :rr
   config.color_enabled = true
   config.include DisplayMessageMatcher
-  config.order = 'rand'
   config.before { Mortar::Helpers.error_with_failure = false }
   config.after { RR.reset }
 end
