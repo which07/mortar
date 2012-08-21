@@ -21,12 +21,12 @@ module Mortar
         File.directory?(".git")
       end
       
-      def git(args, check_success=true)
+      def git(args, check_success=true, check_git_directory=true)
         unless has_git?
           raise GitError, "git must be installed"
         end
         
-        unless has_dot_git?
+        if check_git_directory && !has_dot_git?
           raise GitError, "No .git directory found"
         end
         
@@ -206,6 +206,12 @@ module Mortar
         git("ls-files -o --exclude-standard").split("\n")
       end
       
+      #
+      # clone
+      #
+      def clone(git_host, git_organization, repository, path="")
+        git("clone git@%s:%s/%s.git \"%s\"" % [git_host, git_organization, repository, path], true, false)
+      end
     end
   end
 end

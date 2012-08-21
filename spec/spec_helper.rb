@@ -108,6 +108,26 @@ def stub_core
   end
 end
 
+def with_no_git_directory(&block)
+  starting_dir = Dir.pwd
+  sandbox = File.join(Dir.tmpdir, "mortar", Mortar::UUID.create_random.to_s)
+  FileUtils.mkdir_p(sandbox)
+  Dir.chdir(sandbox)
+  
+  begin
+    block.call()
+  ensure
+    # return to the original starting dir,
+    # if one is defined.  If using FakeFS, it will not
+    # be defined
+    if starting_dir && (! starting_dir.empty?)
+      Dir.chdir(starting_dir)
+    end
+
+    FileUtils.rm_rf(sandbox)
+  end
+end
+
 def with_blank_project(&block)
   # setup a sandbox directory
   starting_dir = Dir.pwd

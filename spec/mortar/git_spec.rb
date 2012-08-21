@@ -46,6 +46,18 @@ module Mortar
         end
       end
       
+      it "raises error on no .git file" do
+        with_no_git_directory do
+          lambda {@git.git("--version") }.should raise_error(Mortar::Git::GitError)
+        end
+      end
+      
+      it "doesn't raises error on no .git file with check disabled" do
+        with_no_git_directory do
+          lambda {@git.git("--version", true, false) }.should_not raise_error(Mortar::Git::GitError)
+        end
+      end
+            
     end
     
     context "working directory" do
@@ -229,6 +241,19 @@ STASH
           starting_status = @git.status
           snapshot_branch = @git.create_snapshot_branch
           post_validate_git_snapshot(@git, starting_status, snapshot_branch)
+        end
+      end
+      
+    end
+    
+    context "clone" do
+      it "clones repo successfully" do
+        with_no_git_directory do
+          File.directory?("rollup").should be_false
+          @git.clone("github.com", "mortarcode", "4fbbd83cce875be8a4000000_rollup", "rollup")
+          File.directory?("rollup").should be_true
+          Dir.chdir("rollup")
+          lambda { @git.git("--version") }.should_not raise_error
         end
       end
       
