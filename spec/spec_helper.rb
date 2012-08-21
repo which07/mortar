@@ -234,6 +234,6 @@ RSpec.configure do |config|
   config.color_enabled = true
   config.include DisplayMessageMatcher
   config.before { Mortar::Helpers.error_with_failure = false }
-  config.after { RR.reset }
+  config.after { RR.verify; RR.reset }
 end
 

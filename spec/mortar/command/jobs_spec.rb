@@ -17,9 +17,6 @@ module Mortar::Command
     context("run") do
       it "runs a job on a new cluster" do
         with_git_initialized_project do |p|
-          # stub git
-          mock(@git).push
-
           # stub api requests
           job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
           cluster_size = 5
@@ -45,9 +42,6 @@ STDOUT
 
       it "runs a job on a new cluster" do
         with_git_initialized_project do |p|
-          # stub git
-          mock(@git).push
-
           # stub api requests
           job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
           cluster_id = "e2790e7e8c7d48e39157238d58191346"
