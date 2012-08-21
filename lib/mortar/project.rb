@@ -15,18 +15,6 @@ module Mortar
         @remote = remote
       end
       
-      def datasets_path
-        File.join(@root_path, "datasets")
-      end
-            
-      def datasets
-        @datasets ||= DataSets.new(
-          datasets_path,
-          "datasets",
-          ".pig")
-        @datasets
-      end
-      
       def pigscripts_path
         File.join(@root_path, "pigscripts")
       end
@@ -104,13 +92,7 @@ module Mortar
         Script.new(name, path)
       end
     end
-    
-    class DataSets < ProjectEntity
-      def element(name, path)
-        Script.new(name, path)
-      end
-    end
-    
+        
     class Script
       
       attr_reader :name
