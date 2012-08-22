@@ -115,6 +115,21 @@ STDERR
 STDERR
       end
       
+      it "shows appropriate error message when user tries to clone into existing directory" do
+        with_no_git_directory do
+          mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [project1, project2]}))
+          starting_dir = Dir.pwd
+          project_dir = File.join(Dir.pwd, project1['name'])
+          FileUtils.mkdir_p(project_dir)
+          
+          stderr, stdout = execute("projects:clone #{project1['name']}")
+          stderr.should == <<-STDERR
+ !    Can't clone project: #{project1['name']} since directory with that name already exists.
+STDERR
+        end
+        
+      end
+      
       it "calls git clone when existing project is cloned" do
         mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [project1, project2]}))
         mock(@git).clone(::GIT_HOST, ::GIT_ORGANIZATION, project1['github_repo_name'], project1['name'])

@@ -105,5 +105,10 @@ class Mortar::Command::Projects < Mortar::Command::Base
       error("Invalid project name: #{name}")
     end
     git.clone(GIT_HOST, GIT_ORGANIZATION, project['github_repo_name'], project['name'])
+    project_dir = File.join(Dir.pwd, project['name'])
+    display(project_dir)
+    unless !File.exists?(project_dir)
+      error("Can't clone project: #{project['name']} since directory with that name already exists.")
+    end
   end
 end
