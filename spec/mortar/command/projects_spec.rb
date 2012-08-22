@@ -15,10 +15,10 @@ module Mortar::Command
     
     project1 = {'name' => "Project1",
                 'status' => Mortar::API::Projects::STATUS_ACTIVE,
-                'github_repo_name' => "Project1"}
+                'git_url' => "git@github.com:mortarcode/Project1"}
     project2 = {'name' => "Project2",
                 'status' => Mortar::API::Projects::STATUS_ACTIVE,
-                'github_repo_name' => "Project2"}
+                'git_url' => "git@github.com:mortarcode/Project2"}
         
     context("index") do
       
@@ -79,12 +79,16 @@ STDERR
       
       it "create a new project successfully" do
         project_id = "1234abcd1234abcd1234"
+        project_name = "some_new_project"
+        project_git_url = "git@github.com:mortarcode/#{project_name}"
         mock(Mortar::Auth.api).post_project("some_new_project") {Excon::Response.new(:body => {"project_id" => project_id})}
         mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Projects::STATUS_PENDING})).ordered
         mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Projects::STATUS_CREATING})).ordered
-        mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Projects::STATUS_ACTIVE})).ordered
+        mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Projects::STATUS_ACTIVE,
+                                                                                             "git_url" => project_git_url})).ordered
+        mock(@git).remote_add("mortar", project_git_url)
 
-        stderr, stdout = execute("projects:create some_new_project")
+        stderr, stdout = execute("projects:create #{project_name}  --polling_interval 0.05", nil, @git)
         stdout.should == <<-STDOUT
 Creating project... started
  ... PENDING
@@ -132,7 +136,8 @@ STDERR
       
       it "calls git clone when existing project is cloned" do
         mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [project1, project2]}))
-        mock(@git).clone(::GIT_HOST, ::GIT_ORGANIZATION, project1['github_repo_name'], project1['name'])
+        mock(@git).clone(project1['git_url'], project1['name'])
+        
         stderr, stdout = execute('projects:clone Project1', nil, @git)
       end
       

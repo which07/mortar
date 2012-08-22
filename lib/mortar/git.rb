@@ -209,8 +209,8 @@ module Mortar
       #
       # clone
       #
-      def clone(git_host, git_organization, repository, path="")
-        git("clone git@%s:%s/%s.git \"%s\"" % [git_host, git_organization, repository, path], true, false)
+      def clone(git_url, path="")
+        git("clone %s \"%s\"" % [git_url, path], true, false)
       end
     end
   end

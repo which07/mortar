@@ -1,8 +1,5 @@
 require "mortar/command/base"
 
-GIT_HOST = "github.com"
-GIT_ORGANIZATION = "mortarcode"
-
 ## manage projects
 #
 class Mortar::Command::Projects < Mortar::Command::Base
@@ -77,7 +74,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
     when Mortar::API::Projects::STATUS_FAILED
       error("Project creation failed.\nError message: #{last_project_result['error_message']}")
     when Mortar::API::Projects::STATUS_ACTIVE
-      git.remote_add("mortar", "git@%s:%s/%s.git" % [GIT_HOST, GIT_ORGANIZATION, last_project_result['github_repo_name']])
+      git.remote_add("mortar", last_project_result['git_url'])
     else
       raise RuntimeError, "Unknown project status: #{last_project_result['status']} for project_id: #{project_id}"
     end
@@ -104,11 +101,13 @@ class Mortar::Command::Projects < Mortar::Command::Base
     unless project
       error("Invalid project name: #{name}")
     end
-    git.clone(GIT_HOST, GIT_ORGANIZATION, project['github_repo_name'], project['name'])
+
     project_dir = File.join(Dir.pwd, project['name'])
     display(project_dir)
     unless !File.exists?(project_dir)
       error("Can't clone project: #{project['name']} since directory with that name already exists.")
     end
+
+    git.clone(project['git_url'], project['name'])
   end
 end
