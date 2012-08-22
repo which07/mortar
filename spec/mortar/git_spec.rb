@@ -52,7 +52,7 @@ module Mortar
         end
       end
       
-      it "doesn't raises error on no .git file with check disabled" do
+      it "does not raise error on no .git file with check disabled" do
         with_no_git_directory do
           lambda {@git.git("--version", true, false) }.should_not raise_error(Mortar::Git::GitError)
         end
