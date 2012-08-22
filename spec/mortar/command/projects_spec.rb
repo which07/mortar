@@ -58,7 +58,12 @@ STDERR
         with_no_git_directory do
           stderr, stdout = execute("projects:create some_new_project")
           stderr.should == <<-STDERR
- !    Can only create a mortar project for an existing git project.
+ !    Can only create a mortar project for an existing git project.  Please run:
+ !    
+ !    git init
+ !    git commit -a -m "first commit"
+ !    
+ !    to initialize your project in git.
 STDERR
         end
       end
