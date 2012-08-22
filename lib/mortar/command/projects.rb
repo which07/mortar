@@ -99,7 +99,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
     projects = api.get_projects().body["projects"]
     project = projects.find{|p| p['name'] == name}
     unless project
-      error("Invalid project name: #{name}")
+      error("No project named: #{name} exists.  Your valid projects are:\n#{projects.collect{ |x| x["name"]}.join("\n")}")
     end
 
     project_dir = File.join(Dir.pwd, project['name'])

@@ -115,7 +115,9 @@ STDERR
         
         stderr, stdout = execute('projects:clone sillyProjectName')
         stderr.should == <<-STDERR
- !    Invalid project name: sillyProjectName
+ !    No project named: sillyProjectName exists.  Your valid projects are:
+ !    Project1
+ !    Project2
 STDERR
       end
       
