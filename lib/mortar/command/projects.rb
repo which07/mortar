@@ -103,7 +103,6 @@ class Mortar::Command::Projects < Mortar::Command::Base
     end
 
     project_dir = File.join(Dir.pwd, project['name'])
-    display(project_dir)
     unless !File.exists?(project_dir)
       error("Can't clone project: #{project['name']} since directory with that name already exists.")
     end
