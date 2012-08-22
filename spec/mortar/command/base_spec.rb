@@ -7,7 +7,7 @@ module Mortar::Command
       @base = Base.new
       stub(@base).display
       @client = Object.new
-      mock(@client).host {'mortar.com'}
+      stub(@client).host {'mortar.com'}
     end
 
     context "detecting the project" do

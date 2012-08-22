@@ -49,9 +49,6 @@ STDERR
       
       it "requests and reports on a successful illustrate" do
         with_git_initialized_project do |p|
-          # stub git
-          mock(@git).push
-          
           # stub api requests
           illustrate_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
           illustrate_url = "https://api.mortardata.com/illustrates/#{illustrate_id}"
@@ -88,9 +85,6 @@ STDOUT
       
       it "requests and reports on a failed illustrate" do
         with_git_initialized_project do |p|
-          # stub git
-          mock(@git).push
-
           # stub api requests
           illustrate_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
           
