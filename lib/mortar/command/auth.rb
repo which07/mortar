@@ -43,6 +43,21 @@ class Mortar::Command::Auth < Mortar::Command::Base
 
   alias_command "logout", "auth:logout"
 
+  # auth:key
+  #
+  # display your api key
+  #
+  #Example:
+  #
+  # $ mortar auth:key
+  # ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCD
+  #
+  def key
+    validate_arguments!
+  
+    display Mortar::Auth.password
+  end
+   
   # auth:whoami
   #
   # display your mortar email address
