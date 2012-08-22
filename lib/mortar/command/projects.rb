@@ -49,6 +49,14 @@ class Mortar::Command::Projects < Mortar::Command::Base
       error("Can only create a mortar project for an existing git project.  Please run:\n\ngit init\ngit commit -a -m \"first commit\"\n\nto initialize your project in git.")
     end
     
+    unless git.remotes(git_organization).empty?
+      begin
+        error("Currently in project: #{project.name}.  You can not create a new project inside of an existing mortar project.")
+      rescue Mortar::Command::CommandFailed => cf
+        error("Currently in an existing Mortar project.  You can not create a new project inside of an existing mortar project.")
+      end
+    end
+    
     project_id = nil
     action("Creating project", {:success => "started"}) do
       project_id = api.post_project(name).body["project_id"]

@@ -68,6 +68,15 @@ STDERR
         end
       end
       
+      it "show appropriate error message when user tries to create a project inside of an existing project" do
+         with_git_initialized_project do |p|           
+           stderr, stdout = execute("projects:create some_new_project", nil, @git)
+           stderr.should == <<-STDERR
+ !    Currently in project: myproject.  You can not create a new project inside of an existing mortar project.
+STDERR
+         end
+      end
+      
       it "create a new project successfully" do
         project_id = "1234abcd1234abcd1234"
         mock(Mortar::Auth.api).post_project("some_new_project") {Excon::Response.new(:body => {"project_id" => project_id})}
