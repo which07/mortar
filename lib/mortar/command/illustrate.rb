@@ -11,6 +11,8 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
   #
   # Illustrate the effects and output of a pigscript.
   #
+  # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
+  #
   # Examples:
   #
   # $ mortar illustrate
@@ -30,7 +32,7 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
     
     illustrate_id = nil
     action("Starting illustrate", {:success => "started"}) do
-      illustrate_id = api.post_illustrate(project.name, pigscript.name, alias_name, git_ref).body["illustrate_id"]
+      illustrate_id = api.post_illustrate(project.name, pigscript.name, alias_name, git_ref, :parameters => pig_parameters).body["illustrate_id"]
     end
     
     last_illustrate_result = nil
