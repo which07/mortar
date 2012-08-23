@@ -3,6 +3,10 @@ require "mortar/auth"
 require "mortar/command"
 require "mortar/project"
 require "mortar/git"
+require "mortar/generators/app/app_generator"
+require "mortar/generators/udf/udf_generator"
+require "mortar/generators/pigscript/pigscript_generator"
+require "mortar/generators/macro/macro_generator"
 
 class Mortar::Command::Base
   include Mortar::Helpers
@@ -27,6 +31,8 @@ class Mortar::Command::Base
       elsif ENV.has_key?('MORTAR_PROJECT')
         [ENV['MORTAR_PROJECT'], nil, nil]
       elsif project_from_dir = extract_project_in_dir()
+        [project_from_dir[0], Dir.pwd, project_from_dir[1]]
+      elsif project_from_dir = extract_project_in_dir_no_git()
         [project_from_dir[0], Dir.pwd, project_from_dir[1]]
       else
         raise Mortar::Command::CommandFailed, "No project specified.\nRun this command from a project folder or specify which project to use with --project <project name>"
@@ -195,6 +201,15 @@ protected
       error("Unable to find pigscript #{pigscript_name}\n#{available_scripts}")
     end
     pigscript
+  end
+
+  def extract_project_in_dir_no_git()
+    folders = Dir.glob("*/")
+    return unless folders.include?("macros/")
+    return unless folders.include?("pigscripts/")
+    return unless folders.include?("udfs/")
+    
+    [File.basename(Dir.getwd), nil]
   end
 
   def extract_project_in_dir(project_name=nil)

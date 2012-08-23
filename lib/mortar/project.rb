@@ -26,6 +26,17 @@ module Mortar
           ".pig")
         @datasets
       end
+
+      def python_udfs_path
+        File.join(@root_path, "udfs/python")
+      end
+
+      def python_udfs
+        @python_udfs ||= PythonUDFS.new(
+          python_udfs_path,
+          "python",
+          ".py")
+      end
       
       def pigscripts_path
         File.join(@root_path, "pigscripts")
@@ -106,6 +117,12 @@ module Mortar
     end
     
     class DataSets < ProjectEntity
+      def element(name, path)
+        Script.new(name, path)
+      end
+    end
+
+    class PythonUDFS < ProjectEntity
       def element(name, path)
         Script.new(name, path)
       end
