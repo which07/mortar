@@ -32,6 +32,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   # -s, --clustersize NUMNODES  # Run job on a new cluster, with NUM_NODES nodes.
   # -k, --keepalive             # Keep this cluster running after the job finishes, to be used for future jobs.  Default: false.
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
+  # -f, --param-file PARAMFILE   # Load pig parameter values from a file.
   #
   #Examples:
   #
@@ -58,13 +59,29 @@ class Mortar::Command::Jobs < Mortar::Command::Base
         end
       end
     end
-    
-    input_parameters = options[:parameter] ? Array(options[:parameter]) : []
-    parameters = input_parameters.map do |name_equals_value|
-      name, value = name_equals_value.split('=', 2)
-      {"name" => name, "value" => value}
+
+    paramfile_params = {}
+    if options[:param_file]
+      File.open(options[:param_file], "r").each do |line|
+        # If the line isn't empty
+        if not line.chomp.empty?
+          name, value = line.split('=', 2)
+          paramfile_params[name] = value
+        end
+      end
     end
     
+    
+    paramoption_params = {}
+    input_parameters = options[:parameter] ? Array(options[:parameter]) : []
+    input_parameters.each do |name_equals_value|
+      name, value = name_equals_value.split('=', 2)
+      paramoption_params[name] = value
+    end
+
+    parameters = paramfile_params.merge(paramoption_params).each do |name, value|
+      {"name" => name, "value" => value}
+    end
         
     validate_git_based_project!
     pigscript = validate_pigscript!(pigscript_name)
