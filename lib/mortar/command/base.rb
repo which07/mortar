@@ -112,7 +112,7 @@ protected
   #
   # Examples of the caller format :
   # * c:/Ruby192/lib/.../lib/mortar/command/addons.rb:8:in `<module:Command>'
-  # * c:/Ruby192/lib/.../mortar-2.0.1/lib/heroku/command/pg.rb:96:in `<class:Pg>'
+  # * c:/Ruby192/lib/.../mortar-2.0.1/lib/mortar/command/pg.rb:96:in `<class:Pg>'
   # * /Users/ph7/...../xray-1.1/lib/xray/thread_dump_signal_handler.rb:9
   #
   def self.extract_help_from_caller(line)

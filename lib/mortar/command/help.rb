@@ -136,12 +136,12 @@ private
     end
 
     if commands_for_namespace(name).size > 0
-      puts "Additional commands, type \"heroku help COMMAND\" for more details:"
+      puts "Additional commands, type \"mortar help COMMAND\" for more details:"
       puts
       help_for_namespace(name)
       puts
     elsif command.nil?
-      error "#{name} is not a heroku command. See `heroku help`."
+      error "#{name} is not a mortar command. See `mortar help`."
     end
   end
 end
