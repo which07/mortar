@@ -61,6 +61,7 @@ STDERR
  !    Can only create a mortar project for an existing git project.  Please run:
  !    
  !    git init
+ !    git add .
  !    git commit -a -m "first commit"
  !    
  !    to initialize your project in git.

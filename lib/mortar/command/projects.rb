@@ -43,7 +43,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
     validate_arguments!
     
     unless git.has_dot_git?
-      error("Can only create a mortar project for an existing git project.  Please run:\n\ngit init\ngit commit -a -m \"first commit\"\n\nto initialize your project in git.")
+      error("Can only create a mortar project for an existing git project.  Please run:\n\ngit init\ngit add .\ngit commit -a -m \"first commit\"\n\nto initialize your project in git.")
     end
     
     unless git.remotes(git_organization).empty?
