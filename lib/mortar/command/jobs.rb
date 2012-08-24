@@ -59,29 +59,6 @@ class Mortar::Command::Jobs < Mortar::Command::Base
         end
       end
     end
-
-    paramfile_params = {}
-    if options[:param_file]
-      File.open(options[:param_file], "r").each do |line|
-        # If the line isn't empty
-        if not line.chomp.empty?
-          name, value = line.split('=', 2)
-          paramfile_params[name] = value
-        end
-      end
-    end
-    
-    
-    paramoption_params = {}
-    input_parameters = options[:parameter] ? Array(options[:parameter]) : []
-    input_parameters.each do |name_equals_value|
-      name, value = name_equals_value.split('=', 2)
-      paramoption_params[name] = value
-    end
-
-    parameters = paramfile_params.merge(paramoption_params).each do |name, value|
-      {"name" => name, "value" => value}
-    end
         
     validate_git_based_project!
     pigscript = validate_pigscript!(pigscript_name)
@@ -93,12 +70,12 @@ class Mortar::Command::Jobs < Mortar::Command::Base
         cluster_size = options[:clustersize].to_i
         keepalive = options[:keepalive] || false
         api.post_job_new_cluster(project.name, pigscript.name, git_ref, cluster_size, 
-          :parameters => parameters,
+          :parameters => pig_parameters,
           :keepalive => keepalive).body["job_id"]
       else
         cluster_id = options[:clusterid]
         api.post_job_existing_cluster(project.name, pigscript.name, git_ref, cluster_id,
-          :parameters => parameters).body["job_id"]
+          :parameters => pig_parameters).body["job_id"]
       end
     end
     display("job_id: #{job_id}")
