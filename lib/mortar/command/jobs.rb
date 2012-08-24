@@ -64,8 +64,11 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     if options[:param_file]
       File.open(options[:param_file], "r").each do |line|
         # If the line isn't empty
-        if not line.chomp.empty?
+        if not line.chomp.empty? and not line.chomp.match(/^;/)
           name, value = line.split('=', 2)
+          if not name or not value
+            error("Parameter file is malformed")
+          end
           paramfile_params[name] = value
         end
       end
@@ -79,8 +82,9 @@ class Mortar::Command::Jobs < Mortar::Command::Base
       paramoption_params[name] = value
     end
 
-    parameters = paramfile_params.merge(paramoption_params).each do |name, value|
-      {"name" => name, "value" => value}
+    parameters = []
+    paramfile_params.merge(paramoption_params).each do |name, value|
+      parameters << {"name" => name, "value" => value}
     end
         
     validate_git_based_project!
