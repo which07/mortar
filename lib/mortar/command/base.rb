@@ -52,7 +52,38 @@ class Mortar::Command::Base
   def git
     @git ||= Mortar::Git::Git.new
   end
+  
+  def pig_parameters
+    paramfile_params = {}
+    if options[:param_file]
+      File.open(options[:param_file], "r").each do |line|
+        # If the line isn't empty
+        if not line.chomp.empty? and not line.chomp.match(/^;/)
+          name, value = line.split('=', 2)
+          if not name or not value
+            error("Parameter file is malformed")
+          end
+          paramfile_params[name] = value
+        end
+      end
+    end
+    
+    
+    paramoption_params = {}
+    input_parameters = options[:parameter] ? Array(options[:parameter]) : []
+    input_parameters.each do |name_equals_value|
+      name, value = name_equals_value.split('=', 2)
+      paramoption_params[name] = value
+    end
 
+    parameters = []
+    paramfile_params.merge(paramoption_params).each do |name, value|
+      parameters << {"name" => name, "value" => value}
+    end
+
+    return parameters
+  end
+  
 protected
 
   def self.inherited(klass)
