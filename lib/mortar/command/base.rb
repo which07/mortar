@@ -52,6 +52,14 @@ class Mortar::Command::Base
   def git
     @git ||= Mortar::Git::Git.new
   end
+  
+  def pig_parameters
+    input_parameters = options[:parameter] ? Array(options[:parameter]) : []
+    parameters = input_parameters.map do |name_equals_value|
+      name, value = name_equals_value.split('=', 2)
+      {"name" => name, "value" => value}
+    end
+  end
 
 protected
 

@@ -58,13 +58,6 @@ class Mortar::Command::Jobs < Mortar::Command::Base
         end
       end
     end
-    
-    input_parameters = options[:parameter] ? Array(options[:parameter]) : []
-    parameters = input_parameters.map do |name_equals_value|
-      name, value = name_equals_value.split('=', 2)
-      {"name" => name, "value" => value}
-    end
-    
         
     validate_git_based_project!
     pigscript = validate_pigscript!(pigscript_name)
@@ -76,12 +69,12 @@ class Mortar::Command::Jobs < Mortar::Command::Base
         cluster_size = options[:clustersize].to_i
         keepalive = options[:keepalive] || false
         api.post_job_new_cluster(project.name, pigscript.name, git_ref, cluster_size, 
-          :parameters => parameters,
+          :parameters => pig_parameters,
           :keepalive => keepalive).body["job_id"]
       else
         cluster_id = options[:clusterid]
         api.post_job_existing_cluster(project.name, pigscript.name, git_ref, cluster_id,
-          :parameters => parameters).body["job_id"]
+          :parameters => pig_parameters).body["job_id"]
       end
     end
     display("job_id: #{job_id}")
