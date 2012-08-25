@@ -22,14 +22,10 @@ class Mortar::Command::Base
   def project
     unless @project
       project_name, project_dir, remote = 
-      if options[:project].is_a?(String)
-        [options[:project], nil, nil]
-      elsif ENV.has_key?('MORTAR_PROJECT')
-        [ENV['MORTAR_PROJECT'], nil, nil]
-      elsif project_from_dir = extract_project_in_dir()
+      if project_from_dir = extract_project_in_dir()
         [project_from_dir[0], Dir.pwd, project_from_dir[1]]
       else
-        raise Mortar::Command::CommandFailed, "No project specified.\nRun this command from a project folder or specify which project to use with --project <project name>"
+        raise Mortar::Command::CommandFailed, "No project found.\nThis command must be run from within a project folder."
       end
       
       # if we only have a project name, look for the remote in the current dir
