@@ -28,8 +28,8 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   #
   # Run a job on a Mortar Hadoop cluster.
   #
-  # -c, --clusterid CLUSTERID   # Run job on an existing cluster.  Default: true.
-  # -s, --clustersize NUMNODES  # Run job on a new cluster, with NUM_NODES nodes.
+  # -c, --clusterid CLUSTERID   # Run job on an existing cluster with ID of CLUSTERID
+  # -s, --clustersize NUMNODES  # Run job on a new cluster, with NUMNODES nodes.
   # -k, --keepalive             # Keep this cluster running after the job finishes, to be used for future jobs.  Default: false.
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
   #
