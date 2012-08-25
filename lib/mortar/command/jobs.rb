@@ -116,7 +116,8 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     }
     
     if job_status["num_hadoop_jobs"] && job_status["num_hadoop_jobs_succeeded"]
-      job_display_entries["hadoop jobs complete"] = "#{job_status["num_hadoop_jobs_succeeded"]} / #{job_status["num_hadoop_jobs"]}"
+      job_display_entries["hadoop jobs complete"] = 
+        '%0.2f / %0.2f' % [job_status["num_hadoop_jobs_succeeded"], job_status["num_hadoop_jobs"]]
     end
     
     styled_header("#{job_status["project_name"]}: #{job_status["pigscript_name"]} (job_id: #{job_status["job_id"]})")
