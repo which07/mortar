@@ -57,10 +57,6 @@ other\tgit@github.com:other.git (push)
         @base.project.name.should == 'myproject-staging'
       end
 
-      it "raises when cannot determine which project is it" do
-        stub(@base).git_remotes {{ 'staging' => 'myproject-staging', 'production' => 'myproject' }}
-        lambda { @base.project }.should raise_error(Mortar::Command::CommandFailed)
-      end
     end
 
   end

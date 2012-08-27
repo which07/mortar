@@ -24,6 +24,8 @@ class Mortar::Command::Base
       project_name, project_dir, remote = 
       if project_from_dir = extract_project_in_dir()
         [project_from_dir[0], Dir.pwd, project_from_dir[1]]
+      elsif project_from_dir = extract_project_in_dir_no_git()
+        [project_from_dir[0], Dir.pwd, project_from_dir[1]]
       else
         raise Mortar::Command::CommandFailed, "No project found.\nThis command must be run from within a project folder."
       end
@@ -229,6 +231,15 @@ protected
       error("Unable to find pigscript #{pigscript_name}\n#{available_scripts}")
     end
     pigscript
+  end
+
+  def extract_project_in_dir_no_git()
+    current_dirs = Dir.glob("*/")
+    missing_dir = Mortar::Project::Project.required_directories.find do |required_dir|
+      ! current_dirs.include?("#{required_dir}/")
+    end
+    
+    return missing_dir ? nil : [File.basename(Dir.getwd), nil]
   end
 
   def extract_project_in_dir(project_name=nil)
