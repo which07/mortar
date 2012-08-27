@@ -2,7 +2,9 @@ require 'rexml/document'
 require 'mortar/helpers'
 require 'mortar/project'
 require 'mortar/version'
+require 'mortar/api'
 require "optparse"
+
 
 module Mortar
   module Command
@@ -101,7 +103,6 @@ module Mortar
     end
 
     global_option :help,    "--help", "-h"
-    global_option :project, "--project PROJECT", "-p"
     global_option :remote,  "--remote REMOTE"
     global_option :polling_interval, "--polling_interval SECONDS", "-p"
 

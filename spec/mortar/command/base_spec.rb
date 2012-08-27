@@ -7,30 +7,22 @@ module Mortar::Command
       @base = Base.new
       stub(@base).display
       @client = Object.new
-      mock(@client).host {'mortar.com'}
+      stub(@client).host {'mortar.com'}
+    end
+    
+    context "error message context" do
+      it "get context for missing parameter error message" do
+        message = "Undefined parameter : INPUT"
+        @base.get_error_message_context(message).should == "Use -p, --parameter NAME=VALUE to set parameter NAME to value VALUE."
+      end
+      
+      it "get context for unhandled error message" do
+        message = "special kind of error"
+        @base.get_error_message_context(message).should == ""
+      end
     end
 
     context "detecting the project" do
-      it "attempts to find the project via the --project option" do
-        stub(@base).options.returns(:project => "myproject")
-        @base.project.name.should == "myproject"
-      end
-
-      it "attempts to find the project via MORTAR_PROJECT when not explicitly specified" do
-        ENV['MORTAR_PROJECT'] = "myenvproject"
-        @base.project.name.should == "myenvproject"
-        stub(@base).options {[]}
-        @base.project.name.should == "myenvproject"
-        ENV.delete('MORTAR_PROJECT')
-      end
-
-      it "overrides MORTAR_PROJECT when explicitly specified" do
-        ENV['MORTAR_PROJECT'] = "myenvproject"
-        stub(@base).options.returns(:project => "myproject")
-        @base.project.name.should == "myproject"
-        ENV.delete('MORTAR_PROJECT')
-      end
-
       it "read remotes from git config" do
         stub(Dir).chdir
         stub(@base.git).has_dot_git? {true}

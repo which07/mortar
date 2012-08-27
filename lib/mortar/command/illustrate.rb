@@ -11,6 +11,9 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
   #
   # Illustrate the effects and output of a pigscript.
   #
+  # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
+  # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
+  #
   # Examples:
   #
   # $ mortar illustrate
@@ -30,34 +33,49 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
     
     illustrate_id = nil
     action("Starting illustrate", {:success => "started"}) do
-      illustrate_id = api.post_illustrate(project.name, pigscript.name, alias_name, git_ref).body["illustrate_id"]
+      illustrate_id = api.post_illustrate(project.name, pigscript.name, alias_name, git_ref, :parameters => pig_parameters).body["illustrate_id"]
     end
-    
-    last_illustrate_result = nil
-    while last_illustrate_result.nil? || (! Mortar::API::Illustrate::STATUSES_COMPLETE.include?(last_illustrate_result["status"]))
-      sleep polling_interval
-      current_illustrate_result = api.get_illustrate(illustrate_id, :exclude_result => true).body
-      if last_illustrate_result.nil? || (last_illustrate_result["status"] != current_illustrate_result["status"])
-        display(" ... #{current_illustrate_result['status']}")
+        
+    illustrate_result = nil
+    display
+    ticking(polling_interval) do |ticks|
+      illustrate_result = api.get_illustrate(illustrate_id, :exclude_result => true).body
+      is_finished =
+        Mortar::API::Illustrate::STATUSES_COMPLETE.include?(illustrate_result["status"])
+        
+      redisplay("Illustrate status: %s %s" % [
+        illustrate_result['status'],
+        is_finished ? " " : spinner(ticks)],
+        is_finished) # only display newline on last message
+      if is_finished
+        display
+        break
       end
-      
-      last_illustrate_result = current_illustrate_result
     end
     
-    case last_illustrate_result['status']
+    case illustrate_result['status']
     when Mortar::API::Illustrate::STATUS_FAILURE
-      error("Illustrate failed.\nError message: #{last_illustrate_result['error_message']}")
+      error_message = "Illustrate failed with #{illustrate_result['error_type'] || 'error'}"
+      if line_number = illustrate_result["line_number"]
+        error_message += " at Line #{line_number}"
+        if column_number = illustrate_result["column_number"]
+          error_message += ", Column #{column_number}"
+        end
+      end
+      error_context = get_error_message_context(illustrate_result['error_message'])
+      error_message += ":\n\n#{illustrate_result['error_message']}\n\n#{error_context}"
+      error(error_message)
     when Mortar::API::Illustrate::STATUS_KILLED
       error("Illustrate killed by user.")
     when Mortar::API::Illustrate::STATUS_SUCCESS
-      web_result_url = last_illustrate_result['web_result_url']
-      display("Illustrate results available at #{web_result_url}")
+      web_result_url = illustrate_result['web_result_url']
+      display("Results available at #{web_result_url}")
       action("Opening web browser to show results") do
         require "launchy"
         Launchy.open(web_result_url).join
       end
     else
-      raise RuntimeError, "Unknown illustrate status: #{last_illustrate_result['status']} for illustrate_id: #{illustrate_id}"
+      raise RuntimeError, "Unknown illustrate status: #{illustrate_result['status']} for illustrate_id: #{illustrate_id}"
     end
   end
 end

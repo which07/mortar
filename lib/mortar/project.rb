@@ -19,18 +19,6 @@ module Mortar
         @remote = remote
       end
       
-      def datasets_path
-        File.join(@root_path, "datasets")
-      end
-            
-      def datasets
-        @datasets ||= DataSets.new(
-          datasets_path,
-          "datasets",
-          ".pig")
-        @datasets
-      end
-
       def python_udfs_path
         File.join(@root_path, "udfs/python")
       end
@@ -115,12 +103,6 @@ module Mortar
     end
     
     class PigScripts < ProjectEntity
-      def element(name, path)
-        Script.new(name, path)
-      end
-    end
-    
-    class DataSets < ProjectEntity
       def element(name, path)
         Script.new(name, path)
       end

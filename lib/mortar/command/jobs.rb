@@ -28,10 +28,11 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   #
   # Run a job on a Mortar Hadoop cluster.
   #
-  # -c, --clusterid CLUSTERID   # Run job on an existing cluster.  Default: true.
-  # -s, --clustersize NUMNODES  # Run job on a new cluster, with NUM_NODES nodes.
-  # -k, --keepalive             # Keep this cluster running after the job finishes, to be used for future jobs.  Default: false.
+  # -c, --clusterid CLUSTERID   # Run job on an existing cluster with ID of CLUSTERID (optional)
+  # -s, --clustersize NUMNODES  # Run job on a new cluster, with NUMNODES nodes (optional; must be >= 2 if provided)
+  # -k, --keepalive             # Keep this cluster running after the job finishes, to be used for future jobs.  (optional; defaults to false)
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
+  # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
   #
   #Examples:
   #
@@ -58,14 +59,8 @@ class Mortar::Command::Jobs < Mortar::Command::Base
         end
       end
     end
-    
-    input_parameters = options[:parameter] ? Array(options[:parameter]) : []
-    parameters = input_parameters.inject({}) do |memoized_params, name_equals_value|
-      key, value = name_equals_value.split('=', 2)
-      memoized_params[key] = value
-      memoized_params
-    end
-    
+
+
         
     validate_git_based_project!
     pigscript = validate_pigscript!(pigscript_name)
@@ -77,12 +72,12 @@ class Mortar::Command::Jobs < Mortar::Command::Base
         cluster_size = options[:clustersize].to_i
         keepalive = options[:keepalive] || false
         api.post_job_new_cluster(project.name, pigscript.name, git_ref, cluster_size, 
-          :parameters => parameters,
+          :parameters => pig_parameters,
           :keepalive => keepalive).body["job_id"]
       else
         cluster_id = options[:clusterid]
         api.post_job_existing_cluster(project.name, pigscript.name, git_ref, cluster_id,
-          :parameters => parameters).body["job_id"]
+          :parameters => pig_parameters).body["job_id"]
       end
     end
     display("job_id: #{job_id}")
@@ -123,8 +118,16 @@ class Mortar::Command::Jobs < Mortar::Command::Base
       "error" => job_status["error"]
     }
     
+    unless job_status["error"].nil? || job_status["error"]["message"].nil?
+      error_context = get_error_message_context(job_status["error"]["message"])
+      unless error_context == ""
+        job_status["error"]["help"] = error_context
+      end
+    end
+    
     if job_status["num_hadoop_jobs"] && job_status["num_hadoop_jobs_succeeded"]
-      job_display_entries["hadoop jobs complete"] = "#{job_status["num_hadoop_jobs_succeeded"]} / #{job_status["num_hadoop_jobs"]}"
+      job_display_entries["hadoop jobs complete"] = 
+        '%0.2f / %0.2f' % [job_status["num_hadoop_jobs_succeeded"], job_status["num_hadoop_jobs"]]
     end
     
     styled_header("#{job_status["project_name"]}: #{job_status["pigscript_name"]} (job_id: #{job_status["job_id"]})")

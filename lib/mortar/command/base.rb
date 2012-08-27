@@ -22,16 +22,12 @@ class Mortar::Command::Base
   def project
     unless @project
       project_name, project_dir, remote = 
-      if options[:project].is_a?(String)
-        [options[:project], nil, nil]
-      elsif ENV.has_key?('MORTAR_PROJECT')
-        [ENV['MORTAR_PROJECT'], nil, nil]
-      elsif project_from_dir = extract_project_in_dir()
+      if project_from_dir = extract_project_in_dir()
         [project_from_dir[0], Dir.pwd, project_from_dir[1]]
       elsif project_from_dir = extract_project_in_dir_no_git()
         [project_from_dir[0], Dir.pwd, project_from_dir[1]]
       else
-        raise Mortar::Command::CommandFailed, "No project specified.\nRun this command from a project folder or specify which project to use with --project <project name>"
+        raise Mortar::Command::CommandFailed, "No project found.\nThis command must be run from within a project folder."
       end
       
       # if we only have a project name, look for the remote in the current dir
@@ -54,7 +50,45 @@ class Mortar::Command::Base
   def git
     @git ||= Mortar::Git::Git.new
   end
+  
+  def pig_parameters
+    paramfile_params = {}
+    if options[:param_file]
+      File.open(options[:param_file], "r").each do |line|
+        # If the line isn't empty
+        if not line.chomp.empty? and not line.chomp.match(/^;/)
+          name, value = line.split('=', 2)
+          if not name or not value
+            error("Parameter file is malformed")
+          end
+          paramfile_params[name] = value
+        end
+      end
+    end
+    
+    
+    paramoption_params = {}
+    input_parameters = options[:parameter] ? Array(options[:parameter]) : []
+    input_parameters.each do |name_equals_value|
+      name, value = name_equals_value.split('=', 2)
+      paramoption_params[name] = value
+    end
 
+    parameters = []
+    paramfile_params.merge(paramoption_params).each do |name, value|
+      parameters << {"name" => name, "value" => value}
+    end
+
+    return parameters
+  end
+  
+  def get_error_message_context(message)
+    if message.start_with? "Undefined parameter"
+      return "Use -p, --parameter NAME=VALUE to set parameter NAME to value VALUE."
+    end
+    return ""
+  end
+  
 protected
 
   def self.inherited(klass)
@@ -106,7 +140,7 @@ protected
   #
   # Examples of the caller format :
   # * c:/Ruby192/lib/.../lib/mortar/command/addons.rb:8:in `<module:Command>'
-  # * c:/Ruby192/lib/.../mortar-2.0.1/lib/heroku/command/pg.rb:96:in `<class:Pg>'
+  # * c:/Ruby192/lib/.../mortar-2.0.1/lib/mortar/command/pg.rb:96:in `<class:Pg>'
   # * /Users/ph7/...../xray-1.1/lib/xray/thread_dump_signal_handler.rb:9
   #
   def self.extract_help_from_caller(line)

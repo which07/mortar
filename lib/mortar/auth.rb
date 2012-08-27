@@ -12,8 +12,7 @@ class Mortar::Auth
     def api
       @api ||= begin
         require("mortar-api-ruby")
-        #api = Mortar::API.new(default_params.merge(:api_key => password))
-        api = Mortar::API.new(default_params.merge(:user => user, :password => password))
+        api = Mortar::API.new(default_params.merge(:user => user, :api_key => password))
 
         def api.request(params, &block)
           response = super
@@ -38,9 +37,7 @@ class Mortar::Auth
     
     # just a stub; will raise if not authenticated
     def check
-      # FIXME: ddaniels stubbed, replace this with an actual call to check authenticated
-      #api.get_user
-      true
+      api.get_user
     end
     
     def default_host
@@ -63,11 +60,11 @@ class Mortar::Auth
       get_credentials[1]
     end
 
-    #def api_key(user = get_credentials[0], password = get_credentials[1])
-    #  require("mortar-api-ruby")
-    #  api = Mortar::API.new(default_params)
-    #  api.post_login(user, password).body["api_key"]
-    #end
+    def api_key(user = get_credentials[0], password = get_credentials[1])
+      require("mortar-api-ruby")
+      api = Mortar::API.new(default_params)
+      api.post_login(user, password).body["api_key"]
+    end
 
     def get_credentials    # :nodoc:
       @credentials ||= (read_credentials || ask_for_and_save_credentials)
@@ -137,6 +134,7 @@ class Mortar::Auth
     end
 
     def ask_for_credentials
+      puts
       puts "Enter your Mortar credentials."
 
       print "Email: "
@@ -145,9 +143,7 @@ class Mortar::Auth
       print "Password (typing will be hidden): "
       password = running_on_windows? ? ask_for_password_on_windows : ask_for_password
 
-      # TODO: convert to using api_key instead of password
-      #[user, api_key(user, password)]
-      [user, password]
+      [user, api_key(user, password)]
     end
 
     def ask_for_password_on_windows

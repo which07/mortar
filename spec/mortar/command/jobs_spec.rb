@@ -17,15 +17,14 @@ module Mortar::Command
     context("run") do
       it "runs a job on a new cluster" do
         with_git_initialized_project do |p|
-          # stub git
-          mock(@git).push
-
           # stub api requests
           job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
           cluster_size = 5
           keepalive = true
 
-          mock(Mortar::Auth.api).post_job_new_cluster("myproject", "my_script", is_a(String), cluster_size, :parameters => {"FIRST_PARAM" => "FOO", "SECOND_PARAM" => "BAR"}, :keepalive => true) {Excon::Response.new(:body => {"job_id" => job_id})}
+          mock(Mortar::Auth.api).post_job_new_cluster("myproject", "my_script", is_a(String), cluster_size, 
+            :parameters => match_array([{"name" => "FIRST_PARAM", "value" => "FOO"}, {"name" => "SECOND_PARAM", "value" => "BAR"}]), 
+            :keepalive => true) {Excon::Response.new(:body => {"job_id" => job_id})}
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
           stderr, stdout = execute("jobs:run my_script --clustersize 5 --keepalive -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
@@ -43,16 +42,13 @@ STDOUT
         end
       end
 
-      it "runs a job on a new cluster" do
+      it "runs a job on an existing cluster" do
         with_git_initialized_project do |p|
-          # stub git
-          mock(@git).push
-
           # stub api requests
           job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
           cluster_id = "e2790e7e8c7d48e39157238d58191346"
 
-          mock(Mortar::Auth.api).post_job_existing_cluster("myproject", "my_script", is_a(String), cluster_id, :parameters => {}) {Excon::Response.new(:body => {"job_id" => job_id})}
+          mock(Mortar::Auth.api).post_job_existing_cluster("myproject", "my_script", is_a(String), cluster_id, :parameters => []) {Excon::Response.new(:body => {"job_id" => job_id})}
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
           stderr, stdout = execute("jobs:run my_script --clusterid e2790e7e8c7d48e39157238d58191346", p, @git)
@@ -67,6 +63,79 @@ To check job status, run:
   mortar jobs:status c571a8c7f76a4fd4a67c103d753e2dd5
 
 STDOUT
+        end
+      end
+
+      it "runs a job with parameter file" do
+        with_git_initialized_project do |p|
+          job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
+          cluster_size = 5
+          keepalive = true
+
+          mock(Mortar::Auth.api).post_job_new_cluster("myproject", "my_script", is_a(String), cluster_size, 
+            :parameters => match_array([{"name" => "FIRST", "value" => "FOO"}, {"name" => "SECOND", "value" => "BAR"}, {"name" => "THIRD", "value" => "BEAR\n"}]), 
+            :keepalive => true) {Excon::Response.new(:body => {"job_id" => job_id})}
+
+          write_file(File.join(p.pigscripts_path, "my_script.pig"))
+
+          parameters = <<PARAMS
+FIRST=PIZZA
+SECOND=LASAGNA
+
+THIRD=BEAR
+PARAMS
+
+          write_file(File.join(p.root_path, "params.ini"), parameters)
+          stderr, stdout = execute("jobs:run my_script --clustersize 5 --keepalive -p FIRST=FOO -p SECOND=BAR --param-file params.ini", p, @git)
+        end
+      end
+
+      it "runs a job with parameter file with comments" do
+        with_git_initialized_project do |p|
+          job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
+          cluster_size = 5
+          keepalive = true
+
+          mock(Mortar::Auth.api).post_job_new_cluster("myproject", "my_script", is_a(String), cluster_size, 
+            :parameters => match_array([{"name" => "FIRST", "value" => "FOO"}, {"name" => "SECOND", "value" => "BAR"}, {"name" => "THIRD", "value" => "BEAR\n"}]), 
+            :keepalive => true) {Excon::Response.new(:body => {"job_id" => job_id})}
+
+          write_file(File.join(p.pigscripts_path, "my_script.pig"))
+
+          parameters = <<PARAMS
+FIRST=PIZZA
+SECOND=LASAGNA
+; This is a test
+
+THIRD=BEAR
+PARAMS
+
+          write_file(File.join(p.root_path, "params.ini"), parameters)
+          stderr, stdout = execute("jobs:run my_script --clustersize 5 --keepalive -p FIRST=FOO -p SECOND=BAR --param-file params.ini", p, @git)
+        end
+      end
+
+      it "runs a job with malformed parameter file" do
+        with_git_initialized_project do |p|
+          job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
+          cluster_size = 5
+          keepalive = true
+
+          write_file(File.join(p.pigscripts_path, "my_script.pig"))
+
+          parameters = <<PARAMS
+FIRST=PIZZA
+SECONDLASAGasNA
+; This is a test
+Natta
+THIRD=BEAR
+PARAMS
+
+          write_file(File.join(p.root_path, "params.ini"), parameters)
+          stderr, stdout = execute("jobs:run my_script --clustersize 5 --keepalive -p FIRST=FOO -p SECOND=BAR --param-file params.ini", p, @git)
+          stderr.should == <<-STDERR
+ !    Parameter file is malformed
+STDERR
         end
       end
     end
@@ -101,7 +170,7 @@ STDOUT
           stdout.should == <<-STDOUT
 === myproject: my_script (job_id: c571a8c7f76a4fd4a67c103d753e2dd5)
 cluster_id:              e2790e7e8c7d48e39157238d58191346
-hadoop jobs complete:    2 / 4
+hadoop jobs complete:    2.00 / 4.00
 job began running at:    2012-02-28T03:41:52.613000+00:00
 job run with parameters: 
   MY_PARAM_2:   3
@@ -141,7 +210,7 @@ STDOUT
             "stop_timestamp" => stop_timestamp,
             "duration" => "6 mins",
             "num_hadoop_jobs" => 4,
-            "num_hadoop_jobs_succeeded" => 2,
+            "num_hadoop_jobs_succeeded" => 0,
             "parameters" => parameters,
             "error" => error
             })}
@@ -154,7 +223,7 @@ error:
   line_number:     43
   message:         An error occurred and here's some more info
   type:            RuntimeError
-hadoop jobs complete:    2 / 4
+hadoop jobs complete:    0.00 / 4.00
 job began running at:    2012-02-28T03:41:52.613000+00:00
 job finished at:         2012-02-28T03:45:52.613000+00:00
 job run with parameters: 

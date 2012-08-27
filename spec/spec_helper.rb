@@ -108,6 +108,26 @@ def stub_core
   end
 end
 
+def with_no_git_directory(&block)
+  starting_dir = Dir.pwd
+  sandbox = File.join(Dir.tmpdir, "mortar", Mortar::UUID.create_random.to_s)
+  FileUtils.mkdir_p(sandbox)
+  Dir.chdir(sandbox)
+  
+  begin
+    block.call()
+  ensure
+    # return to the original starting dir,
+    # if one is defined.  If using FakeFS, it will not
+    # be defined
+    if starting_dir && (! starting_dir.empty?)
+      Dir.chdir(starting_dir)
+    end
+
+    FileUtils.rm_rf(sandbox)
+  end
+end
+
 def with_blank_project(&block)
   # setup a sandbox directory
   starting_dir = Dir.pwd
@@ -120,7 +140,6 @@ def with_blank_project(&block)
   FileUtils.mkdir_p(project_path)
   
   # setup project subdirectories
-  FileUtils.mkdir_p(File.join(project_path, "datasets"))
   FileUtils.mkdir_p(File.join(project_path, "pigscripts"))
   FileUtils.mkdir_p(File.join(project_path, "macros"))
 
@@ -234,8 +253,7 @@ RSpec.configure do |config|
   config.mock_with :rr
   config.color_enabled = true
   config.include DisplayMessageMatcher
-  config.order = 'rand'
   config.before { Mortar::Helpers.error_with_failure = false }
-  config.after { RR.reset }
+  config.after { RR.verify; RR.reset }
 end
 

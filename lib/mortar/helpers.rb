@@ -272,6 +272,15 @@ module Mortar
       $stdout.flush
     end
 
+    def ticking(sleep_time)
+      ticks = 0
+      loop do
+        yield(ticks)
+        ticks +=1
+        sleep sleep_time
+      end
+    end
+
     def spinner(ticks)
       %w(/ - \\ |)[ticks % 4]
     end
