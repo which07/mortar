@@ -41,10 +41,10 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
     ticking(polling_interval) do |ticks|
       illustrate_result = api.get_illustrate(illustrate_id, :exclude_result => true).body
       is_finished =
-        Mortar::API::Illustrate::STATUSES_COMPLETE.include?(illustrate_result["status"])
+        Mortar::API::Illustrate::STATUSES_COMPLETE.include?(illustrate_result["status_code"])
         
       redisplay("Illustrate status: %s %s" % [
-        illustrate_result['status'],
+        illustrate_result['status_description'],
         is_finished ? " " : spinner(ticks)],
         is_finished) # only display newline on last message
       if is_finished
@@ -53,7 +53,7 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
       end
     end
     
-    case illustrate_result['status']
+    case illustrate_result['status_code']
     when Mortar::API::Illustrate::STATUS_FAILURE
       error_message = "Illustrate failed with #{illustrate_result['error_type'] || 'error'}"
       if line_number = illustrate_result["line_number"]
@@ -75,7 +75,7 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
         Launchy.open(web_result_url).join
       end
     else
-      raise RuntimeError, "Unknown illustrate status: #{illustrate_result['status']} for illustrate_id: #{illustrate_id}"
+      raise RuntimeError, "Unknown illustrate status: #{illustrate_result['status_code']} for illustrate_id: #{illustrate_id}"
     end
   end
 end
