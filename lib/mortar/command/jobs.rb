@@ -115,6 +115,13 @@ class Mortar::Command::Jobs < Mortar::Command::Base
       "error" => job_status["error"]
     }
     
+    unless job_status["error"].nil? || job_status["error"]["message"].nil?
+      error_context = get_error_message_context(job_status["error"]["message"])
+      unless error_context == ""
+        job_status["error"]["help"] = error_context
+      end
+    end
+    
     if job_status["num_hadoop_jobs"] && job_status["num_hadoop_jobs_succeeded"]
       job_display_entries["hadoop jobs complete"] = "#{job_status["num_hadoop_jobs_succeeded"]} / #{job_status["num_hadoop_jobs"]}"
     end

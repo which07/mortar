@@ -60,6 +60,13 @@ class Mortar::Command::Base
       {"name" => name, "value" => value}
     end
   end
+  
+  def get_error_message_context(message)
+    if message.start_with? "Undefined parameter"
+      return "Use -p, --parameter NAME=VALUE to set parameter NAME to value VALUE."
+    end
+    return ""
+  end
 
 protected
 

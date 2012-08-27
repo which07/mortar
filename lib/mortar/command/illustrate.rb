@@ -61,7 +61,8 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
           error_message += ", Column #{column_number}"
         end
       end
-      error_message += ":\n\n#{illustrate_result['error_message']}"
+      error_context = get_error_message_context(illustrate_result['error_message'])
+      error_message += ":\n\n#{illustrate_result['error_message']}\n\n#{error_context}"
       error(error_message)
     when Mortar::API::Illustrate::STATUS_KILLED
       error("Illustrate killed by user.")
