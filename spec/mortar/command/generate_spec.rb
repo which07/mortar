@@ -1,6 +1,6 @@
 require "spec_helper"
 require "mortar/command/generate"
-require "FileUtils"
+require "fileutils"
 require "tmpdir"
 
 describe Mortar::Command::Generate do
