@@ -1,14 +1,18 @@
 require "erb"
+require "fileutils"
 
 module Mortar
   module Generators
     class Base 
-      include FileUtils
       include Mortar::Helpers
 
-      def initialize
-        @src_path = ""
-        @dest_path = ""
+      def initialize()
+        # This is a really ugly way to turn the subclass name 'Mortar::Generators::ProjectGenerator'
+        # into 'project' so we can use it to find the appropriate templates folder
+
+        generator_type = self.class.name.split("::")[2].scan(/[A-Z][^A-Z]*/)[0].downcase
+        @src_path = File.expand_path("../../templates/#{generator_type}", __FILE__)
+        @dest_path = Dir.pwd
         @rel_path = ""
         @binding_variables = {}
       end
@@ -32,25 +36,25 @@ module Mortar
             display_conflict(msg)
           end 
         else
+          display_create(msg)  
           FileUtils.mkdir_p(File.dirname(dest_path)) if options[:recursive]
           FileUtils.cp(src_path, dest_path)
-          display_create(msg)  
         end
       end
 
-      def directory(folder, options={ :verbose => true })
+      def mkdir(folder, options={ :verbose => true })
         dest_path = File.join(@dest_path, @rel_path, folder)
         msg = File.join(@rel_path, folder)[1..-1]
 
         if File.exists?(dest_path) 
           display_exists(options[:verbose] ? msg : "") 
         else
-          FileUtils.mkdir(dest_path)
           display_create(options[:verbose] ? msg : "")
+          FileUtils.mkdir(dest_path)
         end
       end
 
-      def template(src_file, dest_file, options={ :recursive => false })
+      def generate_file(src_file, dest_file, options={ :recursive => false })
         src_path = File.join(@src_path, @rel_path, src_file)
         dest_path = File.join(@dest_path, @rel_path, dest_file)
         msg = File.join(@rel_path, dest_file)[1..-1]

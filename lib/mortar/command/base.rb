@@ -3,10 +3,7 @@ require "mortar/auth"
 require "mortar/command"
 require "mortar/project"
 require "mortar/git"
-require "mortar/generators/app/app_generator"
-require "mortar/generators/udf/udf_generator"
-require "mortar/generators/pigscript/pigscript_generator"
-require "mortar/generators/macro/macro_generator"
+require "mortar/generators"
 
 class Mortar::Command::Base
   include Mortar::Helpers
@@ -204,12 +201,12 @@ protected
   end
 
   def extract_project_in_dir_no_git()
-    folders = Dir.glob("*/")
-    return unless folders.include?("macros/")
-    return unless folders.include?("pigscripts/")
-    return unless folders.include?("udfs/")
+    current_dirs = Dir.glob("*/")
+    missing_dir = Project.required_directories.find do |required_dir|
+      ! current_dirs.include?("#{required_dir}/")
+    end
     
-    [File.basename(Dir.getwd), nil]
+    return missing_dir ? nil : [File.basename(Dir.getwd), nil]
   end
 
   def extract_project_in_dir(project_name=nil)

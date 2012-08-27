@@ -4,27 +4,27 @@ require "mortar/command/base"
 #
 class Mortar::Command::Generate < Mortar::Command::Base
   
-  # generate:application
+  # generate:project
   #
-  # generate new application
+  # generate new project
   # 
   #
   # Examples:
   #
-  # $ mortar generate:application
+  # $ mortar generate:project
   # 
   # TBD
   # 
-  def application
+  def project
     project_name = shift_argument
     unless project_name
       error("Usage: mortar new PROJECTNAME\nMust specify PROJECTNAME.")
     end
     pigscript_name = project_name
-    app_generator = Mortar::Generators::AppGenerator.new
-    app_generator.new_application(project_name, options)
+    app_generator = Mortar::Generators::ProjectGenerator.new
+    app_generator.generate_project(project_name, options)
   end
-  alias_command "new", "generate:application"
+  alias_command "new", "generate:project"
 
 
 
@@ -45,7 +45,7 @@ class Mortar::Command::Generate < Mortar::Command::Base
       error("Usage: mortar generate:python_udf UDFNAME\nMust specify UDFNAME.")
     end
     udf_generator = Mortar::Generators::UDFGenerator.new
-    udf_generator.new_python_udf(udf_name, project, options)
+    udf_generator.generate_python_udf(udf_name, project, options)
 
   end
 
@@ -69,7 +69,7 @@ class Mortar::Command::Generate < Mortar::Command::Base
     options[:skip_udf] ||= false
     
     script_generator = Mortar::Generators::PigscriptGenerator.new
-    script_generator.new_pigscript(script_name, project, options)
+    script_generator.generate_pigscript(script_name, project, options)
 
   end
 
@@ -87,11 +87,11 @@ class Mortar::Command::Generate < Mortar::Command::Base
   def macro
     macro_name = shift_argument
     unless macro_name
-      error("Usage: mortar generate:pigscript MACRONAME\nMust specify MACRONAME.")
+      error("Usage: mortar generate:macro MACRONAME\nMust specify MACRONAME.")
     end
     
     macro_generator = Mortar::Generators::MacroGenerator.new
-    macro_generator.new_macro(macro_name, project, options)
+    macro_generator.generate_macro(macro_name, project, options)
 
   end
 

@@ -32,7 +32,7 @@ module Mortar
       end
 
       def python_udfs
-        @python_udfs ||= PythonUDFS.new(
+        @python_udfs ||= PythonUDFs.new(
           python_udfs_path,
           "python",
           ".py")
@@ -122,7 +122,7 @@ module Mortar
       end
     end
 
-    class PythonUDFS < ProjectEntity
+    class PythonUDFs < ProjectEntity
       def element(name, path)
         Script.new(name, path)
       end

@@ -1,42 +1,36 @@
 require "mortar/generators/generator_base"
 module Mortar
   module Generators
-    class AppGenerator < Base
+    class ProjectGenerator < Base
 
-      def initialize
-        super
-        @src_path = File.expand_path("../template", __FILE__)
-        @dest_path = Dir.pwd
-      end
-
-      def new_application(project_name, options)
+      def generate_project(project_name, options)
 
         set_script_binding(project_name, options)
-        directory project_name, :verbose => false
+        mkdir project_name, :verbose => false
         @dest_path = File.join(@dest_path, project_name)
         
-        #copy_file "README.md", "README.md"
+        copy_file "README.md", "README.md"
         copy_file "gitignore", ".gitignore"
         copy_file "Gemfile", "Gemfile"
         
-        directory "pigscripts"
+        mkdir "pigscripts"
         
         inside "pigscripts" do
-          template "<%app_name%>.pig", "#{project_name}.pig"
+          generate_file "pigscript.pig", "#{project_name}.pig"
         end
         
-        directory "macros"
+        mkdir "macros"
         
         inside "macros" do
           copy_file "gitkeep", ".gitkeep"
         end
         
-        directory "udfs"
+        mkdir "udfs"
         
         inside "udfs" do
-          directory "python"
+          mkdir "python"
           inside "python" do
-            copy_file "<%app_name%>.py", "#{project_name}.py"
+            copy_file "python_udf.py", "#{project_name}.py"
           end
         end
         
