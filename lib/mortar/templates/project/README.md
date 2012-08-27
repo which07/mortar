@@ -2,7 +2,6 @@
 
 Copy TK
 
-<%= project_name %>
 
 # Getting Started
 
