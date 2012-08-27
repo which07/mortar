@@ -103,7 +103,6 @@ module Mortar
     end
 
     global_option :help,    "--help", "-h"
-    global_option :project, "--project PROJECT", "-p"
     global_option :remote,  "--remote REMOTE"
     global_option :polling_interval, "--polling_interval SECONDS", "-p"
 

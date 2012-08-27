@@ -12,6 +12,7 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
   # Illustrate the effects and output of a pigscript.
   #
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
+  # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
   #
   # Examples:
   #

@@ -23,26 +23,6 @@ module Mortar::Command
     end
 
     context "detecting the project" do
-      it "attempts to find the project via the --project option" do
-        stub(@base).options.returns(:project => "myproject")
-        @base.project.name.should == "myproject"
-      end
-
-      it "attempts to find the project via MORTAR_PROJECT when not explicitly specified" do
-        ENV['MORTAR_PROJECT'] = "myenvproject"
-        @base.project.name.should == "myenvproject"
-        stub(@base).options {[]}
-        @base.project.name.should == "myenvproject"
-        ENV.delete('MORTAR_PROJECT')
-      end
-
-      it "overrides MORTAR_PROJECT when explicitly specified" do
-        ENV['MORTAR_PROJECT'] = "myenvproject"
-        stub(@base).options.returns(:project => "myproject")
-        @base.project.name.should == "myproject"
-        ENV.delete('MORTAR_PROJECT')
-      end
-
       it "read remotes from git config" do
         stub(Dir).chdir
         stub(@base.git).has_dot_git? {true}
