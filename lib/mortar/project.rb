@@ -6,7 +6,7 @@ module Mortar
     
     class Project
       def self.required_directories
-        ["macros/", "pigscripts/", "udfs/"]
+        ["macros", "pigscripts", "udfs"]
       end
       
       attr_accessor :name

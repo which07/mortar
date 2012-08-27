@@ -202,7 +202,7 @@ protected
   def extract_project_in_dir_no_git()
     current_dirs = Dir.glob("*/")
     missing_dir = Mortar::Project::Project.required_directories.find do |required_dir|
-      ! current_dirs.include?("#{required_dir}")
+      ! current_dirs.include?("#{required_dir}/")
     end
     
     return missing_dir ? nil : [File.basename(Dir.getwd), nil]
