@@ -32,6 +32,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   # -s, --clustersize NUMNODES  # Run job on a new cluster, with NUMNODES nodes.
   # -k, --keepalive             # Keep this cluster running after the job finishes, to be used for future jobs.  Default: false.
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
+  # -f, --param-file PARAMFILE   # Load pig parameter values from a file.
   #
   #Examples:
   #
@@ -58,6 +59,8 @@ class Mortar::Command::Jobs < Mortar::Command::Base
         end
       end
     end
+
+
         
     validate_git_based_project!
     pigscript = validate_pigscript!(pigscript_name)
