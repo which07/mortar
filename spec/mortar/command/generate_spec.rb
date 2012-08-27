@@ -48,6 +48,8 @@ STDERR
       File.exists?("Test/macros/.gitkeep").should be_true
       File.exists?("Test/pigscripts/Test.pig").should be_true
       File.exists?("Test/udfs/python/Test.py").should be_true
+
+      File.read("Test/pigscripts/Test.pig").each_line { |line| line.match(/<%.*%>/).should be_nil }
     end
 
     it "error when name isn't provided" do
@@ -64,6 +66,7 @@ STDERR
       with_blank_project do |p| 
         stderr, stdout = execute("generate:pigscript Oink", p)
         File.exists?(File.join(p.root_path, "pigscripts/Oink.pig")).should be_true
+        File.read("pigscripts/Oink.pig").each_line { |line| line.match(/<%.*%>/).should be_nil }
       end
     end
 
@@ -83,6 +86,7 @@ STDERR
       with_blank_project do |p| 
         stderr, stdout = execute("generate:python_udf slither", p)
         File.exists?(File.join(p.root_path, "udfs/python/slither.py")).should be_true
+        File.read("udfs/python/slither.py").each_line { |line| line.match(/<%.*%>/).should be_nil }
       end
     end
 
@@ -102,6 +106,7 @@ STDERR
       with_blank_project do |p| 
         stderr, stdout = execute("generate:macro big_mac", p)
         File.exists?(File.join(p.root_path, "macros/big_mac.pig")).should be_true
+        File.read("macros/big_mac.pig").each_line { |line| line.match(/<%.*%>/).should be_nil }
       end
     end
 
