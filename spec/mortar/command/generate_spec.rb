@@ -1,5 +1,5 @@
 require "spec_helper"
-require "mortar/command/generator"
+require "mortar/command/generate"
 require "FileUtils"
 require "tmpdir"
 
@@ -63,7 +63,7 @@ STDERR
     it "Generate a new pigscript in a project" do
       with_blank_project do |p| 
         stderr, stdout = execute("generate:pigscript Oink", p)
-        File.exists?(File.join(p.root_path, "pigscripts/Oink.pig"))
+        File.exists?(File.join(p.root_path, "pigscripts/Oink.pig")).should be_true
       end
     end
 
@@ -82,7 +82,7 @@ STDERR
     it "Generate a new python udf in a project" do
       with_blank_project do |p| 
         stderr, stdout = execute("generate:python_udf slither", p)
-        File.exists?(File.join(p.root_path, "udfs/python/slither.py"))
+        File.exists?(File.join(p.root_path, "udfs/python/slither.py")).should be_true
       end
     end
 
@@ -101,7 +101,7 @@ STDERR
     it "Generate a new macro in a project" do
       with_blank_project do |p| 
         stderr, stdout = execute("generate:macro big_mac", p)
-        File.exists?(File.join(p.root_path, "macros/big_mac.py"))
+        File.exists?(File.join(p.root_path, "macros/big_mac.pig")).should be_true
       end
     end
 

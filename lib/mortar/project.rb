@@ -5,6 +5,10 @@ module Mortar
     class ProjectError < RuntimeError; end
     
     class Project
+      def self.required_directories
+        ["macros/", "pigscripts/", "udfs/"]
+      end
+      
       attr_accessor :name
       attr_accessor :remote
       attr_accessor :root_path

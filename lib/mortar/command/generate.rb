@@ -1,9 +1,13 @@
+require "mortar/generators/project_generator"
+require "mortar/generators/udf_generator"
+require "mortar/generators/pigscript_generator"
+require "mortar/generators/macro_generator"
 require "mortar/command/base"
 
 # generate new projects and scaffolding
 #
 class Mortar::Command::Generate < Mortar::Command::Base
-  
+
   # generate:project
   #
   # generate new project
@@ -15,7 +19,7 @@ class Mortar::Command::Generate < Mortar::Command::Base
   # 
   # TBD
   # 
-  def project
+  def _project
     project_name = shift_argument
     unless project_name
       error("Usage: mortar new PROJECTNAME\nMust specify PROJECTNAME.")
@@ -24,7 +28,8 @@ class Mortar::Command::Generate < Mortar::Command::Base
     app_generator = Mortar::Generators::ProjectGenerator.new
     app_generator.generate_project(project_name, options)
   end
-  alias_command "new", "generate:project"
+  alias_command "new", "generate:_project"
+  alias_command "generate:project", "generate:_project"
 
 
 

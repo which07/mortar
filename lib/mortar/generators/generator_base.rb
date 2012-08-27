@@ -10,7 +10,7 @@ module Mortar
         # This is a really ugly way to turn the subclass name 'Mortar::Generators::ProjectGenerator'
         # into 'project' so we can use it to find the appropriate templates folder
 
-        generator_type = self.class.name.split("::")[2].scan(/[A-Z][^A-Z]*/)[0].downcase
+        generator_type = self.class.name.split("::")[2].match(/.*(?=([A-Z]))/)[0].downcase
         @src_path = File.expand_path("../../templates/#{generator_type}", __FILE__)
         @dest_path = Dir.pwd
         @rel_path = ""
