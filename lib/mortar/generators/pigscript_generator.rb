@@ -4,7 +4,6 @@ module Mortar
     class PigscriptGenerator < Base
 
       def generate_pigscript(script_name, project, options)
-        puts "generate sciprt"
         set_script_binding(script_name, options)
 
 
