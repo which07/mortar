@@ -1,0 +1,45 @@
+require 'spec_helper'
+require 'mortar/command/clusters'
+
+module Mortar::Command
+  describe Clusters do
+    
+    before(:each) do
+      stub_core
+    end
+        
+    context("index") do
+      
+      it "lists running and recently started clusters" do
+        # stub api request
+        clusters = [{"cluster_id" => "50fbe5a23004292547fc2224", 
+                     "size" => 2,
+                     "status_description" => "Running",
+                     "start_timestamp" => "2012-08-27T21:27:15.669000+00:00",
+                     "duration" => "2 mins"},
+                    {"cluster_id" => "50fbe5a23004292547fc2225", 
+                                 "size" => 10,
+                                 "status_description" => "Shut Down",
+                                 "start_timestamp" => "2011-08-27T21:27:15.669000+00:00",
+                                 "duration" => "20 mins"}]
+         mock(Mortar::Auth.api).get_clusters().returns(Excon::Response.new(:body => {"clusters" => clusters}))
+         stderr, stdout = execute("clusters", nil, nil)
+         stdout.should == <<-STDOUT
+cluster_id                Size (# of Nodes)  Status     Type  Start Timestamp                   Elapsed Time
+------------------------  -----------------  ---------  ----  --------------------------------  ------------
+50fbe5a23004292547fc2224                  2  Running          2012-08-27T21:27:15.669000+00:00  2 mins
+50fbe5a23004292547fc2225                 10  Shut Down        2011-08-27T21:27:15.669000+00:00  20 mins
+STDOUT
+      end
+
+      it "handles no clusters running" do
+        mock(Mortar::Auth.api).get_clusters().returns(Excon::Response.new(:body => {"clusters" => []}))
+         stderr, stdout = execute("clusters", nil, nil)
+         stdout.should == <<-STDOUT
+cluster_id  Size (# of Nodes)  Status  Type  Start Timestamp  Elapsed Time
+----------  -----------------  ------  ----  ---------------  ------------
+STDOUT
+      end
+    end
+  end
+end
