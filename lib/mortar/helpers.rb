@@ -446,5 +446,24 @@ module Mortar
       end
     end
 
+    private
+
+      def create_display_method(name, colour_code, new_line=true)
+        define_method("display_#{name}") do |msg|
+          if new_line
+            printf("\e[#{colour_code}m%12s\e[0m  #{msg}\n", name)
+          else
+            printf("\e[#{colour_code}m#{name}\e[0m\t#{msg}")
+            $stdout.flush
+          end
+        end
+      end
+
+      create_display_method("create", "1;32")
+      create_display_method("run", "1;32")
+      create_display_method("exists", "1;34")
+      create_display_method("identical", "1;34")
+      create_display_method("conflict", "1;31")
+
   end
 end

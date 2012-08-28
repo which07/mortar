@@ -9,6 +9,18 @@ module Mortar::Command
       @client = Object.new
       stub(@client).host {'mortar.com'}
     end
+    
+    context "error message context" do
+      it "get context for missing parameter error message" do
+        message = "Undefined parameter : INPUT"
+        @base.get_error_message_context(message).should == "Use -p, --parameter NAME=VALUE to set parameter NAME to value VALUE."
+      end
+      
+      it "get context for unhandled error message" do
+        message = "special kind of error"
+        @base.get_error_message_context(message).should == ""
+      end
+    end
 
     context "detecting the project" do
       it "read remotes from git config" do
@@ -45,10 +57,6 @@ other\tgit@github.com:other.git (push)
         @base.project.name.should == 'myproject-staging'
       end
 
-      it "raises when cannot determine which project is it" do
-        stub(@base).git_remotes {{ 'staging' => 'myproject-staging', 'production' => 'myproject' }}
-        lambda { @base.project }.should raise_error(Mortar::Command::CommandFailed)
-      end
     end
 
   end

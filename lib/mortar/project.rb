@@ -5,6 +5,10 @@ module Mortar
     class ProjectError < RuntimeError; end
     
     class Project
+      def self.required_directories
+        ["macros", "pigscripts", "udfs"]
+      end
+      
       attr_accessor :name
       attr_accessor :remote
       attr_accessor :root_path
@@ -13,6 +17,17 @@ module Mortar
         @name = name
         @root_path = root_path
         @remote = remote
+      end
+      
+      def python_udfs_path
+        File.join(@root_path, "udfs/python")
+      end
+
+      def python_udfs
+        @python_udfs ||= PythonUDFs.new(
+          python_udfs_path,
+          "python",
+          ".py")
       end
       
       def pigscripts_path
@@ -92,7 +107,13 @@ module Mortar
         Script.new(name, path)
       end
     end
-        
+
+    class PythonUDFs < ProjectEntity
+      def element(name, path)
+        Script.new(name, path)
+      end
+    end
+    
     class Script
       
       attr_reader :name
