@@ -15,19 +15,44 @@ module Mortar::Command
     end
     
     context("run") do
+      it "handles singlejobcluster parameter" do
+        with_git_initialized_project do |p|
+          # stub api requests
+          job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
+          cluster_size = 5
+
+          mock(Mortar::Auth.api).post_job_new_cluster("myproject", "my_script", is_a(String), cluster_size, 
+            :parameters => match_array([{"name" => "FIRST_PARAM", "value" => "FOO"}, {"name" => "SECOND_PARAM", "value" => "BAR"}]), 
+            :keepalive => false) {Excon::Response.new(:body => {"job_id" => job_id})}
+
+          write_file(File.join(p.pigscripts_path, "my_script.pig"))
+          stderr, stdout = execute("jobs:run my_script -1 --clustersize 5 -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
+          stdout.should == <<-STDOUT
+Taking code snapshot... done
+Sending code snapshot to Mortar... done
+Requesting job execution... done
+job_id: c571a8c7f76a4fd4a67c103d753e2dd5
+
+To check job status, run:
+
+  mortar jobs:status c571a8c7f76a4fd4a67c103d753e2dd5
+
+STDOUT
+        end
+      end
+      
       it "runs a job on a new cluster" do
         with_git_initialized_project do |p|
           # stub api requests
           job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
           cluster_size = 5
-          keepalive = true
 
           mock(Mortar::Auth.api).post_job_new_cluster("myproject", "my_script", is_a(String), cluster_size, 
             :parameters => match_array([{"name" => "FIRST_PARAM", "value" => "FOO"}, {"name" => "SECOND_PARAM", "value" => "BAR"}]), 
             :keepalive => true) {Excon::Response.new(:body => {"job_id" => job_id})}
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("jobs:run my_script --clustersize 5 --keepalive -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
+          stderr, stdout = execute("jobs:run my_script --clustersize 5 -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
@@ -86,7 +111,7 @@ THIRD=BEAR
 PARAMS
 
           write_file(File.join(p.root_path, "params.ini"), parameters)
-          stderr, stdout = execute("jobs:run my_script --clustersize 5 --keepalive -p FIRST=FOO -p SECOND=BAR --param-file params.ini", p, @git)
+          stderr, stdout = execute("jobs:run my_script --clustersize 5 -p FIRST=FOO -p SECOND=BAR --param-file params.ini", p, @git)
         end
       end
 
@@ -111,7 +136,7 @@ THIRD=BEAR
 PARAMS
 
           write_file(File.join(p.root_path, "params.ini"), parameters)
-          stderr, stdout = execute("jobs:run my_script --clustersize 5 --keepalive -p FIRST=FOO -p SECOND=BAR --param-file params.ini", p, @git)
+          stderr, stdout = execute("jobs:run my_script --clustersize 5 -p FIRST=FOO -p SECOND=BAR --param-file params.ini", p, @git)
         end
       end
 
@@ -132,7 +157,7 @@ THIRD=BEAR
 PARAMS
 
           write_file(File.join(p.root_path, "params.ini"), parameters)
-          stderr, stdout = execute("jobs:run my_script --clustersize 5 --keepalive -p FIRST=FOO -p SECOND=BAR --param-file params.ini", p, @git)
+          stderr, stdout = execute("jobs:run my_script --clustersize 5 -p FIRST=FOO -p SECOND=BAR --param-file params.ini", p, @git)
           stderr.should == <<-STDERR
  !    Parameter file is malformed
 STDERR
