@@ -30,7 +30,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   #
   # -c, --clusterid CLUSTERID   # Run job on an existing cluster with ID of CLUSTERID (optional)
   # -s, --clustersize NUMNODES  # Run job on a new cluster, with NUMNODES nodes (optional; must be >= 2 if provided)
-  # -k, --keepalive             # Keep this cluster running after the job finishes, to be used for future jobs.  (optional; defaults to false)
+  # -1, --singlejobcluster      # Stop the cluster after job completes.  (Default: false—-cluster can be used for other jobs, and will shut down after 1 hour of inactivity)
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
   # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
   #
@@ -53,7 +53,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     end
       
     if options[:clusterid]
-      [:clustersize, :keepalive].each do |opt|
+      [:clustersize, :singlejobcluster].each do |opt|
         unless options[opt].nil?
           error("Option #{opt.to_s} cannot be set when running a job on an existing cluster (with --clusterid option)")
         end
@@ -70,7 +70,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     job_id = action("Requesting job execution") do
       if options[:clustersize]
         cluster_size = options[:clustersize].to_i
-        keepalive = options[:keepalive] || false
+        keepalive = ! options[:singlejobcluster]
         api.post_job_new_cluster(project.name, pigscript.name, git_ref, cluster_size, 
           :parameters => pig_parameters,
           :keepalive => keepalive).body["job_id"]
