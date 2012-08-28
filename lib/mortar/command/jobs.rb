@@ -1,6 +1,6 @@
 require "mortar/command/base"
 require "mortar/snapshot"
-
+require "time"
 # manage pig scripts
 #
 class Mortar::Command::Jobs < Mortar::Command::Base
@@ -11,6 +11,9 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   #
   # Show recent and running jobs.
   #
+  # -l, --limit LIMITJOBS # Limit the number of jobs returned (defaults to 10)
+  # -s, --skip SKIPJOBS   # Skip a certain amount of jobs (defaults to 0)
+  #
   # Examples:
   #
   # $ mortar jobs
@@ -18,10 +21,17 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   # TBD
   #
   def index
-    raise NotImplementedError, "FIXME implement me"
-    # call API for running jobs
-    
-    # emit them to the console
+    options[:limit] ||= '10'
+    options[:skip] ||= '0'
+    jobs = api.get_jobs(options[:skip], options[:limit]).body['jobs']
+    jobs.each do |job|
+      if job['start_timestamp']
+        job['start_timestamp'] = Time.parse(job['start_timestamp']).strftime('%A, %B %e, %Y, %l:%M %p')
+      end
+    end
+    headers = [ 'job_id', 'script' , 'status' , 'start_date' , 'elapsed_time' , 'cluster_size' , 'cluster_id']
+    columns = [ 'job_id', 'name', 'status_description', 'start_timestamp', 'duration', 'cluster_size', 'cluster_id']
+    display_table(jobs, columns, headers)
   end
     
   # jobs:run PIGSCRIPT
