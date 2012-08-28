@@ -71,9 +71,9 @@ STDERR
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
-Starting illustrate... started
+Starting illustrate... done
 
-\r\e[0KIllustrate status: Pending /\r\e[0KIllustrate status: GATEWAY_STARTING -\r\e[0KIllustrate status: In progress \\\r\e[0KIllustrate status: Reading data |\r\e[0KIllustrate status: Pruning data /\r\e[0KIllustrate status: Succeeded  
+\r\e[0KStatus: Pending... /\r\e[0KStatus: GATEWAY_STARTING... -\r\e[0KStatus: In progress... \\\r\e[0KStatus: Reading data... |\r\e[0KStatus: Pruning data... /\r\e[0KStatus: Succeeded  
 
 Results available at https://api.mortardata.com/illustrates/c571a8c7f76a4fd4a67c103d753e2dd5
 Opening web browser to show results... done
@@ -106,9 +106,9 @@ STDOUT
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
-Starting illustrate... started
+Starting illustrate... done
 
-\r\e[0KIllustrate status: Pending /\r\e[0KIllustrate status: Failed  
+\r\e[0KStatus: Pending... /\r\e[0KStatus: Failed  
 
 STDOUT
           stderr.should == <<-STDERR

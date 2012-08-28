@@ -32,7 +32,7 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
     git_ref = create_and_push_snapshot_branch(git, project)
     
     illustrate_id = nil
-    action("Starting illustrate", {:success => "started"}) do
+    action("Starting illustrate") do
       illustrate_id = api.post_illustrate(project.name, pigscript.name, alias_name, git_ref, :parameters => pig_parameters).body["illustrate_id"]
     end
         
@@ -43,8 +43,8 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
       is_finished =
         Mortar::API::Illustrate::STATUSES_COMPLETE.include?(illustrate_result["status_code"])
         
-      redisplay("Illustrate status: %s %s" % [
-        illustrate_result['status_description'],
+      redisplay("Status: %s %s" % [
+        illustrate_result['status_description'] + (is_finished ? "" : "..."),
         is_finished ? " " : spinner(ticks)],
         is_finished) # only display newline on last message
       if is_finished
