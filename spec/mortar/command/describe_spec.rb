@@ -5,7 +5,7 @@ require 'mortar/api/describe'
 require 'launchy'
 
 module Mortar::Command
-  describe describe do
+  describe Describe do
     
     before(:each) do
       stub_core      
