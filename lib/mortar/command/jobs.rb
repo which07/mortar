@@ -83,8 +83,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
 
     display("job_id: #{response['job_id']}")
     display
-    display("Job status can be viewed on the web at:\n\n #{response['job_url']}")
-    display
+    display("Job status can be viewed on the web at:\n\n #{response['web_job_url']}")
     display
     display("Or by running:\n\n  mortar jobs:status #{response['job_id']}")
     display
