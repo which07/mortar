@@ -266,9 +266,5 @@ STDOUT
       
       
     end
-
-    context("stop") do
-    end
-    
   end
 end
