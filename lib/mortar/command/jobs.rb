@@ -30,7 +30,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
       end
     end
     headers = [ 'job_id', 'script' , 'status' , 'start_date' , 'elapsed_time' , 'cluster_size' , 'cluster_id']
-    columns = [ 'job_id', 'name', 'status_description', 'start_timestamp', 'duration', 'cluster_size', 'cluster_id']
+    columns = [ 'job_id', 'display_name', 'status_description', 'start_timestamp', 'duration', 'cluster_size', 'cluster_id']
     display_table(jobs, columns, headers)
   end
     
