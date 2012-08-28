@@ -107,7 +107,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     job_status = api.get_job(job_id).body
 
     job_display_entries = {
-      "status" => job_status["status"],
+      "status" => job_status["status_description"],
       "progress" => "#{job_status["progress"]}%",
       "cluster_id" => job_status["cluster_id"],
       "job submitted at" => job_status["start_timestamp"],
