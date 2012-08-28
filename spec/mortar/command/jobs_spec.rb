@@ -146,7 +146,7 @@ STDERR
           job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
           pigscript_name = "my_script"
           project_name = "myproject"
-          status = Mortar::API::Jobs::STATUS_RUNNING
+          status_code = Mortar::API::Jobs::STATUS_RUNNING
           progress = 55
           cluster_id = "e2790e7e8c7d48e39157238d58191346"
           start_timestamp = "2012-02-28T03:35:42.831000+00:00"
@@ -156,7 +156,8 @@ STDERR
           mock(Mortar::Auth.api).get_job(job_id) {Excon::Response.new(:body => {"job_id" => job_id,
             "pigscript_name" => pigscript_name,
             "project_name" => project_name,
-            "status" => status,
+            "status_code" => status_code,
+            "status_description" => "Running",
             "progress" => progress,
             "cluster_id" => cluster_id,
             "start_timestamp" => start_timestamp,
@@ -178,7 +179,7 @@ job run with parameters:
 job running for:         6 mins
 job submitted at:        2012-02-28T03:35:42.831000+00:00
 progress:                55%
-status:                  running
+status:                  Running
 STDOUT
         end
       end
@@ -188,7 +189,7 @@ STDOUT
           job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
           pigscript_name = "my_script"
           project_name = "myproject"
-          status = Mortar::API::Jobs::STATUS_EXECUTION_ERROR
+          status_code = Mortar::API::Jobs::STATUS_EXECUTION_ERROR
           progress = 55
           cluster_id = "e2790e7e8c7d48e39157238d58191346"
           start_timestamp = "2012-02-28T03:35:42.831000+00:00"
@@ -202,7 +203,8 @@ STDOUT
           mock(Mortar::Auth.api).get_job(job_id) {Excon::Response.new(:body => {"job_id" => job_id,
             "pigscript_name" => pigscript_name,
             "project_name" => project_name,
-            "status" => status,
+            "status_code" => status_code,
+            "status_description" => "Execution error",
             "progress" => progress,
             "cluster_id" => cluster_id,
             "start_timestamp" => start_timestamp,
@@ -232,7 +234,7 @@ job run with parameters:
 job running for:         6 mins
 job submitted at:        2012-02-28T03:35:42.831000+00:00
 progress:                55%
-status:                  execution_error
+status:                  Execution error
 STDOUT
         end
       end
