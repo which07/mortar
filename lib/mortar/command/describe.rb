@@ -62,7 +62,8 @@ class Mortar::Command::Describe < Mortar::Command::Base
           error_message += ", Column #{column_number}"
         end
       end
-      error_message += ":\n\n#{describe_result['error_message']}"
+      error_context = get_error_message_context(describe_result['error_message'])
+      error_message += ":\n\n#{describe_result['error_message']}\n\n#{error_context}"
       error(error_message)
     when Mortar::API::Describe::STATUS_KILLED
       error("Describe killed by user.")
