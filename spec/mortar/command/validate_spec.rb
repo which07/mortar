@@ -43,19 +43,19 @@ STDERR
           parameters = ["name"=>"key", "value"=>"value" ]
           
           mock(Mortar::Auth.api).post_validate("myproject", "my_script", is_a(String), :parameters => parameters) {Excon::Response.new(:body => {"validate_id" => validate_id})}
-          mock(Mortar::Auth.api).get_validate(validate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Validate::STATUS_QUEUED})).ordered
-          mock(Mortar::Auth.api).get_validate(validate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Validate::STATUS_GATEWAY_STARTING})).ordered
-          mock(Mortar::Auth.api).get_validate(validate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Validate::STATUS_PROGRESS})).ordered
-          mock(Mortar::Auth.api).get_validate(validate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Validate::STATUS_SUCCESS})).ordered
+          mock(Mortar::Auth.api).get_validate(validate_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Validate::STATUS_QUEUED, "status_description" => "Pending"})).ordered
+          mock(Mortar::Auth.api).get_validate(validate_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Validate::STATUS_GATEWAY_STARTING, "status_description" => "GATEWAY_STARTING"})).ordered
+          mock(Mortar::Auth.api).get_validate(validate_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Validate::STATUS_PROGRESS, "status_description" => "Starting"})).ordered
+          mock(Mortar::Auth.api).get_validate(validate_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Validate::STATUS_SUCCESS, "status_description" => "Success"})).ordered
                               
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
           stderr, stdout = execute("validate my_script --polling_interval 0.05 -p key=value", p, @git)
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
-Starting validate... started
+Starting validate... done
 
-\r\e[0KValidate status: QUEUED /\r\e[0KValidate status: GATEWAY_STARTING -\r\e[0KValidate status: PROGRESS \\\r\e[0KValidate status: SUCCESS  
+\r\e[0KStatus: Pending... /\r\e[0KStatus: GATEWAY_STARTING... -\r\e[0KStatus: Starting... \\\r\e[0KStatus: Success  
 
 Your script is valid.
 STDOUT
@@ -73,8 +73,8 @@ STDOUT
           error_type = 'PigError'
           
           mock(Mortar::Auth.api).post_validate("myproject", "my_script", is_a(String), :parameters => []) {Excon::Response.new(:body => {"validate_id" => validate_id})}
-          mock(Mortar::Auth.api).get_validate(validate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Validate::STATUS_QUEUED})).ordered
-          mock(Mortar::Auth.api).get_validate(validate_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Validate::STATUS_FAILURE, 
+          mock(Mortar::Auth.api).get_validate(validate_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Validate::STATUS_QUEUED, "status_description" => "Pending"})).ordered
+          mock(Mortar::Auth.api).get_validate(validate_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Validate::STATUS_FAILURE, "status_description" => "Failed",
             "error_message" => error_message,
             "line_number" => line_number,
             "column_number" => column_number,
@@ -85,9 +85,9 @@ STDOUT
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
-Starting validate... started
+Starting validate... done
 
-\r\e[0KValidate status: QUEUED /\r\e[0KValidate status: FAILURE  
+\r\e[0KStatus: Pending... /\r\e[0KStatus: Failed  
 
 STDOUT
           stderr.should == <<-STDERR

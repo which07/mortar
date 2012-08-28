@@ -32,7 +32,7 @@ class Mortar::Command::Describe < Mortar::Command::Base
     git_ref = create_and_push_snapshot_branch(git, project)
     
     describe_id = nil
-    action("Starting describe", {:success => "started"}) do
+    action("Starting describe") do
       describe_id = api.post_describe(project.name, pigscript.name, alias_name, git_ref, :parameters => pig_parameters).body["describe_id"]
     end
         
@@ -41,10 +41,10 @@ class Mortar::Command::Describe < Mortar::Command::Base
     ticking(polling_interval) do |ticks|
       describe_result = api.get_describe(describe_id, :exclude_result => true).body
       is_finished =
-        Mortar::API::Describe::STATUSES_COMPLETE.include?(describe_result["status"])
+        Mortar::API::Describe::STATUSES_COMPLETE.include?(describe_result["status_code"])
         
-      redisplay("Describe status: %s %s" % [
-        describe_result['status'],
+      redisplay("Status: %s %s" % [
+        describe_result['status_description'] + (is_finished ? "" : "..."),
         is_finished ? " " : spinner(ticks)],
         is_finished) # only display newline on last message
       if is_finished
@@ -53,7 +53,7 @@ class Mortar::Command::Describe < Mortar::Command::Base
       end
     end
     
-    case describe_result['status']
+    case describe_result['status_code']
     when Mortar::API::Describe::STATUS_FAILURE
       error_message = "Describe failed with #{describe_result['error_type'] || 'error'}"
       if line_number = describe_result["line_number"]

@@ -55,10 +55,10 @@ STDERR
           parameters = ["name"=>"key", "value"=>"value" ]
           
           mock(Mortar::Auth.api).post_describe("myproject", "my_script", "my_alias", is_a(String), :parameters => parameters) {Excon::Response.new(:body => {"describe_id" => describe_id})}
-          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status" => Mortar::API::Describe::STATUS_QUEUED})).ordered
-          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status" => Mortar::API::Describe::STATUS_GATEWAY_STARTING})).ordered
-          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status" => Mortar::API::Describe::STATUS_PROGRESS})).ordered
-          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status" => Mortar::API::Describe::STATUS_SUCCESS, "web_result_url" => describe_url})).ordered
+          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Describe::STATUS_QUEUED, "status_description" => "Pending"})).ordered
+          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Describe::STATUS_GATEWAY_STARTING, "status_description" => "Gateway starting"})).ordered
+          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Describe::STATUS_PROGRESS, "status_description" => "Starting pig"})).ordered
+          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Describe::STATUS_SUCCESS, "status_description" => "Success", "web_result_url" => describe_url})).ordered
           
           # stub launchy
           mock(Launchy).open(describe_url) {Thread.new {}}
@@ -68,9 +68,9 @@ STDERR
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
-Starting describe... started
+Starting describe... done
 
-\r\e[0KDescribe status: QUEUED /\r\e[0KDescribe status: GATEWAY_STARTING -\r\e[0KDescribe status: PROGRESS \\\r\e[0KDescribe status: SUCCESS  
+\r\e[0KStatus: Pending... /\r\e[0KStatus: Gateway starting... -\r\e[0KStatus: Starting pig... \\\r\e[0KStatus: Success  
 
 Results available at https://api.mortardata.com/describe/c571a8c7f76a4fd4a67c103d753e2dd5
 Opening web browser to show results... done
@@ -89,8 +89,8 @@ STDOUT
           error_type = 'PigError'
           
           mock(Mortar::Auth.api).post_describe("myproject", "my_script", "my_alias", is_a(String), :parameters => []) {Excon::Response.new(:body => {"describe_id" => describe_id})}
-          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status" => Mortar::API::Describe::STATUS_QUEUED})).ordered
-          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status" => Mortar::API::Describe::STATUS_FAILURE, 
+          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Describe::STATUS_QUEUED, "status_description" => "Pending"})).ordered
+          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Describe::STATUS_FAILURE, "status_description" => "Failed",
             "error_message" => error_message,
             "line_number" => line_number,
             "column_number" => column_number,
@@ -101,9 +101,9 @@ STDOUT
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
-Starting describe... started
+Starting describe... done
 
-\r\e[0KDescribe status: QUEUED /\r\e[0KDescribe status: FAILURE  
+\r\e[0KStatus: Pending... /\r\e[0KStatus: Failed  
 
 STDOUT
           stderr.should == <<-STDERR
