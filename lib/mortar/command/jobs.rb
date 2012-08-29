@@ -143,23 +143,16 @@ class Mortar::Command::Jobs < Mortar::Command::Base
         '%0.2f / %0.2f' % [job_status["num_hadoop_jobs_succeeded"], job_status["num_hadoop_jobs"]]
     end
     
+    if job_status["outputs"] && job_status["outputs"].length > 0
+      job_display_entries["outputs"] = Hash[job_status["outputs"].select{|o| o["alias"]}.collect do |output|
+        output_hash = {}
+        output_hash["location"] = output["location"] if output["location"]
+        output_hash["records"] = output["records"] if output["records"]
+        [output['alias'], output_hash]
+      end]
+    end
+    
     styled_header("#{job_status["project_name"]}: #{job_status["pigscript_name"]} (job_id: #{job_status["job_id"]})")
     styled_hash(job_display_entries)
   end
-  
-  # jobs:stop JOB_ID
-  #
-  # Stop a running job.
-  #
-  #Examples:
-  #
-  # $ mortar jobs:stop 84f3c86f20034ed4bf5e359120a47f5a
-  #
-  # TBD
-  def stop
-    raise NotImplementedError, "FIXME implement me"
-  end
-  
-  alias_command "stop", "jobs:run"
-  
 end
