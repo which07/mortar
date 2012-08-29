@@ -1,5 +1,6 @@
 require "mortar"
 require "mortar/helpers"
+require "mortar/errors"
 
 require "netrc"
 
@@ -35,9 +36,17 @@ class Mortar::Auth
       delete_credentials
     end
     
-    # just a stub; will raise if not authenticated
     def check
-      api.get_user
+      @mortar_user = api.get_user.body
+      #Need to ensure user has a github_username
+      unless @mortar_user.fetch("user_github_username", nil)
+        begin
+          ask_for_and_save_github_username
+        rescue Mortar::CLI::Errors::InvalidGithubUsername => e
+          retry if retry_set_github_username?
+          raise e
+        end
+      end
     end
     
     def default_host
@@ -146,6 +155,15 @@ class Mortar::Auth
       [user, api_key(user, password)]
     end
 
+    def ask_for_github_username
+      puts
+      puts "Please enter your github username (not email address)."
+
+      print "Github Username: "
+      github_username = ask
+      github_username
+    end
+
     def ask_for_password_on_windows
       require "Win32API"
       char = nil
@@ -183,6 +201,11 @@ class Mortar::Auth
         display "Authentication failed."
         retry if retry_login?
         exit 1
+      rescue Mortar::CLI::Errors::InvalidGithubUsername => e
+        #Too many failures at setting github username
+        display "Authentication failed."
+        delete_credentials
+        exit 1
       rescue Exception => e
         delete_credentials
         raise e
@@ -191,11 +214,62 @@ class Mortar::Auth
       #check_for_associated_ssh_key unless Mortar::Command.current_command == "keys:add"
       @credentials
     end
+
+    def ask_for_and_save_github_username
+      require ("mortar-api-ruby")
+      begin
+        @github_username = ask_for_github_username
+        save_github_username
+      end
+    end
+
+    def save_github_username
+      task_id = api.update_user(@mortar_user['user_id'], {'user_github_username' => @github_username}).body['task_id']
+
+      task_result = nil
+      ticking(polling_interval) do |ticks|
+        task_result = api.get_task(task_id).body
+        is_finished =
+          Mortar::API::Task::STATUSES_COMPLETE.include?(task_result["status_code"])
+        
+        redisplay("Setting github username: %s" % 
+          [is_finished ? " Done!" : spinner(ticks)],
+          is_finished) # only display newline on last message
+        if is_finished
+          display
+          break
+        end
+      end
+
+      case task_result['status_code']
+      when Mortar::API::Task::STATUS_FAILURE
+        error_message = "Setting github username failed with #{task_result['error_type'] || 'error'}"
+        error_message += ":\n\n#{task_result['error_message']}\n\n"
+        output_with_bang error_message
+        raise Mortar::CLI::Errors::InvalidGithubUsername.new
+      when Mortar::API::Task::STATUS_SUCCESS
+        display "Successfully set github username." 
+      else
+        #Raise error so .netrc file is wiped out.
+        raise RuntimeError, "Unknown task status: #{task_result['status_code']}"
+      end
+    end
+
     
     def retry_login?
       @login_attempts ||= 0
       @login_attempts += 1
       @login_attempts < 3
+    end
+
+    def retry_set_github_username?
+      @set_github_username_attempts ||= 0
+      @set_github_username_attempts += 1
+      @set_github_username_attempts < 3
+    end
+
+    def polling_interval
+      (2.0).to_f
     end
     
 

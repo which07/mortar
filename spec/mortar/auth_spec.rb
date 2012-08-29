@@ -10,7 +10,6 @@ module Mortar
       ENV['MORTAR_API_KEY'] = nil
       
       @cli = Mortar::Auth
-      stub(@cli).check
       stub(@cli).display
       stub(@cli).running_on_a_mac? {false}
       @cli.credentials = nil
@@ -37,6 +36,7 @@ module Mortar
     end
 
     it "asks for credentials when the file doesn't exist" do
+      stub(@cli).check
       @cli.delete_credentials
       mock(@cli).ask_for_credentials {["u", "p"]}
       #@cli.should_receive(:check_for_associated_ssh_key)
@@ -78,6 +78,60 @@ module Mortar
       #@cli.should_receive(:check_for_associated_ssh_key)
       @cli.reauthorize
       Netrc.read(@cli.netrc_path)["api.#{@cli.host}"].should == (['one', 'two'])
+    end
+
+    it "prompts for github_username when user doesn't have one." do
+      user_id = "123456789"
+      new_github_username = "some_new_github_username"
+      task_id = "1a2b3c4d"
+      stub(@cli).polling_interval.returns(0.05)
+
+      mock(@cli).ask_for_credentials.returns("username", "apikey")
+      stub(@cli).write_credentials
+      mock(@cli.api).get_user() {Excon::Response.new(:body => {"user_id" => user_id, "user_email" => "foo@foo.com"})}
+      mock(@cli).ask_for_github_username.returns(new_github_username)
+
+      mock(@cli.api).update_user(user_id,{"user_github_username" => new_github_username}) {Excon::Response.new(:body => {"task_id" => task_id})}
+
+      mock(@cli.api).get_task(task_id).returns(Excon::Response.new(:body => {"task_id" => task_id, "status_code" => "QUEUED"})).ordered
+      mock(@cli.api).get_task(task_id).returns(Excon::Response.new(:body => {"task_id" => task_id, "status_code" => "PROGRESS"})).ordered
+      mock(@cli.api).get_task(task_id).returns(Excon::Response.new(:body => {"task_id" => task_id, "status_code" => "SUCCESS"})).ordered
+
+      @cli.ask_for_and_save_credentials
+    end
+
+    it "remove credentials when call to set github_username fails" do
+      user_id = "abcdef"
+      new_github_username = "some_new_github_username"
+      task_id = "1a2b3c4d5e"
+      stub(@cli).polling_interval.returns(0.05)
+      mock(@cli).retry_set_github_username?.returns(false)
+
+
+      mock(@cli).ask_for_credentials.returns("username", "apikey")
+      stub(@cli).write_credentials
+      mock(@cli.api).get_user() {Excon::Response.new(:body => {"user_id" => user_id, "user_email" => "foo@foo.com"})}
+      mock(@cli).ask_for_github_username.returns(new_github_username)
+
+      mock(@cli.api).update_user(user_id,{"user_github_username" => new_github_username}) {Excon::Response.new(:body => {"task_id" => task_id})}
+
+      mock(@cli.api).get_task(task_id).returns(Excon::Response.new(:body => {"task_id" => task_id, "status_code" => "QUEUED"})).ordered
+      mock(@cli.api).get_task(task_id).returns(Excon::Response.new(:body => {"task_id" => task_id, "status_code" => "PROGRESS"})).ordered
+      mock(@cli.api).get_task(task_id).returns(Excon::Response.new(:body => {"task_id" => task_id, "status_code" => "FAILURE"})).ordered
+
+      mock(@cli).delete_credentials
+
+      lambda { @cli.ask_for_and_save_credentials }.should raise_error(SystemExit)
+    end
+
+    it "try 3 times to get github username" do
+      user_id = "abcdefghijkl"
+
+      mock(@cli.api).get_user() {Excon::Response.new(:body => {"user_id" => user_id, "user_email" => "foo@foo.com"})}
+
+      stub(@cli).ask_for_and_save_github_username.times(3).returns { raise Mortar::CLI::Errors::InvalidGithubUsername.new }
+
+      lambda { @cli.check }.should raise_error(Mortar::CLI::Errors::InvalidGithubUsername)
     end
   end
 end
