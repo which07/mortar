@@ -77,22 +77,25 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     git_ref = create_and_push_snapshot_branch(git, project)
     
     # post job to API
-    job_id = action("Requesting job execution") do
+    response = action("Requesting job execution") do
       if options[:clustersize]
         cluster_size = options[:clustersize].to_i
         keepalive = ! options[:singlejobcluster]
         api.post_job_new_cluster(project.name, pigscript.name, git_ref, cluster_size, 
           :parameters => pig_parameters,
-          :keepalive => keepalive).body["job_id"]
+          :keepalive => keepalive).body
       else
         cluster_id = options[:clusterid]
         api.post_job_existing_cluster(project.name, pigscript.name, git_ref, cluster_id,
-          :parameters => pig_parameters).body["job_id"]
+          :parameters => pig_parameters).body
       end
     end
-    display("job_id: #{job_id}")
+
+    display("job_id: #{response['job_id']}")
     display
-    display("To check job status, run:\n\n  mortar jobs:status #{job_id}")
+    display("Job status can be viewed on the web at:\n\n #{response['web_job_url']}")
+    display
+    display("Or by running:\n\n  mortar jobs:status #{response['job_id']}")
     display
   end
   
