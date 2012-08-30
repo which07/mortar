@@ -13,6 +13,7 @@ GEM
     diff-lcs (1.1.3)
     excon (0.15.5)
     fakefs (0.4.0)
+    gem-release (0.4.1)
     launchy (2.1.2)
       addressable (~> 2.3)
     mortar-api-ruby (0.1.0)
@@ -35,6 +36,7 @@ PLATFORMS
 DEPENDENCIES
   excon (~> 0.15.4)
   fakefs
+  gem-release
   mortar!
   rake
   rr
