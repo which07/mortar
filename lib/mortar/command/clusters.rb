@@ -18,8 +18,13 @@ class Mortar::Command::Clusters < Mortar::Command::Base
     validate_arguments!
     
     clusters = api.get_clusters().body['clusters']
-    display_table(clusters,
+    if not clusters.empty?
+      display_table(clusters,
       %w( cluster_id size status_description cluster_type_description start_timestamp duration),
       ['cluster_id', 'Size (# of Nodes)', 'Status', 'Type', 'Start Timestamp', 'Elapsed Time'])
+    else
+      display("There are currently no clusters running")
+    end
+    
   end
 end

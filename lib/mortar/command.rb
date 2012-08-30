@@ -109,6 +109,7 @@ module Mortar
     def self.prepare_run(cmd, args=[])
       command = parse(cmd)
 
+
       if args.include?('-h') || args.include?('--help')
         args.unshift(cmd) unless cmd =~ /^-.*/
         cmd = 'help'
@@ -119,6 +120,12 @@ module Mortar
         if %w( -v --version ).include?(cmd)
           cmd = 'version'
           command = parse(cmd)
+        elsif Dir[File.join(File.dirname(__FILE__), "command", "*.rb")].to_s.include?(cmd)
+          display "#{cmd} command has no index action!"
+          display
+          args.unshift(cmd) unless cmd =~ /^-.*/
+          cmd = 'help'
+          command = parse('help')
         else
           error([
             "`#{cmd}` is not a mortar command.",
