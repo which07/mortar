@@ -280,6 +280,10 @@ protected
   end
 
   def git_organization
+    ENV['MORTAR_ORGANIZATION'] || default_git_organization
+  end
+
+  def default_git_organization
     "mortarcode"
   end
   
