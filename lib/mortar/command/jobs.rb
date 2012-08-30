@@ -155,4 +155,29 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     styled_header("#{job_status["project_name"]}: #{job_status["pigscript_name"]} (job_id: #{job_status["job_id"]})")
     styled_hash(job_display_entries)
   end
+
+  # jobs:stop JOB_ID
+  #
+  # Stop a running job.
+  #
+  #Examples:
+  #
+  # $ mortar jobs:stop 84f3c86f20034ed4bf5e359120a47f5a
+  #
+  # TBD
+  def stop
+    job_id = shift_argument
+    unless job_id
+      error("Usage: mortar jobs:stop JOB_ID\nMust specify JOB_ID.")
+    end
+
+    response = api.stop_job(job_id).body  
+
+    #TODO: jkarn - Once all servers have the additional message field we can remove this check.
+    if response['message'].nil?
+      display("Stopping job #{job_id}.")
+    else
+      display(response['message'])
+    end
+  end
 end
