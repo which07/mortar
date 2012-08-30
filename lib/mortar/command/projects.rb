@@ -132,5 +132,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
     end
 
     git.clone(project['git_url'], project['name'])
+
+    display "\nYour project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n\n"
   end
 end
