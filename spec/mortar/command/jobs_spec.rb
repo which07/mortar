@@ -323,11 +323,10 @@ STDOUT
           stdout.should == <<-STDOUT
 === myproject: my_script (job_id: c571a8c7f76a4fd4a67c103d753e2dd5)
 cluster_id:              e2790e7e8c7d48e39157238d58191346
-error:                   
-  column_number:   34
-  line_number:     43
-  message:         An error occurred and here's some more info
-  type:            RuntimeError
+error - column_number:   34
+error - line_number:     43
+error - message:         An error occurred and here's some more info
+error - type:            RuntimeError
 hadoop jobs complete:    0.00 / 4.00
 job began running at:    2012-02-28T03:41:52.613000+00:00
 job finished at:         2012-02-28T03:45:52.613000+00:00

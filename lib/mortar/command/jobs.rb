@@ -138,8 +138,9 @@ class Mortar::Command::Jobs < Mortar::Command::Base
         unless error_context == ""
           job_status["error"]["help"] = error_context
         end
-        job_display_entries["error type"] = job_status["error"]["type"]
-        job_display_entries["error message"] = job_status["error"]["message"]
+        job_status["error"].each_pair do |key, value|
+          job_display_entries["error - #{key}"] = value
+        end
       end
       
       if job_status["num_hadoop_jobs"] && job_status["num_hadoop_jobs_succeeded"]
@@ -175,7 +176,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
             hadoop_jobs_ratio_complete = 
               '%0.2f / %0.2f' % [job_status["num_hadoop_jobs_succeeded"], job_status["num_hadoop_jobs"]]
           end
-          
+
           printf("\r[#{spinner(ticks)}] Status: [%-22s] %s%% Complete (%s MapReduce jobs finished)", progressbar, job_status["progress"], hadoop_jobs_ratio_complete)
         else
           redisplay("[#{spinner(ticks)}] Status: #{job_status['status_description']}")

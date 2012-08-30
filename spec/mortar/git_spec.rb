@@ -250,7 +250,7 @@ STASH
       it "clones repo successfully" do
         with_no_git_directory do
           File.directory?("rollup").should be_false
-          @git.clone("git@github.com:mortarcode/4fbbd83cce875be8a4000000_rollup", "rollup")
+          @git.clone("git@github.com:mortarcode-dev/4fbbd83cce875be8a4000000_rollup", "rollup")
           File.directory?("rollup").should be_true
           Dir.chdir("rollup")
           lambda { @git.git("--version") }.should_not raise_error
