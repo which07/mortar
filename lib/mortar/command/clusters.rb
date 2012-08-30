@@ -1,6 +1,6 @@
 require "mortar/command/base"
 
-## manage clusters
+# manage clusters
 #
 class Mortar::Command::Clusters < Mortar::Command::Base
     

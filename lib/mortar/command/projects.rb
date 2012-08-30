@@ -1,6 +1,6 @@
 require "mortar/command/base"
 
-## manage projects
+# manage projects
 #
 class Mortar::Command::Projects < Mortar::Command::Base
   
