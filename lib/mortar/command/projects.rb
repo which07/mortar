@@ -71,30 +71,38 @@ class Mortar::Command::Projects < Mortar::Command::Base
     end
     
     project_id = nil
-    action("Creating project", {:success => "started"}) do
+    action("Sending request to create project: #{name}") do
       project_id = api.post_project(name).body["project_id"]
     end
     
-    last_project_result = nil
-    while last_project_result.nil? || (! Mortar::API::Projects::STATUSES_COMPLETE.include?(last_project_result["status"]))
-      sleep polling_interval
-      current_project_result = api.get_project(project_id).body
-      if last_project_result.nil? || (last_project_result["status"] != current_project_result["status"])
-        display(" ... #{current_project_result['status']}")
+    project_result = nil
+    project_status = nil
+    display
+    ticking(polling_interval) do |ticks|
+      project_result = api.get_project(project_id).body
+      project_status = project_result.fetch("status_code", project_result["status"])
+      project_description = project_result.fetch("status_description", project_status)
+      is_finished = Mortar::API::Projects::STATUSES_COMPLETE.include?(project_status)
+
+      redisplay("Status: %s %s" % [
+        project_description + (is_finished ? "" : "..."),
+        is_finished ? " " : spinner(ticks)],
+        is_finished) # only display newline on last message
+      if is_finished
+        display
+        break
       end
-      
-      last_project_result = current_project_result
     end
     
-    case last_project_result['status']
+    case project_status
     when Mortar::API::Projects::STATUS_FAILED
-      error("Project creation failed.\nError message: #{last_project_result['error_message']}")
+      error("Project creation failed.\nError message: #{project_result['error_message']}")
     when Mortar::API::Projects::STATUS_ACTIVE
-      git.remote_add("mortar", last_project_result['git_url'])
+      git.remote_add("mortar", project_result['git_url'])
+      display "Your project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n\n"
     else
-      raise RuntimeError, "Unknown project status: #{last_project_result['status']} for project_id: #{project_id}"
+      raise RuntimeError, "Unknown project status: #{project_status} for project_id: #{project_id}"
     end
-    
     
   end
   

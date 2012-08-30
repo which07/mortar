@@ -94,7 +94,7 @@ STDERR
          end
       end
       
-      it "create a new project successfully" do
+      it "create a new project successfully - with status" do
         project_id = "1234abcd1234abcd1234"
         project_name = "some_new_project"
         project_git_url = "git@github.com:mortarcode/#{project_name}"
@@ -107,10 +107,24 @@ STDERR
 
         stderr, stdout = execute("projects:create #{project_name}  --polling_interval 0.05", nil, @git)
         stdout.should == <<-STDOUT
-Creating project... started
- ... PENDING
- ... CREATING
- ... ACTIVE
+Sending request to create project: some_new_project... done\n\n\r\e[0KStatus: PENDING... /\r\e[0KStatus: CREATING... -\r\e[0KStatus: ACTIVE  \n\nYour project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n
+STDOUT
+      end
+
+      it "create a new project successfully - with status_code and status_description" do
+        project_id = "1234abcd1234abcd1234"
+        project_name = "some_new_project"
+        project_git_url = "git@github.com:mortarcode/#{project_name}"
+        mock(Mortar::Auth.api).post_project("some_new_project") {Excon::Response.new(:body => {"project_id" => project_id})}
+        mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status_description" => "Pending", "status_code" => Mortar::API::Projects::STATUS_PENDING})).ordered
+        mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status_description" => "Creating", "status_code" => Mortar::API::Projects::STATUS_CREATING})).ordered
+        mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status_description" => "Active", "status_code" => Mortar::API::Projects::STATUS_ACTIVE,
+                                                                                             "git_url" => project_git_url})).ordered
+        mock(@git).remote_add("mortar", project_git_url)
+
+        stderr, stdout = execute("projects:create #{project_name}  --polling_interval 0.05", nil, @git)
+        stdout.should == <<-STDOUT
+Sending request to create project: some_new_project... done\n\n\r\e[0KStatus: Pending... /\r\e[0KStatus: Creating... -\r\e[0KStatus: Active  \n\nYour project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n
 STDOUT
       end
       
