@@ -16,20 +16,21 @@
 
 require "mortar/command/base"
 
-# manage pig scripts
+# list available pigscripts
 #
 class Mortar::Command::PigScripts < Mortar::Command::Base
     
   # pigscripts
   #
-  # display the available set of pigscripts
+  # Display the available set of pigscripts
   #
   #Examples:
   #
   # $ mortar pigscripts
   # 
-  # hourly_top_searchers
-  # user_engagement
+  #=== pigscripts
+  #hourly_top_searchers
+  #user_engagement
   #
   def index
     # validation

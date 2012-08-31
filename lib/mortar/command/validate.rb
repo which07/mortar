@@ -17,7 +17,7 @@
 require "mortar/command/base"
 require "mortar/snapshot"
 
-# manage pig scripts
+# check script syntax
 #
 class Mortar::Command::Validate < Mortar::Command::Base
   
@@ -35,9 +35,15 @@ class Mortar::Command::Validate < Mortar::Command::Base
   #
   # Examples:
   #
-  # $ mortar validate
+  # $ mortar validate generate_regression_model_coefficients
   # 
-  # TBD
+  #Taking code snapshot... done
+  #Sending code snapshot to Mortar... done
+  #Starting validate... done
+  #
+  #Status: Success  
+  #
+  #Your script is valid.
   #
   def index
     pigscript_name = shift_argument
