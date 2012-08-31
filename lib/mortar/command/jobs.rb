@@ -17,7 +17,8 @@
 require "mortar/command/base"
 require "mortar/snapshot"
 require "time"
-# manage pig scripts
+
+# run and view status of pig jobs (run, status)
 #
 class Mortar::Command::Jobs < Mortar::Command::Base
 
@@ -32,10 +33,12 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   #
   # Examples:
   #
-  # $ mortar jobs
+  # $ mortar jobs -l 2
   # 
-  # TBD
-  #
+  #job_id                    script                 status   start_date                           elapsed_time  cluster_size  cluster_id
+  #------------------------  ---------------------  -------  -----------------------------------  ------------  ------------  ------------------------
+  #2000cbbba40a860a6f000000  rollup: mock_expanded  Success  Friday, August 31, 2012, 10:40 AM    2 mins                   3  2000cc3cb0c635b7cbff5aaa
+  #20009deca40a866cd5000000  rollup: mock_expanded  Stopped  Thursday, August 30, 2012,  1:08 PM  < 1 min                  2  2000857ae4b0dd5573da35aa
   def index
     options[:limit] ||= '10'
     options[:skip] ||= '0'
@@ -62,10 +65,20 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   #
   #Examples:
   #
-  # $ mortar jobs:run
+  # $ mortar jobs:run --clustersize 3 geenrate_regression_model_coefficients
   # 
-  # TBD
+  #Taking code snapshot... done
+  #Sending code snapshot to Mortar... done
+  #Requesting job execution... done
+  #job_id: 2000cbbba40a860a6f000000
   #
+  #Job status can be viewed on the web at:
+  #
+  #https://hawk.mortardata.com/jobs/job_detail?job_id=2000cbbba40a860a6f000000
+  #
+  #Or by running:
+  #
+  #mortar jobs:status 2000cbbba40a860a6f000000
   def run
     # arguemnts
     pigscript_name = shift_argument
@@ -127,9 +140,12 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   #
   #Examples:
   #
-  # $ mortar jobs:status 84f3c86f20034ed4bf5e359120a47f5a
+  # $ mortar jobs:status 2000cbbba40a860a6f000000
   #
-  # TBD
+  #=== songhotness: generate_regression_model_coefficients (job_id: 2000cbbba40a860a6f000000)
+  #hadoop jobs complete:    0.00 / 1.00
+  #progress:                0%
+  #status:                  Starting Cluster
   def status
     job_id = shift_argument
     unless job_id
@@ -209,6 +225,31 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     else
       job_status = api.get_job(job_id).body
       display_job_status(job_status)
+    end
+  end
+
+  # jobs:stop JOB_ID
+  #
+  # Stop a running job.
+  #
+  #Examples:
+  #
+  # $ mortar jobs:stop 2000cbbba40a860a6f000000
+  #
+  #Stopping job 2000cbbba40a860a6f000000
+  def stop
+    job_id = shift_argument
+    unless job_id
+      error("Usage: mortar jobs:stop JOB_ID\nMust specify JOB_ID.")
+    end
+
+    response = api.stop_job(job_id).body  
+
+    #TODO: jkarn - Once all servers have the additional message field we can remove this check.
+    if response['message'].nil?
+      display("Stopping job #{job_id}.")
+    else
+      display(response['message'])
     end
   end
 end

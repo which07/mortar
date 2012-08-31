@@ -31,10 +31,10 @@ module Mortar::Command
     
     project1 = {'name' => "Project1",
                 'status' => Mortar::API::Projects::STATUS_ACTIVE,
-                'git_url' => "git@github.com:mortarcode/Project1"}
+                'git_url' => "git@github.com:mortarcode-dev/Project1"}
     project2 = {'name' => "Project2",
                 'status' => Mortar::API::Projects::STATUS_ACTIVE,
-                'git_url' => "git@github.com:mortarcode/Project2"}
+                'git_url' => "git@github.com:mortarcode-dev/Project2"}
         
     context("index") do
       
@@ -94,10 +94,10 @@ STDERR
          end
       end
       
-      it "create a new project successfully" do
+      it "create a new project successfully - with status" do
         project_id = "1234abcd1234abcd1234"
         project_name = "some_new_project"
-        project_git_url = "git@github.com:mortarcode/#{project_name}"
+        project_git_url = "git@github.com:mortarcode-dev/#{project_name}"
         mock(Mortar::Auth.api).post_project("some_new_project") {Excon::Response.new(:body => {"project_id" => project_id})}
         mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Projects::STATUS_PENDING})).ordered
         mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Projects::STATUS_CREATING})).ordered
@@ -107,10 +107,24 @@ STDERR
 
         stderr, stdout = execute("projects:create #{project_name}  --polling_interval 0.05", nil, @git)
         stdout.should == <<-STDOUT
-Creating project... started
- ... PENDING
- ... CREATING
- ... ACTIVE
+Sending request to create project: some_new_project... done\n\n\r\e[0KStatus: PENDING... /\r\e[0KStatus: CREATING... -\r\e[0KStatus: ACTIVE  \n\nYour project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n
+STDOUT
+      end
+
+      it "create a new project successfully - with status_code and status_description" do
+        project_id = "1234abcd1234abcd1234"
+        project_name = "some_new_project"
+        project_git_url = "git@github.com:mortarcode-dev/#{project_name}"
+        mock(Mortar::Auth.api).post_project("some_new_project") {Excon::Response.new(:body => {"project_id" => project_id})}
+        mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status_description" => "Pending", "status_code" => Mortar::API::Projects::STATUS_PENDING})).ordered
+        mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status_description" => "Creating", "status_code" => Mortar::API::Projects::STATUS_CREATING})).ordered
+        mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status_description" => "Active", "status_code" => Mortar::API::Projects::STATUS_ACTIVE,
+                                                                                             "git_url" => project_git_url})).ordered
+        mock(@git).remote_add("mortar", project_git_url)
+
+        stderr, stdout = execute("projects:create #{project_name}  --polling_interval 0.05", nil, @git)
+        stdout.should == <<-STDOUT
+Sending request to create project: some_new_project... done\n\n\r\e[0KStatus: Pending... /\r\e[0KStatus: Creating... -\r\e[0KStatus: Active  \n\nYour project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n
 STDOUT
       end
       
@@ -121,7 +135,7 @@ STDOUT
       it "sets the remote of a project" do
         with_git_initialized_project do |p|           
           project_name = p.name
-          project_git_url = "git@github.com:mortarcode/#{project_name}"
+          project_git_url = "git@github.com:mortarcode-dev/#{project_name}"
           `git remote rm mortar`
           mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [ { "name" => project_name, "status" => Mortar::API::Projects::STATUS_ACTIVE, "git_url" => project_git_url } ] })).ordered   
 
@@ -129,7 +143,6 @@ STDOUT
 
           stderr, stdout = execute("projects:set_remote #{project_name}", p, @git)
           stdout.should == <<-STDOUT
-
 Successfully added the mortar remote to the myproject project
 STDOUT
         end
@@ -140,8 +153,8 @@ STDOUT
           project_name = p.name
 
           stderr, stdout = execute("projects:set_remote #{project_name}", p, @git)
-          stderr.should == <<-STDERR
- !    The remote has already been set for project: myproject
+          stdout.should == <<-STDERR
+The remote has already been set for project: myproject
 STDERR
         end
       end
@@ -159,7 +172,7 @@ STDERR
       it "No project with that name" do
         with_git_initialized_project do |p|           
           project_name = p.name
-          project_git_url = "git@github.com:mortarcode/#{project_name}"
+          project_git_url = "git@github.com:mortarcode-dev/#{project_name}"
           mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [ { "name" => "derp", "status" => Mortar::API::Projects::STATUS_ACTIVE, "git_url" => project_git_url } ] })).ordered   
           `git remote rm mortar`
 
@@ -171,18 +184,6 @@ STDERR
 STDERR
         end
       end
-
-      it "Git already initialized" do
-        with_git_initialized_project do |p|           
-          project_name = p.name
-
-          stderr, stdout = execute("projects:set_remote #{project_name}", p, @git)
-          stderr.should == <<-STDERR
- !    The remote has already been set for project: myproject
-STDERR
-        end
-      end
-
     end
     
     

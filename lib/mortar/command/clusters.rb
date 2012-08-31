@@ -16,7 +16,7 @@
 
 require "mortar/command/base"
 
-## manage clusters
+# view running and recent clusters
 #
 class Mortar::Command::Clusters < Mortar::Command::Base
     
@@ -28,7 +28,9 @@ class Mortar::Command::Clusters < Mortar::Command::Base
   #
   # $ mortar clusters
   # 
-  #TBD
+  #cluster_id                Size (# of Nodes)  Status    Type         Start Timestamp  Elapsed Time
+  #------------------------  -----------------  --------  -----------  ---------------  ------------
+  #5023ca3ce0c222b7caaa546a                  3  Starting  Multi - Job                   
   #
   def index
     validate_arguments!

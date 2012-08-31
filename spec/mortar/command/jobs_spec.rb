@@ -435,6 +435,29 @@ status:                  Success
 STDOUT
         end
       end
+
+      context("stop") do
+        it "Stops a running job with default message" do
+          job_id = "1234abcd"
+          mock(Mortar::Auth.api).stop_job(job_id) {Excon::Response.new(:body => {"success" => true})}
+
+          stderr, stdout = execute("jobs:stop #{job_id}")
+          stdout.should == <<-STDOUT
+Stopping job #{job_id}.
+STDOUT
+        end
+
+        it "Stops a running job with server message" do
+          job_id = "1234abcd"
+          message = "some awesome message"
+          mock(Mortar::Auth.api).stop_job(job_id) {Excon::Response.new(:body => {"success" => true, "message" => message})}
+
+          stderr, stdout = execute("jobs:stop #{job_id}")
+          stdout.should == "#{message}\n"
+        end
+
+
+      end
     end
   end
 end

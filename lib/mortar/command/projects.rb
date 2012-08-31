@@ -16,7 +16,7 @@
 
 require "mortar/command/base"
 
-## manage projects
+# manage projects (create, clone)
 #
 class Mortar::Command::Projects < Mortar::Command::Base
   
@@ -71,36 +71,44 @@ class Mortar::Command::Projects < Mortar::Command::Base
     end
     
     project_id = nil
-    action("Creating project", {:success => "started"}) do
+    action("Sending request to create project: #{name}") do
       project_id = api.post_project(name).body["project_id"]
     end
     
-    last_project_result = nil
-    while last_project_result.nil? || (! Mortar::API::Projects::STATUSES_COMPLETE.include?(last_project_result["status"]))
-      sleep polling_interval
-      current_project_result = api.get_project(project_id).body
-      if last_project_result.nil? || (last_project_result["status"] != current_project_result["status"])
-        display(" ... #{current_project_result['status']}")
+    project_result = nil
+    project_status = nil
+    display
+    ticking(polling_interval) do |ticks|
+      project_result = api.get_project(project_id).body
+      project_status = project_result.fetch("status_code", project_result["status"])
+      project_description = project_result.fetch("status_description", project_status)
+      is_finished = Mortar::API::Projects::STATUSES_COMPLETE.include?(project_status)
+
+      redisplay("Status: %s %s" % [
+        project_description + (is_finished ? "" : "..."),
+        is_finished ? " " : spinner(ticks)],
+        is_finished) # only display newline on last message
+      if is_finished
+        display
+        break
       end
-      
-      last_project_result = current_project_result
     end
     
-    case last_project_result['status']
+    case project_status
     when Mortar::API::Projects::STATUS_FAILED
-      error("Project creation failed.\nError message: #{last_project_result['error_message']}")
+      error("Project creation failed.\nError message: #{project_result['error_message']}")
     when Mortar::API::Projects::STATUS_ACTIVE
-      git.remote_add("mortar", last_project_result['git_url'])
+      git.remote_add("mortar", project_result['git_url'])
+      display "Your project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n\n"
     else
-      raise RuntimeError, "Unknown project status: #{last_project_result['status']} for project_id: #{project_id}"
+      raise RuntimeError, "Unknown project status: #{project_status} for project_id: #{project_id}"
     end
-    
     
   end
 
   # projects:set_remote PROJECT
   #
-  # adds the mortar remote to the local git project
+  # Adds the Mortar remote to the local git project. This is necessary for successfully executing many of the Mortar commands.
   #
   #Example:
   #
@@ -114,12 +122,12 @@ class Mortar::Command::Projects < Mortar::Command::Base
     end
 
     unless git.has_dot_git?
-      error("Can only create a mortar project for an existing git project.  Please run:\n\ngit init\ngit add .\ngit commit -a -m \"first commit\"\n\nto initialize your project in git.")
+      error("Can only set the remote for an existing git project.  Please run:\n\ngit init\ngit add .\ngit commit -a -m \"first commit\"\n\nto initialize your project in git.")
     end
 
-    display git.remotes(git_organization)
     if git.remotes(git_organization).include?("mortar")
-      error("The remote has already been set for project: #{project_name}")
+      display("The remote has already been set for project: #{project_name}")
+      return
     end
 
     projects = api.get_projects().body["projects"]
@@ -128,15 +136,9 @@ class Mortar::Command::Projects < Mortar::Command::Base
       error("No project named: #{project_name} exists. You can create this project using:\n\n mortar projects:create")
     end
 
-    case project['status']
-    when Mortar::API::Projects::STATUS_FAILED
-      error("unable to add remote for project named: #{project_name} because it failed to be created. Try recreating it by using:\n\n mortar projects:create")
-    when Mortar::API::Projects::STATUS_ACTIVE
-      git.remote_add("mortar", project['git_url'])
-      display("Successfully added the mortar remote to the #{project_name} project")
-    else
-      raise RuntimeError, "Unknown project status: #{project['status']}"
-    end
+    git.remote_add("mortar", project['git_url'])
+    display("Successfully added the mortar remote to the #{project_name} project")
+
   end
   
   # projects:clone PROJECT
@@ -165,5 +167,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
     end
 
     git.clone(project['git_url'], project['name'])
+
+    display "\nYour project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n\n"
   end
 end
