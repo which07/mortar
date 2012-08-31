@@ -1,8 +1,7 @@
-# Weclome to Mortar!
+# Welcome to Mortar!
 
-Copy TK
-
+Mortar is a platform-as-a-service for Hadoop.  With Mortar, you can run jobs on Hadoop using Apache Pig and Python without any special training.  You create your project using the Mortar command-line tool, deploy code using the Git revision control system, and Mortar does the rest.
 
 # Getting Started
 
-Copy TK
+For help getting started with Mortar, check out the [Mortar Help](http://preview.help.mortardata.com/) site.
