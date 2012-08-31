@@ -56,7 +56,7 @@ Job status can be viewed on the web at:
 
 Or by running:
 
-  mortar jobs:status c571a8c7f76a4fd4a67c103d753e2dd5
+  mortar jobs:status c571a8c7f76a4fd4a67c103d753e2dd5 --poll
 
 STDOUT
         end
@@ -87,7 +87,7 @@ Job status can be viewed on the web at:
 
 Or by running:
 
-  mortar jobs:status c571a8c7f76a4fd4a67c103d753e2dd5
+  mortar jobs:status c571a8c7f76a4fd4a67c103d753e2dd5 --poll
 
 STDOUT
         end
@@ -116,7 +116,7 @@ Job status can be viewed on the web at:
 
 Or by running:
 
-  mortar jobs:status c571a8c7f76a4fd4a67c103d753e2dd5
+  mortar jobs:status c571a8c7f76a4fd4a67c103d753e2dd5 --poll
 
 STDOUT
         end
