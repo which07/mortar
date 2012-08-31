@@ -66,10 +66,8 @@ class Mortar::Command::Validate < Mortar::Command::Base
       validate_result = api.get_validate(validate_id).body
       is_finished =
         Mortar::API::Validate::STATUSES_COMPLETE.include?(validate_result["status_code"])
-        
-      redisplay("Status: %s %s" % [
-        validate_result['status_description']  + (is_finished ? "" : "..."),
-        is_finished ? " " : spinner(ticks)],
+       
+      redisplay("[#{spinner(ticks)}] Checking your script for problems with: Pig syntax, Python syntax, and S3 data access",
         is_finished) # only display newline on last message
       if is_finished
         display

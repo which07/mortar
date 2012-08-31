@@ -135,6 +135,9 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   #
   # Check the status of a job.
   #
+  # -p, --poll      # Poll the status of a job
+  #
+  #
   #Examples:
   #
   # $ mortar jobs:status 2000cbbba40a860a6f000000
@@ -149,43 +152,80 @@ class Mortar::Command::Jobs < Mortar::Command::Base
       error("Usage: mortar jobs:status JOB_ID\nMust specify JOB_ID.")
     end
     
-    job_status = api.get_job(job_id).body
+    # Inner function to display the hash table when the job is complte
+    def display_job_status(job_status)
+      job_display_entries = {
+        "status" => job_status["status_description"],
+        "progress" => "#{job_status["progress"]}%",
+        "cluster_id" => job_status["cluster_id"],
+        "job submitted at" => job_status["start_timestamp"],
+        "job began running at" => job_status["running_timestamp"],
+        "job finished at" => job_status["stop_timestamp"],
+        "job running for" => job_status["duration"],
+        "job run with parameters" => job_status["parameters"],
+      }
 
-    job_display_entries = {
-      "status" => job_status["status_description"],
-      "progress" => "#{job_status["progress"]}%",
-      "cluster_id" => job_status["cluster_id"],
-      "job submitted at" => job_status["start_timestamp"],
-      "job began running at" => job_status["running_timestamp"],
-      "job finished at" => job_status["stop_timestamp"],
-      "job running for" => job_status["duration"],
-      "job run with parameters" => job_status["parameters"],
-      "error" => job_status["error"]
-    }
-    
-    unless job_status["error"].nil? || job_status["error"]["message"].nil?
-      error_context = get_error_message_context(job_status["error"]["message"])
-      unless error_context == ""
-        job_status["error"]["help"] = error_context
+      
+      unless job_status["error"].nil? || job_status["error"]["message"].nil?
+        error_context = get_error_message_context(job_status["error"]["message"])
+        unless error_context == ""
+          job_status["error"]["help"] = error_context
+        end
+        job_status["error"].each_pair do |key, value|
+          job_display_entries["error - #{key}"] = value
+        end
       end
+      
+      if job_status["num_hadoop_jobs"] && job_status["num_hadoop_jobs_succeeded"]
+        job_display_entries["hadoop jobs complete"] = 
+          '%0.2f / %0.2f' % [job_status["num_hadoop_jobs_succeeded"], job_status["num_hadoop_jobs"]]
+      end
+      
+      if job_status["outputs"] && job_status["outputs"].length > 0
+        job_display_entries["outputs"] = Hash[job_status["outputs"].select{|o| o["alias"]}.collect do |output|
+          output_hash = {}
+          output_hash["location"] = output["location"] if output["location"]
+          output_hash["records"] = output["records"] if output["records"]
+          [output['alias'], output_hash]
+        end]
+      end
+      
+      styled_header("#{job_status["project_name"]}: #{job_status["pigscript_name"]} (job_id: #{job_status["job_id"]})")
+      styled_hash(job_display_entries)
     end
     
-    if job_status["num_hadoop_jobs"] && job_status["num_hadoop_jobs_succeeded"]
-      job_display_entries["hadoop jobs complete"] = 
-        '%0.2f / %0.2f' % [job_status["num_hadoop_jobs_succeeded"], job_status["num_hadoop_jobs"]]
+    # If polling the status
+    if options[:poll]
+      ticking(polling_interval) do |ticks|
+        job_status = api.get_job(job_id).body
+        # If the job is complete exit and display the table normally 
+        if Mortar::API::Jobs::STATUSES_COMPLETE.include?(job_status["status_code"] )
+          redisplay("")
+          display_job_status(job_status)
+          break
+        end
+
+        # If the job is running show the progress bar
+        if job_status["status_code"] == Mortar::API::Jobs::STATUS_RUNNING
+          progressbar = "=" + ("=" * (job_status["progress"].to_i / 5)) + ">"
+
+          if job_status["num_hadoop_jobs"] && job_status["num_hadoop_jobs_succeeded"]
+            hadoop_jobs_ratio_complete = 
+              '%0.2f / %0.2f' % [job_status["num_hadoop_jobs_succeeded"], job_status["num_hadoop_jobs"]]
+          end
+
+          printf("\r[#{spinner(ticks)}] Status: [%-22s] %s%% Complete (%s MapReduce jobs finished)", progressbar, job_status["progress"], hadoop_jobs_ratio_complete)
+
+        # If the job is not complete, but not in the running state, just display its status
+        else
+          redisplay("[#{spinner(ticks)}] Status: #{job_status['status_description']}")
+        end
+      end
+    # If not polling, get the job status and display the results
+    else
+      job_status = api.get_job(job_id).body
+      display_job_status(job_status)
     end
-    
-    if job_status["outputs"] && job_status["outputs"].length > 0
-      job_display_entries["outputs"] = Hash[job_status["outputs"].select{|o| o["alias"]}.collect do |output|
-        output_hash = {}
-        output_hash["location"] = output["location"] if output["location"]
-        output_hash["records"] = output["records"] if output["records"]
-        [output['alias'], output_hash]
-      end]
-    end
-    
-    styled_header("#{job_status["project_name"]}: #{job_status["pigscript_name"]} (job_id: #{job_status["job_id"]})")
-    styled_hash(job_display_entries)
   end
 
   # jobs:stop JOB_ID

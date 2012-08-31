@@ -52,8 +52,7 @@ STDOUT
         mock(Mortar::Auth.api).get_clusters().returns(Excon::Response.new(:body => {"clusters" => []}))
          stderr, stdout = execute("clusters", nil, nil)
          stdout.should == <<-STDOUT
-cluster_id  Size (# of Nodes)  Status  Type  Start Timestamp  Elapsed Time
-----------  -----------------  ------  ----  ---------------  ------------
+There are no running or recent clusters
 STDOUT
       end
     end

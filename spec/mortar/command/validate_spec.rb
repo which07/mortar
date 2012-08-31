@@ -71,7 +71,7 @@ Taking code snapshot... done
 Sending code snapshot to Mortar... done
 Starting validate... done
 
-\r\e[0KStatus: Pending... /\r\e[0KStatus: GATEWAY_STARTING... -\r\e[0KStatus: Starting... \\\r\e[0KStatus: Success  
+\r\e[0K[/] Checking your script for problems with: Pig syntax, Python syntax, and S3 data access\r\e[0K[-] Checking your script for problems with: Pig syntax, Python syntax, and S3 data access\r\e[0K[\\] Checking your script for problems with: Pig syntax, Python syntax, and S3 data access\r\e[0K[|] Checking your script for problems with: Pig syntax, Python syntax, and S3 data access
 
 Your script is valid.
 STDOUT
@@ -103,7 +103,7 @@ Taking code snapshot... done
 Sending code snapshot to Mortar... done
 Starting validate... done
 
-\r\e[0KStatus: Pending... /\r\e[0KStatus: Failed  
+\r\e[0K[/] Checking your script for problems with: Pig syntax, Python syntax, and S3 data access\r\e[0K[-] Checking your script for problems with: Pig syntax, Python syntax, and S3 data access
 
 STDOUT
           stderr.should == <<-STDERR

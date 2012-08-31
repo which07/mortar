@@ -12,7 +12,7 @@
  * User-Defined Functions (UDFs)
  */
 
-REGISTER '../udfs/python/<%= script_name %>.py' using streaming_python as <%= script_name %>;
+REGISTER '../udfs/python/<%= script_name %>.py' USING streaming_python AS <%= script_name %>;
 <% end %>
 
 -- This is an example of loading up input data

@@ -105,6 +105,41 @@ class Mortar::Command::Projects < Mortar::Command::Base
     end
     
   end
+
+  # projects:set_remote PROJECT
+  #
+  # Adds the Mortar remote to the local git project. This is necessary for successfully executing many of the Mortar commands.
+  #
+  #Example:
+  #
+  # $ mortar projects:set_remote my_project
+  #
+  def set_remote
+    project_name = shift_argument
+
+    unless project_name
+      error("Usage: mortar projects:set_remote PROJECT\nMust specify PROJECT.")
+    end
+
+    unless git.has_dot_git?
+      error("Can only set the remote for an existing git project.  Please run:\n\ngit init\ngit add .\ngit commit -a -m \"first commit\"\n\nto initialize your project in git.")
+    end
+
+    if git.remotes(git_organization).include?("mortar")
+      display("The remote has already been set for project: #{project_name}")
+      return
+    end
+
+    projects = api.get_projects().body["projects"]
+    project = projects.find { |p| p['name'] == project_name}
+    unless project
+      error("No project named: #{project_name} exists. You can create this project using:\n\n mortar projects:create")
+    end
+
+    git.remote_add("mortar", project['git_url'])
+    display("Successfully added the mortar remote to the #{project_name} project")
+
+  end
   
   # projects:clone PROJECT
   #

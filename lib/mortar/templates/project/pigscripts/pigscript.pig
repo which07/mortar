@@ -10,7 +10,7 @@
 /**
  * User-Defined Functions (UDFs)
  */
-REGISTER '../udfs/python/<%= project_name %>.py' using streaming_python as <%= project_name %>;
+REGISTER '../udfs/python/<%= project_name %>.py' USING streaming_python AS <%= project_name %>;
 
 -- This is an example of loading up input data
 my_input_data = LOAD '$INPUT_PATH' 
