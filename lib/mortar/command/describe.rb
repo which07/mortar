@@ -32,9 +32,16 @@ class Mortar::Command::Describe < Mortar::Command::Base
   #
   # Examples:
   #
-  # $ mortar describe
+  # $ mortar describe generate_regression_model_coefficients songs_sample
   # 
-  # TBD
+  #Taking code snapshot... done
+  #Sending code snapshot to Mortar... done
+  #Starting describe... done
+  #
+  #Status: Success  
+  #
+  #Results available at https://hawk.mortardata.com/describes/2000cf2e421aa909690000af
+  #Opening web browser to show results... done
   #
   def index
     pigscript_name = shift_argument

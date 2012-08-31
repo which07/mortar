@@ -24,16 +24,26 @@ require "mortar/command/base"
 #
 class Mortar::Command::Generate < Mortar::Command::Base
 
-  # generate:project
+  # generate:project [PROJECTNAME]
   #
-  # generate new project
+  # Generate the files and directory structure necessary for a Mortar project.
   # 
   #
   # Examples:
   #
   # $ mortar generate:project
   # 
-  # TBD
+  #create  README.md
+  #create  .gitignore
+  #create  Gemfile
+  #create  pigscripts
+  #create  pigscripts/my_new_project.pig
+  #create  macros
+  #create  macros/.gitkeep
+  #create  udfs
+  #create  udfs/python
+  #create  udfs/python/my_new_project.py
+  #   run  bundle install
   # 
   def _project
     project_name = shift_argument
@@ -49,16 +59,16 @@ class Mortar::Command::Generate < Mortar::Command::Base
 
 
 
-  # generate:python_udf
+  # generate:python_udf [UDFNAME]
   #
-  # generate new python user defined function
+  # Generate a new python user defined function
   # 
   #
   # Examples:
   #
-  # $ mortar generate:python_udf UDFNAME
+  # $ mortar generate:python_udf my_new_udf
   # 
-  # TBD
+  #create  udfs/python/my_new_udf.py
   # 
   def python_udf
     udf_name = shift_argument
@@ -70,17 +80,18 @@ class Mortar::Command::Generate < Mortar::Command::Base
 
   end
 
-  # generate:pigscript
+  # generate:pigscript [SCRIPTNAME]
   #
-  # generate new pig script
+  # Generate new pig script.
   #
   # --skip-udf # Create the pig script without a partnered python udf 
   #
   # Examples:
   #
-  # $ mortar generate:pigscript SCRIPTNAME
+  # $ mortar generate:pigscript my_new_pigscript
   # 
-  # TBD
+  #create  pigscripts/my_new_pigscript.pig
+  #create  udfs/python/my_new_pigscript.py
   # 
   def pigscript
     script_name = shift_argument
@@ -94,16 +105,16 @@ class Mortar::Command::Generate < Mortar::Command::Base
 
   end
 
-  # generate:macro
+  # generate:macro [MACRONAME]
   #
-  # generate new macro
+  # Generate a new pig macro.
   #
   #
   # Examples:
   #
-  # $ mortar generate:macro MACRONAME
+  # $ mortar generate:macro my_new_macro
   # 
-  # TBD
+  #create  macros/my_new_macro.pig
   # 
   def macro
     macro_name = shift_argument

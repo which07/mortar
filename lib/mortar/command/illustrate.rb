@@ -32,10 +32,16 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
   #
   # Examples:
   #
-  # $ mortar illustrate
+  # $ mortar illustrate generate_regression_model_coefficients songs_sample
   # 
-  # TBD
+  #Taking code snapshot... done
+  #Sending code snapshot to Mortar... done
+  #Starting illustrate... done
   #
+  #Status: Success  
+  #
+  #Results available at https://hawk.mortardata.com/illustrates/2000ce2f421aa909680000af
+  #Opening web browser to show results... done
   def index
     pigscript_name = shift_argument
     alias_name = shift_argument
