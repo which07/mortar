@@ -97,6 +97,47 @@ class Mortar::Command::Projects < Mortar::Command::Base
     
     
   end
+
+  # projects:set_remote PROJECT
+  #
+  # adds the mortar remote to the local git project
+  #
+  #Example:
+  #
+  # $ mortar projects:set_remote my_project
+  #
+  def set_remote
+    project_name = shift_argument
+
+    unless project_name
+      error("Usage: mortar projects:set_remote PROJECT\nMust specify PROJECT.")
+    end
+
+    unless git.has_dot_git?
+      error("Can only create a mortar project for an existing git project.  Please run:\n\ngit init\ngit add .\ngit commit -a -m \"first commit\"\n\nto initialize your project in git.")
+    end
+
+    display git.remotes(git_organization)
+    if git.remotes(git_organization).include?("mortar")
+      error("The remote has already been set for project: #{project_name}")
+    end
+
+    projects = api.get_projects().body["projects"]
+    project = projects.find { |p| p['name'] == project_name}
+    unless project
+      error("No project named: #{project_name} exists. You can create this project using:\n\n mortar projects:create")
+    end
+
+    case project['status']
+    when Mortar::API::Projects::STATUS_FAILED
+      error("unable to add remote for project named: #{project_name} because it failed to be created. Try recreating it by using:\n\n mortar projects:create")
+    when Mortar::API::Projects::STATUS_ACTIVE
+      git.remote_add("mortar", project['git_url'])
+      display("Successfully added the mortar remote to the #{project_name} project")
+    else
+      raise RuntimeError, "Unknown project status: #{project['status']}"
+    end
+  end
   
   # projects:clone PROJECT
   #

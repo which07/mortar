@@ -52,7 +52,7 @@ STDOUT
         mock(Mortar::Auth.api).get_clusters().returns(Excon::Response.new(:body => {"clusters" => []}))
          stderr, stdout = execute("clusters", nil, nil)
          stdout.should == <<-STDOUT
-There are currently no clusters running
+There are no running or recent clusters
 STDOUT
       end
     end

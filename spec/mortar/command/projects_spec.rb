@@ -115,6 +115,75 @@ STDOUT
       end
       
     end
+
+    context("set_remote") do
+      
+      it "sets the remote of a project" do
+        with_git_initialized_project do |p|           
+          project_name = p.name
+          project_git_url = "git@github.com:mortarcode/#{project_name}"
+          `git remote rm mortar`
+          mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [ { "name" => project_name, "status" => Mortar::API::Projects::STATUS_ACTIVE, "git_url" => project_git_url } ] })).ordered   
+
+          mock(@git).remote_add("mortar", project_git_url)
+
+          stderr, stdout = execute("projects:set_remote #{project_name}", p, @git)
+          stdout.should == <<-STDOUT
+
+Successfully added the mortar remote to the myproject project
+STDOUT
+        end
+      end
+
+      it "remote already added" do
+        with_git_initialized_project do |p|           
+          project_name = p.name
+
+          stderr, stdout = execute("projects:set_remote #{project_name}", p, @git)
+          stderr.should == <<-STDERR
+ !    The remote has already been set for project: myproject
+STDERR
+        end
+      end
+
+      it "No project given" do
+        with_git_initialized_project do |p|           
+          stderr, stdout = execute("projects:set_remote", p, @git)
+          stderr.should == <<-STDERR
+ !    Usage: mortar projects:set_remote PROJECT
+ !    Must specify PROJECT.
+STDERR
+        end
+      end
+
+      it "No project with that name" do
+        with_git_initialized_project do |p|           
+          project_name = p.name
+          project_git_url = "git@github.com:mortarcode/#{project_name}"
+          mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [ { "name" => "derp", "status" => Mortar::API::Projects::STATUS_ACTIVE, "git_url" => project_git_url } ] })).ordered   
+          `git remote rm mortar`
+
+          stderr, stdout = execute("projects:set_remote #{project_name}", p, @git)
+          stderr.should == <<-STDERR
+ !    No project named: myproject exists. You can create this project using:
+ !    
+ !     mortar projects:create
+STDERR
+        end
+      end
+
+      it "Git already initialized" do
+        with_git_initialized_project do |p|           
+          project_name = p.name
+
+          stderr, stdout = execute("projects:set_remote #{project_name}", p, @git)
+          stderr.should == <<-STDERR
+ !    The remote has already been set for project: myproject
+STDERR
+        end
+      end
+
+    end
     
     
     context("clone") do

@@ -86,7 +86,7 @@ Taking code snapshot... done
 Sending code snapshot to Mortar... done
 Starting describe... done
 
-\r\e[0KStatus: Pending... /\r\e[0KStatus: Gateway starting... -\r\e[0KStatus: Starting pig... \\\r\e[0KStatus: Success  
+\r\e[0K[/] Calculating schema for my_alias and ancestors...\r\e[0K[-] Calculating schema for my_alias and ancestors...\r\e[0K[\\] Calculating schema for my_alias and ancestors...\r\e[0K[|] Calculating schema for my_alias and ancestors...
 
 Results available at https://api.mortardata.com/describe/c571a8c7f76a4fd4a67c103d753e2dd5
 Opening web browser to show results... done
@@ -119,7 +119,7 @@ Taking code snapshot... done
 Sending code snapshot to Mortar... done
 Starting describe... done
 
-\r\e[0KStatus: Pending... /\r\e[0KStatus: Failed  
+\r\e[0K[/] Calculating schema for my_alias and ancestors...\r\e[0K[-] Calculating schema for my_alias and ancestors...
 
 STDOUT
           stderr.should == <<-STDERR

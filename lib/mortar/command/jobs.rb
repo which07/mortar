@@ -136,8 +136,9 @@ class Mortar::Command::Jobs < Mortar::Command::Base
       error("Usage: mortar jobs:status JOB_ID\nMust specify JOB_ID.")
     end
     
+    # Inner function to display the hash table when the job is complte
     def display_job_status(job_status)
-        job_display_entries = {
+      job_display_entries = {
         "status" => job_status["status_description"],
         "progress" => "#{job_status["progress"]}%",
         "cluster_id" => job_status["cluster_id"],
@@ -177,14 +178,18 @@ class Mortar::Command::Jobs < Mortar::Command::Base
       styled_hash(job_display_entries)
     end
     
+    # If polling the status
     if options[:poll]
       ticking(polling_interval) do |ticks|
         job_status = api.get_job(job_id).body
+        # If the job is complete exit and display the table normally 
         if Mortar::API::Jobs::STATUSES_COMPLETE.include?(job_status["status_code"] )
           redisplay("")
           display_job_status(job_status)
-          break;
+          break
         end
+
+        # If the job is running show the progress bar
         if job_status["status_code"] == Mortar::API::Jobs::STATUS_RUNNING
           progressbar = "=" + ("=" * (job_status["progress"].to_i / 5)) + ">"
 
@@ -194,10 +199,13 @@ class Mortar::Command::Jobs < Mortar::Command::Base
           end
 
           printf("\r[#{spinner(ticks)}] Status: [%-22s] %s%% Complete (%s MapReduce jobs finished)", progressbar, job_status["progress"], hadoop_jobs_ratio_complete)
+
+        # If the job is not complete, but not in the running state, just display its status
         else
           redisplay("[#{spinner(ticks)}] Status: #{job_status['status_description']}")
         end
       end
+    # If not polling, get the job status and display the results
     else
       job_status = api.get_job(job_id).body
       display_job_status(job_status)

@@ -59,9 +59,7 @@ class Mortar::Command::Describe < Mortar::Command::Base
       is_finished =
         Mortar::API::Describe::STATUSES_COMPLETE.include?(describe_result["status_code"])
         
-      redisplay("Status: %s %s" % [
-        describe_result['status_description'] + (is_finished ? "" : "..."),
-        is_finished ? " " : spinner(ticks)],
+      redisplay("[#{spinner(ticks)}] Calculating schema for #{alias_name} and ancestors...",
         is_finished) # only display newline on last message
       if is_finished
         display

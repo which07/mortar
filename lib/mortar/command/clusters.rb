@@ -39,7 +39,7 @@ class Mortar::Command::Clusters < Mortar::Command::Base
       %w( cluster_id size status_description cluster_type_description start_timestamp duration),
       ['cluster_id', 'Size (# of Nodes)', 'Status', 'Type', 'Start Timestamp', 'Elapsed Time'])
     else
-      display("There are currently no clusters running")
+      display("There are no running or recent clusters")
     end
     
   end
