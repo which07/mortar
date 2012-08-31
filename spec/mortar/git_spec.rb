@@ -194,7 +194,7 @@ STASH
       
       it "finds a single remote" do
         with_git_initialized_project do |p|
-          remotes = @git.remotes("mortarcode")
+          remotes = @git.remotes("mortarcode-dev")
           remotes["mortar"].should == p.name
         end
       end

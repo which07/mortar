@@ -49,7 +49,7 @@ def execute(command_line, project=nil, git=nil)
       stub(base).project.returns(project)
     end
   end
-  
+
   # stub git
   if git
     # stub out any operations that affect remote resources
@@ -57,6 +57,7 @@ def execute(command_line, project=nil, git=nil)
     
     any_instance_of(Mortar::Command::Base) do |base|
       stub(base).git.returns(git)
+      stub(base).git_organization.returns("mortarcode-dev")
     end
   end
 
@@ -190,7 +191,7 @@ def with_git_initialized_project(&block)
     remote = "mortar"
     `git add README.txt`
     `git commit -a -m "First commit"`
-    `git remote add #{remote} git@github.com:mortarcode/4dbbd83cae8d5bf8a4000000_#{project.name}.git`
+    `git remote add #{remote} git@github.com:mortarcode-dev/4dbbd83cae8d5bf8a4000000_#{project.name}.git`
     project.remote = remote
     block.call(project)
   end

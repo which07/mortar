@@ -31,10 +31,10 @@ module Mortar::Command
     
     project1 = {'name' => "Project1",
                 'status' => Mortar::API::Projects::STATUS_ACTIVE,
-                'git_url' => "git@github.com:mortarcode/Project1"}
+                'git_url' => "git@github.com:mortarcode-dev/Project1"}
     project2 = {'name' => "Project2",
                 'status' => Mortar::API::Projects::STATUS_ACTIVE,
-                'git_url' => "git@github.com:mortarcode/Project2"}
+                'git_url' => "git@github.com:mortarcode-dev/Project2"}
         
     context("index") do
       
@@ -97,7 +97,7 @@ STDERR
       it "create a new project successfully - with status" do
         project_id = "1234abcd1234abcd1234"
         project_name = "some_new_project"
-        project_git_url = "git@github.com:mortarcode/#{project_name}"
+        project_git_url = "git@github.com:mortarcode-dev/#{project_name}"
         mock(Mortar::Auth.api).post_project("some_new_project") {Excon::Response.new(:body => {"project_id" => project_id})}
         mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Projects::STATUS_PENDING})).ordered
         mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Projects::STATUS_CREATING})).ordered
@@ -114,7 +114,7 @@ STDOUT
       it "create a new project successfully - with status_code and status_description" do
         project_id = "1234abcd1234abcd1234"
         project_name = "some_new_project"
-        project_git_url = "git@github.com:mortarcode/#{project_name}"
+        project_git_url = "git@github.com:mortarcode-dev/#{project_name}"
         mock(Mortar::Auth.api).post_project("some_new_project") {Excon::Response.new(:body => {"project_id" => project_id})}
         mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status_description" => "Pending", "status_code" => Mortar::API::Projects::STATUS_PENDING})).ordered
         mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status_description" => "Creating", "status_code" => Mortar::API::Projects::STATUS_CREATING})).ordered
