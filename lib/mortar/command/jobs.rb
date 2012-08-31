@@ -17,7 +17,8 @@
 require "mortar/command/base"
 require "mortar/snapshot"
 require "time"
-# manage pig scripts
+
+# run and view status of pig jobs (run, status)
 #
 class Mortar::Command::Jobs < Mortar::Command::Base
 

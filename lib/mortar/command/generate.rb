@@ -20,7 +20,7 @@ require "mortar/generators/pigscript_generator"
 require "mortar/generators/macro_generator"
 require "mortar/command/base"
 
-# generate new projects and scaffolding
+# generate mortar code (project, pigscript, python_udf, macro)
 #
 class Mortar::Command::Generate < Mortar::Command::Base
 

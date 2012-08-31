@@ -17,7 +17,7 @@
 require "mortar/command/base"
 require "mortar/snapshot"
 
-# manage pig scripts
+# show data schema for pigscript
 #
 class Mortar::Command::Describe < Mortar::Command::Base
   

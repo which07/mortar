@@ -16,7 +16,7 @@
 
 require "mortar/command/base"
 
-# manage pig scripts
+# list available pigscripts
 #
 class Mortar::Command::PigScripts < Mortar::Command::Base
     

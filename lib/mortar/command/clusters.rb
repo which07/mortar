@@ -16,7 +16,7 @@
 
 require "mortar/command/base"
 
-# manage clusters
+# view running and recent clusters
 #
 class Mortar::Command::Clusters < Mortar::Command::Base
     

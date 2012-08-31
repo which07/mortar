@@ -17,7 +17,7 @@
 require "mortar/command/base"
 require "mortar/snapshot"
 
-# manage pig scripts
+# check script syntax
 #
 class Mortar::Command::Validate < Mortar::Command::Base
   

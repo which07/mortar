@@ -16,7 +16,7 @@
 
 require "mortar/command/base"
 
-# manage projects
+# manage projects (create, clone)
 #
 class Mortar::Command::Projects < Mortar::Command::Base
   
