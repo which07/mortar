@@ -29,8 +29,26 @@ module Mortar
       #
       
       def has_git?
-        %x{ git --version }
-        $?.success?
+        # Needs to have git version 1.7.7 or greater.  Earlier versions lack 
+        # the necessary untracked option for stash.
+        git_version_output, has_git = run_cmd("git --version")
+        if has_git
+          git_version = git_version_output.split(" ")[2]
+          versions = git_version.split(".")
+          is_ok_version = versions[0].to_i >= 1 &&
+                          versions[1].to_i >= 7 &&
+                          versions[2].to_i >= 7
+        end
+        has_git && is_ok_version
+      end
+
+      def run_cmd(cmd)
+        begin
+          output = %x{#{cmd}}
+        rescue Exception => e
+          output = ""
+        end
+        return [output, $?.success?]
       end
       
       def has_dot_git?
@@ -39,7 +57,7 @@ module Mortar
       
       def git(args, check_success=true, check_git_directory=true)
         unless has_git?
-          raise GitError, "git must be installed"
+          raise GitError, "git 1.7.7 or higher must be installed"
         end
         
         if check_git_directory && !has_dot_git?
