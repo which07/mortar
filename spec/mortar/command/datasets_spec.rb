@@ -94,6 +94,24 @@ STDOUT
 
         end
       end
+
+      it "tries to create a dataset in an existing directory" do
+        with_git_initialized_project do |p|
+          dataset_id = "12345abcde"
+          name = "My_pet_dataset"
+          url = "s3://my_pet_dataset"
+          num_rows = "60"
+
+          datasets_dir = File.join(Dir.pwd, "datasets", name)
+          FileUtils.mkdir_p(datasets_dir)
+
+          stderr, stdout = execute("datasets:limit #{url} #{num_rows} #{name} --polling_interval 0.05")
+
+          stderr.should == <<-STDERR
+ !    Dataset #{name} already exists.
+STDERR
+        end
+      end
     
     end
   end
