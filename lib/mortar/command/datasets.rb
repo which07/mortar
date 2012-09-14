@@ -20,6 +20,8 @@ require "mortar/command/base"
 #
 class Mortar::Command::Datasets < Mortar::Command::Base
 
+  WARNING_NUM_ROWS = 50
+
   #datasets:sample [INPUT_URL] [PERCENT_TO_RETURN] [DATASET_NAME]
   #
   #Create a resuable dataset [DATASET_NAME] made up of [PERCENT_TO_RETURN]
@@ -36,6 +38,9 @@ class Mortar::Command::Datasets < Mortar::Command::Base
     dataset_name = shift_argument
     unless input_url && sample_percent && dataset_name
       error("Usage: mortar datasets:sample INPUT_URL PERCENT_TO_RETURN DATASET_NAME\nMust specifiy INPUT_URL, PERCENT_TO_RETURN, and DATASET_NAME.")
+    end
+    if does_dataset_exist(dataset_name)
+      error("Dataset #{dataset_name} already exists.")
     end
     validate_arguments!
     validate_git_based_project!
@@ -65,6 +70,13 @@ class Mortar::Command::Datasets < Mortar::Command::Base
     unless input_url && num_rows && dataset_name
       error("Usage: mortar datasets:limit INPUT_URL NUM_ROWS DATASET_NAME\nMust specifiy INPUT_URL, NUM_ROWS, and DATASET_NAME.")
     end
+    if does_dataset_exist(dataset_name)
+      error("Dataset #{dataset_name} already exists.")
+    end
+    unless num_rows.to_i < WARNING_NUM_ROWS
+      warning("Creating datasets with more than #{WARNING_NUM_ROWS} rows is not recommended.  Large local datasets may cause slowness when using Mortar.")
+      display
+    end
     validate_arguments!
     validate_git_based_project!
 
@@ -80,6 +92,11 @@ class Mortar::Command::Datasets < Mortar::Command::Base
 
   private
 
+  def does_dataset_exist(dataset_name)
+    dataset_path = File.join(project.datasets_path, dataset_name)
+    File.exists?(dataset_path)
+  end
+
   def poll_for_dataset_results(dataset_id)
     dataset_result = nil
     display
@@ -90,7 +107,7 @@ class Mortar::Command::Datasets < Mortar::Command::Base
 
       redisplay("Status: %s %s" % [
         dataset_result['status_description'] + (is_finished ? "" : "..."),
-        is_finished ? " " : spinner(ticks)],
+        is_finished ? "" : spinner(ticks)],
         is_finished) # only display newline on last message
       if is_finished
         display

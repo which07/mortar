@@ -65,6 +65,10 @@ module Mortar
         end
         path
       end
+
+      def datasets_path
+        path = File.join(@root_path, "datasets")
+      end
     end
     
     class ProjectEntity

@@ -61,6 +61,16 @@ module Mortar
       end
     end
 
+    def warning(msg="", new_line=true)
+      message = "WARNING: #{msg}"
+      if new_line
+        display(message)
+      else
+        print(msg)
+        $stdout.flush
+      end
+    end
+
     def redisplay(line, line_break = false)
       display("\r\e[0K#{line}", line_break)
     end

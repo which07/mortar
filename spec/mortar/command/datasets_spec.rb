@@ -67,12 +67,12 @@ STDERR
           dataset_id = "12345abcde"
           name = "My_pet_dataset"
           url = "s3://my_pet_dataset"
-          num_rows = "20"
+          num_rows = "60"
 
           sample_s3_urls = [ {'url' => "url1",
                               'name' => "url1_name"}]
 
-          mock(Mortar::Auth.api).post_dataset_sample(p.name, name, url, num_rows) {Excon::Response.new(:body => {"dataset_id" => dataset_id})}
+          mock(Mortar::Auth.api).post_dataset_limit(p.name, name, url, num_rows) {Excon::Response.new(:body => {"dataset_id" => dataset_id})}
           mock(Mortar::Auth.api).get_dataset(dataset_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Datasets::STATUS_PENDING, "status_description" => "Pending"})).ordered
           mock(Mortar::Auth.api).get_dataset(dataset_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Datasets::STATUS_CREATING, "status_description" => "Creating"})).ordered
           mock(Mortar::Auth.api).get_dataset(dataset_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Datasets::STATUS_SAVING, "status_description" => "Uploading"})).ordered
@@ -82,7 +82,15 @@ STDERR
             mock(base).download_to_file(sample_s3_urls[0]['url'], "datasets/#{name}/#{sample_s3_urls[0]['name']}")
           end
 
-          stderr, stdout = execute("datasets:sample #{url} #{num_rows} #{name} --polling_interval 0.05")
+          stderr, stdout = execute("datasets:limit #{url} #{num_rows} #{name} --polling_interval 0.05")
+
+          stdout.should == <<-STDOUT
+WARNING: Creating datasets with more than 50 rows is not recommended.  Large local datasets may cause slowness when using Mortar.
+
+Requesting dataset creation... done
+
+\r\e[0KStatus: Pending... /\r\e[0KStatus: Creating... -\r\e[0KStatus: Uploading... \\\r\e[0KStatus: Success \n\n
+STDOUT
 
         end
       end
