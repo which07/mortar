@@ -53,22 +53,22 @@ class Mortar::Command::Datasets < Mortar::Command::Base
     poll_for_dataset_results(dataset_id)
   end
 
-  #datasets:limit [INPUT_URL] [NUM_ROWS] [DATASET_NAME]
+  #datasets:head [INPUT_URL] [NUM_ROWS] [DATASET_NAME]
   #
   #Create a reusable dataset [DATASET_NAME] made up of [NUM_ROWS]
-  #number of rows from the input file(s) at [INPUT_URL].
+  #number of rows from the head of the input file(s) at [INPUT_URL].
   #
   # Examples:
   #
-  # $ mortar datasets:limit s3n://tbmmsd/*.tsv.* 100 samll_song_sample
+  # $ mortar datasets:head s3n://tbmmsd/*.tsv.* 100 samll_song_sample
   #
   # TBD
-  def limit
+  def head
     input_url = shift_argument
     num_rows = shift_argument
     dataset_name = shift_argument
     unless input_url && num_rows && dataset_name
-      error("Usage: mortar datasets:limit INPUT_URL NUM_ROWS DATASET_NAME\nMust specifiy INPUT_URL, NUM_ROWS, and DATASET_NAME.")
+      error("Usage: mortar datasets:head INPUT_URL NUM_ROWS DATASET_NAME\nMust specifiy INPUT_URL, NUM_ROWS, and DATASET_NAME.")
     end
     if does_dataset_exist(dataset_name)
       error("Dataset #{dataset_name} already exists.")

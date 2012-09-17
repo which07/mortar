@@ -62,7 +62,7 @@ STDERR
         end
       end
 
-      it "requests and reports on a successful datasets:limit" do
+      it "requests and reports on a successful datasets:head" do
         with_git_initialized_project do |p|
           dataset_id = "12345abcde"
           name = "My_pet_dataset"
@@ -82,7 +82,7 @@ STDERR
             mock(base).download_to_file(sample_s3_urls[0]['url'], "datasets/#{name}/#{sample_s3_urls[0]['name']}")
           end
 
-          stderr, stdout = execute("datasets:limit #{url} #{num_rows} #{name} --polling_interval 0.05")
+          stderr, stdout = execute("datasets:head #{url} #{num_rows} #{name} --polling_interval 0.05")
 
           stdout.should == <<-STDOUT
 WARNING: Creating datasets with more than 50 rows is not recommended.  Large local datasets may cause slowness when using Mortar.
@@ -105,7 +105,7 @@ STDOUT
           datasets_dir = File.join(Dir.pwd, "datasets", name)
           FileUtils.mkdir_p(datasets_dir)
 
-          stderr, stdout = execute("datasets:limit #{url} #{num_rows} #{name} --polling_interval 0.05")
+          stderr, stdout = execute("datasets:head #{url} #{num_rows} #{name} --polling_interval 0.05")
 
           stderr.should == <<-STDERR
  !    Dataset #{name} already exists.
