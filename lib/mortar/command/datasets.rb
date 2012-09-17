@@ -24,7 +24,7 @@ class Mortar::Command::Datasets < Mortar::Command::Base
 
   #datasets:sample [INPUT_URL] [PERCENT_TO_RETURN] [DATASET_NAME]
   #
-  #Create a resuable dataset [DATASET_NAME] made up of [PERCENT_TO_RETURN]
+  #Create a reusable dataset [DATASET_NAME] made up of [PERCENT_TO_RETURN]
   #percent of rows from the input file(s) at [INPUT_URL].
   #
   # Examples:
@@ -55,7 +55,7 @@ class Mortar::Command::Datasets < Mortar::Command::Base
 
   #datasets:limit [INPUT_URL] [NUM_ROWS] [DATASET_NAME]
   #
-  #Create a resuable dataset [DATASET_NAME] made up of [NUM_ROWS]
+  #Create a reusable dataset [DATASET_NAME] made up of [NUM_ROWS]
   #number of rows from the input file(s) at [INPUT_URL].
   #
   # Examples:
