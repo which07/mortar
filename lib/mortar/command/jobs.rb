@@ -40,6 +40,8 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   #2000cbbba40a860a6f000000  rollup: mock_expanded  Success  Friday, August 31, 2012, 10:40 AM    2 mins                   3  2000cc3cb0c635b7cbff5aaa
   #20009deca40a866cd5000000  rollup: mock_expanded  Stopped  Thursday, August 30, 2012,  1:08 PM  < 1 min                  2  2000857ae4b0dd5573da35aa
   def index
+    validate_arguments!
+
     options[:limit] ||= '10'
     options[:skip] ||= '0'
     jobs = api.get_jobs(options[:skip], options[:limit]).body['jobs']
