@@ -22,6 +22,7 @@ class Mortar::Command::Datasets < Mortar::Command::Base
 
   WARNING_NUM_ROWS = 50
 
+=begin
   #datasets:sample [INPUT_URL] [PERCENT_TO_RETURN] [DATASET_NAME]
   #
   #Create a reusable dataset [DATASET_NAME] made up of [PERCENT_TO_RETURN]
@@ -52,6 +53,7 @@ class Mortar::Command::Datasets < Mortar::Command::Base
 
     poll_for_dataset_results(dataset_id)
   end
+=end
 
   #datasets:head [INPUT_URL] [NUM_ROWS] [DATASET_NAME]
   #

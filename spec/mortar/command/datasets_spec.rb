@@ -29,14 +29,15 @@ module Mortar::Command
 
       it "errors when missing command" do
         with_git_initialized_project do |p|
-          stderr, stdout = execute("datasets:sample s3n://tbmmsd/*.tsv.* 0.001", p)
+          stderr, stdout = execute("datasets:head s3n://tbmmsd/*.tsv.* 5", p)
           stderr.should == <<-STDERR
- !    Usage: mortar datasets:sample INPUT_URL PERCENT_TO_RETURN DATASET_NAME
- !    Must specifiy INPUT_URL, PERCENT_TO_RETURN, and DATASET_NAME.
+ !    Usage: mortar datasets:head INPUT_URL NUM_ROWS DATASET_NAME
+ !    Must specifiy INPUT_URL, NUM_ROWS, and DATASET_NAME.
 STDERR
         end
       end
 
+=begin
       it "requests and reports on a successful datasets:sample" do
         with_git_initialized_project do |p|
           dataset_id = "12345abcde"
@@ -61,6 +62,7 @@ STDERR
 
         end
       end
+=end
 
       it "requests and reports on a successful datasets:head" do
         with_git_initialized_project do |p|
