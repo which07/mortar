@@ -65,7 +65,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   #
   #Examples:
   #
-  # $ mortar jobs:run --clustersize 3 geenrate_regression_model_coefficients
+  # $ mortar jobs:run --clustersize 3 generate_regression_model_coefficients
   # 
   #Taking code snapshot... done
   #Sending code snapshot to Mortar... done
