@@ -24,14 +24,6 @@ class Mortar::Command::Clusters < Mortar::Command::Base
   #
   # Display running and recently terminated clusters.
   #
-  #Examples:
-  #
-  # $ mortar clusters
-  # 
-  #cluster_id                Size (# of Nodes)  Status    Type         Start Timestamp  Elapsed Time
-  #------------------------  -----------------  --------  -----------  ---------------  ------------
-  #5023ca3ce0c222b7caaa546a                  3  Starting  Multi - Job                   
-  #
   def index
     validate_arguments!
     

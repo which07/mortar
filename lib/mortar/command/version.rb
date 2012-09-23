@@ -28,11 +28,6 @@ class Mortar::Command::Version < Mortar::Command::Base
   #
   # show mortar client version
   #
-  #Example:
-  #
-  # $ mortar version
-  # mortar/1.2.3 (x86_64-darwin11.4.2) ruby/1.9.3
-  #
   def index
     validate_arguments!
 

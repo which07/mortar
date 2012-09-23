@@ -31,17 +31,9 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
   # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
   #
   # Examples:
-  #
-  # $ mortar illustrate generate_regression_model_coefficients songs_sample
-  # 
-  #Taking code snapshot... done
-  #Sending code snapshot to Mortar... done
-  #Starting illustrate... done
-  #
-  #Status: Success  
-  #
-  #Results available at https://hawk.mortardata.com/illustrates/2000ce2f421aa909680000af
-  #Opening web browser to show results... done
+  #  
+  #     Illustrate the songs_sample relation in the generate_regression_model_coefficients script.
+  #         $ mortar illustrate generate_regression_model_coefficients songs_sample
   def index
     pigscript_name = shift_argument
     alias_name = shift_argument
