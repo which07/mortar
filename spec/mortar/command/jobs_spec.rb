@@ -28,6 +28,14 @@ module Mortar::Command
     end
         
     context("index") do
+      it "shows help when user adds help argument" do
+        with_git_initialized_project do |p|
+          stderr_dash_h, stdout_dash_h = execute("jobs -h", p, @git) 
+          stderr_help, stdout_help = execute("jobs help", p, @git)
+          stdout_dash_h.should == stdout_help
+          stderr_dash_h.should == stderr_help
+        end
+      end
     end
     
     context("run") do
