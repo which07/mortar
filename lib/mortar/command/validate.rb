@@ -33,18 +33,6 @@ class Mortar::Command::Validate < Mortar::Command::Base
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
   # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
   #
-  # Examples:
-  #
-  # $ mortar validate generate_regression_model_coefficients
-  # 
-  #Taking code snapshot... done
-  #Sending code snapshot to Mortar... done
-  #Starting validate... done
-  #
-  #Status: Success  
-  #
-  #Your script is valid.
-  #
   def index
     pigscript_name = shift_argument
     unless pigscript_name

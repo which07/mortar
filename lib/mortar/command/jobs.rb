@@ -33,13 +33,11 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   #
   # Examples:
   #
-  # $ mortar jobs -l 2
-  # 
-  #job_id                    script                 status   start_date                           elapsed_time  cluster_size  cluster_id
-  #------------------------  ---------------------  -------  -----------------------------------  ------------  ------------  ------------------------
-  #2000cbbba40a860a6f000000  rollup: mock_expanded  Success  Friday, August 31, 2012, 10:40 AM    2 mins                   3  2000cc3cb0c635b7cbff5aaa
-  #20009deca40a866cd5000000  rollup: mock_expanded  Stopped  Thursday, August 30, 2012,  1:08 PM  < 1 min                  2  2000857ae4b0dd5573da35aa
+  #     List the last 20 jobs:
+  #          $ mortar jobs -l 20
   def index
+    validate_arguments!
+
     options[:limit] ||= '10'
     options[:skip] ||= '0'
     jobs = api.get_jobs(options[:skip], options[:limit]).body['jobs']
@@ -65,20 +63,8 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   #
   #Examples:
   #
-  # $ mortar jobs:run --clustersize 3 generate_regression_model_coefficients
-  # 
-  #Taking code snapshot... done
-  #Sending code snapshot to Mortar... done
-  #Requesting job execution... done
-  #job_id: 2000cbbba40a860a6f000000
-  #
-  #Job status can be viewed on the web at:
-  #
-  #https://hawk.mortardata.com/jobs/job_detail?job_id=2000cbbba40a860a6f000000
-  #
-  #Or by running:
-  #
-  #mortar jobs:status 2000cbbba40a860a6f000000
+  #    Run the generate_regression_model_coefficients script on a 3 node cluster.
+  #        $ mortar jobs:run generate_regression_model_coefficients --clustersize 3
   def run
     # arguemnts
     pigscript_name = shift_argument
@@ -98,9 +84,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
         end
       end
     end
-
-
-        
+ 
     validate_git_based_project!
     pigscript = validate_pigscript!(pigscript_name)
     git_ref = create_and_push_snapshot_branch(git, project)
@@ -137,15 +121,6 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   #
   # -p, --poll      # Poll the status of a job
   #
-  #
-  #Examples:
-  #
-  # $ mortar jobs:status 2000cbbba40a860a6f000000
-  #
-  #=== songhotness: generate_regression_model_coefficients (job_id: 2000cbbba40a860a6f000000)
-  #hadoop jobs complete:    0.00 / 1.00
-  #progress:                0%
-  #status:                  Starting Cluster
   def status
     job_id = shift_argument
     unless job_id
@@ -232,11 +207,6 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   #
   # Stop a running job.
   #
-  #Examples:
-  #
-  # $ mortar jobs:stop 2000cbbba40a860a6f000000
-  #
-  #Stopping job 2000cbbba40a860a6f000000
   def stop
     job_id = shift_argument
     unless job_id

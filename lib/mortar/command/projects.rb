@@ -23,15 +23,6 @@ class Mortar::Command::Projects < Mortar::Command::Base
   # projects
   #
   # Display the available set of projects
-  #
-  #Examples:
-  #
-  # $ mortar projects
-  # 
-  #=== projects
-  #demo
-  #rollup
-  #
   def index
     validate_arguments!
     projects = api.get_projects().body["projects"]
@@ -46,11 +37,6 @@ class Mortar::Command::Projects < Mortar::Command::Base
   # projects:create PROJECT
   #
   # create a mortar project for the current directory with the name PROJECT
-  #
-  #Example:
-  #
-  # $ mortar projects:create my_new_project
-  #
   def create
     name = shift_argument
     unless name
@@ -110,10 +96,6 @@ class Mortar::Command::Projects < Mortar::Command::Base
   #
   # Adds the Mortar remote to the local git project. This is necessary for successfully executing many of the Mortar commands.
   #
-  #Example:
-  #
-  # $ mortar projects:set_remote my_project
-  #
   def set_remote
     project_name = shift_argument
 
@@ -144,10 +126,6 @@ class Mortar::Command::Projects < Mortar::Command::Base
   # projects:clone PROJECT
   #
   # clone the mortar project PROJECT into the current directory.
-  #
-  #Example:
-  #
-  # $ mortar projects:clone my_new_project
   #
   def clone
     name = shift_argument

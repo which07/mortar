@@ -278,6 +278,7 @@ STASH
       
     end
     
+=begin
     context "clone" do
       it "clones repo successfully" do
         with_no_git_directory do
@@ -288,7 +289,7 @@ STASH
           lambda { @git.git("--version") }.should_not raise_error
         end
       end
-      
     end
+=end
   end
 end

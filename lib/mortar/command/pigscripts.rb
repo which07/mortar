@@ -23,15 +23,6 @@ class Mortar::Command::PigScripts < Mortar::Command::Base
   # pigscripts
   #
   # Display the available set of pigscripts
-  #
-  #Examples:
-  #
-  # $ mortar pigscripts
-  # 
-  #=== pigscripts
-  #hourly_top_searchers
-  #user_engagement
-  #
   def index
     # validation
     validate_arguments!
