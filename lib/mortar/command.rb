@@ -227,6 +227,8 @@ module Mortar
       error extract_error(e.response.body) {
         e.response.body =~ /^([\w\s]+ not found).?$/ ? $1 : e.message # "Resource not found"
       }
+    rescue Mortar::Git::GitError => e
+      error e.message
     rescue Mortar::Project::ProjectError => e
       error e.message
     rescue Mortar::API::Errors::Timeout
