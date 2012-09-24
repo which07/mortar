@@ -32,7 +32,6 @@ module Mortar
           
           copy_file "README.md", "README.md"
           copy_file "gitignore", ".gitignore"
-          copy_file "Gemfile", "Gemfile"
           
           mkdir "pigscripts"
           
@@ -55,18 +54,6 @@ module Mortar
             end
           end
           
-          display_run("bundle install")
-          #First verify that we can cd into the project dir. 
-          #The directory change isn't persisted outside of this system command.
-          output = `cd #{project_name}`
-          unless $?.exitstatus == 0
-            raise  Mortar::Command::CommandFailed, output
-          end
-
-          output = `cd #{project_name} && bundle install`
-          unless $?.exitstatus == 0
-            raise  Mortar::Command::CommandFailed, output
-          end
         rescue => e 
           #If we can't set up the project correctly and the project folder
           #didn't exist before - remove it.
