@@ -124,6 +124,7 @@ module Mortar
     global_option :help,    "--help", "-h"
     global_option :remote,  "--remote REMOTE"
     global_option :polling_interval, "--polling_interval SECONDS", "-p"
+    global_option :no_browser, "--no_browser"
 
     def self.prepare_run(cmd, args=[])
       command = parse(cmd)
