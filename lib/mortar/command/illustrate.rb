@@ -29,6 +29,7 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
   #
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
   # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
+  # --no_browser                # Don't open the illustrate results automatically in the browser.
   #
   # Examples:
   #  
@@ -84,9 +85,12 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
     when Mortar::API::Illustrate::STATUS_SUCCESS
       web_result_url = illustrate_result['web_result_url']
       display("Results available at #{web_result_url}")
-      action("Opening web browser to show results") do
-        require "launchy"
-        Launchy.open(web_result_url).join
+
+      unless no_browser?
+        action("Opening web browser to show results") do
+          require "launchy"
+          Launchy.open(web_result_url).join
+        end
       end
     else
       raise RuntimeError, "Unknown illustrate status: #{illustrate_result['status_code']} for illustrate_id: #{illustrate_id}"
