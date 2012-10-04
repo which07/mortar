@@ -15,6 +15,7 @@
 #
 
 require "spec_helper"
+require "mortar/generators/generator_base"
 require "mortar/command/generate"
 require "fileutils"
 require "tmpdir"
@@ -34,20 +35,45 @@ describe Mortar::Command::Generate do
       File.exists?("Test/pigscripts").should be_true
       File.exists?("Test/udfs").should be_true
       File.exists?("Test/README.md").should be_true
-      File.exists?("Test/Gemfile").should be_true
-      #File.exists?("Test/Gemfile.lock").should be_true
+      File.exists?("Test/Gemfile").should be_false
       File.exists?("Test/macros/.gitkeep").should be_true
       File.exists?("Test/pigscripts/Test.pig").should be_true
       File.exists?("Test/udfs/python/Test.py").should be_true
 
       File.read("Test/pigscripts/Test.pig").each_line { |line| line.match(/<%.*%>/).should be_nil }
     end
+
     it "error when name isn't provided" do
       stderr, stdout = execute("generate:project")
       stderr.should == <<-STDERR
  !    Usage: mortar new PROJECTNAME
  !    Must specify PROJECTNAME.
 STDERR
+    end
+
+    it 'removes project directory when generate:project fails' do
+      any_instance_of(Mortar::Generators::Base) do |base|
+        stub(base).copy_file { raise Mortar::Command::CommandFailed, 'Bad Copy'}
+      end
+      begin
+        stderr, stdout = execute("generate:project Test")
+      rescue => e
+        e.message.should == 'Bad Copy'
+      end
+      File.exists?("Test").should be_false
+    end
+
+    it 'does not remove pre-existing project directory when generate:project fails' do
+      FileUtils.mkdir("Test")
+      any_instance_of(Mortar::Generators::Base) do |base|
+        stub(base).copy_file { raise Mortar::Command::CommandFailed, 'Bad Copy'}
+      end
+      begin
+        stderr, stdout = execute("generate:project Test")
+      rescue => e
+        e.message.should == 'Bad Copy'
+      end
+      File.exists?("Test").should be_true
     end
   end
 
@@ -59,8 +85,7 @@ STDERR
       File.exists?("Test/pigscripts").should be_true
       File.exists?("Test/udfs").should be_true
       File.exists?("Test/README.md").should be_true
-      File.exists?("Test/Gemfile").should be_true
-      #File.exists?("Test/Gemfile.lock").should be_true
+      File.exists?("Test/Gemfile").should be_false
       File.exists?("Test/macros/.gitkeep").should be_true
       File.exists?("Test/pigscripts/Test.pig").should be_true
       File.exists?("Test/udfs/python/Test.py").should be_true

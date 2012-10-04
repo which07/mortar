@@ -22,36 +22,47 @@ module Mortar
       def generate_project(project_name, options)
 
         set_script_binding(project_name, options)
-        mkdir project_name, :verbose => false
-        @dest_path = File.join(@dest_path, project_name)
-        
-        copy_file "README.md", "README.md"
-        copy_file "gitignore", ".gitignore"
-        copy_file "Gemfile", "Gemfile"
-        
-        mkdir "pigscripts"
-        
-        inside "pigscripts" do
-          generate_file "pigscript.pig", "#{project_name}.pig"
-        end
-        
-        mkdir "macros"
-        
-        inside "macros" do
-          copy_file "gitkeep", ".gitkeep"
-        end
-        
-        mkdir "udfs"
-        
-        inside "udfs" do
-          mkdir "python"
-          inside "python" do
-            copy_file "python_udf.py", "#{project_name}.py"
+        #TODO: This needs refactoring.  Too many side effects and unnecessary
+        #complexity.  Just manage the directory structure explicitly.
+        project_path = File.join(@dest_path, project_name)
+        project_already_existed = File.exists?(project_path)
+        begin
+          mkdir project_name, :verbose => false
+          @dest_path = File.join(@dest_path, project_name)
+          
+          copy_file "README.md", "README.md"
+          copy_file "gitignore", ".gitignore"
+          
+          mkdir "pigscripts"
+          
+          inside "pigscripts" do
+            generate_file "pigscript.pig", "#{project_name}.pig"
           end
+          
+          mkdir "macros"
+          
+          inside "macros" do
+            copy_file "gitkeep", ".gitkeep"
+          end
+          
+          mkdir "udfs"
+          
+          inside "udfs" do
+            mkdir "python"
+            inside "python" do
+              copy_file "python_udf.py", "#{project_name}.py"
+            end
+          end
+          
+        rescue => e 
+          #If we can't set up the project correctly and the project folder
+          #didn't exist before - remove it.
+          unless project_already_existed or not File.exists?(project_path)
+            display("\nProject creation failed.  Removing generated files.\n")
+            FileUtils.remove_dir project_path
+          end
+          raise e
         end
-        
-        display_run("bundle install")
-        `cd #{project_name} && bundle install && cd ..`
 
       end
 

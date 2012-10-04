@@ -28,23 +28,6 @@ class Mortar::Command::Generate < Mortar::Command::Base
   #
   # Generate the files and directory structure necessary for a Mortar project.
   # 
-  #
-  # Examples:
-  #
-  # $ mortar generate:project
-  # 
-  #create  README.md
-  #create  .gitignore
-  #create  Gemfile
-  #create  pigscripts
-  #create  pigscripts/my_new_project.pig
-  #create  macros
-  #create  macros/.gitkeep
-  #create  udfs
-  #create  udfs/python
-  #create  udfs/python/my_new_project.py
-  #   run  bundle install
-  # 
   def _project
     project_name = shift_argument
     unless project_name
@@ -58,17 +41,9 @@ class Mortar::Command::Generate < Mortar::Command::Base
   alias_command "generate:project", "generate:_project"
 
 
-
   # generate:python_udf [UDFNAME]
   #
   # Generate a new python user defined function
-  # 
-  #
-  # Examples:
-  #
-  # $ mortar generate:python_udf my_new_udf
-  # 
-  #create  udfs/python/my_new_udf.py
   # 
   def python_udf
     udf_name = shift_argument
@@ -77,7 +52,6 @@ class Mortar::Command::Generate < Mortar::Command::Base
     end
     udf_generator = Mortar::Generators::UDFGenerator.new
     udf_generator.generate_python_udf(udf_name, project, options)
-
   end
 
   # generate:pigscript [SCRIPTNAME]
@@ -86,13 +60,6 @@ class Mortar::Command::Generate < Mortar::Command::Base
   #
   # --skip-udf # Create the pig script without a partnered python udf 
   #
-  # Examples:
-  #
-  # $ mortar generate:pigscript my_new_pigscript
-  # 
-  #create  pigscripts/my_new_pigscript.pig
-  #create  udfs/python/my_new_pigscript.py
-  # 
   def pigscript
     script_name = shift_argument
     unless script_name
@@ -102,20 +69,12 @@ class Mortar::Command::Generate < Mortar::Command::Base
     
     script_generator = Mortar::Generators::PigscriptGenerator.new
     script_generator.generate_pigscript(script_name, project, options)
-
   end
 
   # generate:macro [MACRONAME]
   #
   # Generate a new pig macro.
   #
-  #
-  # Examples:
-  #
-  # $ mortar generate:macro my_new_macro
-  # 
-  #create  macros/my_new_macro.pig
-  # 
   def macro
     macro_name = shift_argument
     unless macro_name
@@ -124,9 +83,6 @@ class Mortar::Command::Generate < Mortar::Command::Base
     
     macro_generator = Mortar::Generators::MacroGenerator.new
     macro_generator.generate_macro(macro_name, project, options)
-
   end
 
-
-  
 end

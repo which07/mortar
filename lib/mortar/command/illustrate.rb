@@ -29,19 +29,12 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
   #
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
   # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
+  # --no_browser                # Don't open the illustrate results automatically in the browser.
   #
   # Examples:
-  #
-  # $ mortar illustrate generate_regression_model_coefficients songs_sample
-  # 
-  #Taking code snapshot... done
-  #Sending code snapshot to Mortar... done
-  #Starting illustrate... done
-  #
-  #Status: Success  
-  #
-  #Results available at https://hawk.mortardata.com/illustrates/2000ce2f421aa909680000af
-  #Opening web browser to show results... done
+  #  
+  #     Illustrate the songs_sample relation in the generate_regression_model_coefficients script.
+  #         $ mortar illustrate generate_regression_model_coefficients songs_sample
   def index
     pigscript_name = shift_argument
     alias_name = shift_argument
@@ -92,9 +85,12 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
     when Mortar::API::Illustrate::STATUS_SUCCESS
       web_result_url = illustrate_result['web_result_url']
       display("Results available at #{web_result_url}")
-      action("Opening web browser to show results") do
-        require "launchy"
-        Launchy.open(web_result_url).join
+
+      unless no_browser?
+        action("Opening web browser to show results") do
+          require "launchy"
+          Launchy.open(web_result_url).join
+        end
       end
     else
       raise RuntimeError, "Unknown illustrate status: #{illustrate_result['status_code']} for illustrate_id: #{illustrate_id}"

@@ -124,6 +124,7 @@ module Mortar
     global_option :help,    "--help", "-h"
     global_option :remote,  "--remote REMOTE"
     global_option :polling_interval, "--polling_interval SECONDS", "-p"
+    global_option :no_browser, "--no_browser"
 
     def self.prepare_run(cmd, args=[])
       command = parse(cmd)
@@ -226,6 +227,8 @@ module Mortar
       error extract_error(e.response.body) {
         e.response.body =~ /^([\w\s]+ not found).?$/ ? $1 : e.message # "Resource not found"
       }
+    rescue Mortar::Git::GitError => e
+      error e.message
     rescue Mortar::Project::ProjectError => e
       error e.message
     rescue Mortar::API::Errors::Timeout

@@ -31,17 +31,8 @@ class Mortar::Command::Help < Mortar::Command::Base
   #
   #Examples:
   #
-  # $ mortar help
-  # Usage: mortar COMMAND [command-specific-options]
-  #
-  # Primary help topics, type "mortar help TOPIC" for more details:
-  #
-  #   ...
-  #
-  # Additional topics:
-  #
-  #   ...
-  #
+  #    Get help about mortar illustrate command.
+  #        $ mortar help llustrate
   def index
     if command = args.shift
       help_for_command(command)

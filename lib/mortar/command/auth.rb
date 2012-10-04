@@ -27,14 +27,6 @@ class Mortar::Command::Auth < Mortar::Command::Base
   #
   # log in with your mortar credentials
   #
-  #Example:
-  #
-  # $ mortar auth:login
-  # Enter your Mortar credentials:
-  # Email: email@example.com
-  # Password (typing will be hidden):
-  # Authentication successful.
-  #
   def login
     validate_arguments!
 
@@ -47,11 +39,6 @@ class Mortar::Command::Auth < Mortar::Command::Base
   # auth:logout
   #
   # clear local authentication credentials
-  #
-  #Example:
-  #
-  # $ mortar auth:logout
-  # Local credentials cleared.
   #
   def logout
     validate_arguments!
@@ -66,11 +53,6 @@ class Mortar::Command::Auth < Mortar::Command::Base
   #
   # display your api key
   #
-  #Example:
-  #
-  # $ mortar auth:key
-  # ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCD
-  #
   def key
     validate_arguments!
   
@@ -80,11 +62,6 @@ class Mortar::Command::Auth < Mortar::Command::Base
   # auth:whoami
   #
   # display your mortar email address
-  #
-  #Example:
-  #
-  # $ mortar auth:whoami
-  # email@example.com
   #
   def whoami
     validate_arguments!
