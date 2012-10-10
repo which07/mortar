@@ -66,8 +66,8 @@ module Mortar
         path
       end
 
-      def datasets_path
-        path = File.join(@root_path, "datasets")
+      def fixtures_path
+        path = File.join(@root_path, "fixtures")
       end
     end
     
