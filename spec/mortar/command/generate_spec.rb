@@ -32,11 +32,13 @@ describe Mortar::Command::Generate do
       stderr, stdout = execute("generate:project Test")
       File.exists?("Test").should be_true
       File.exists?("Test/macros").should be_true
+      File.exists?("Test/fixtures").should be_true
       File.exists?("Test/pigscripts").should be_true
       File.exists?("Test/udfs").should be_true
       File.exists?("Test/README.md").should be_true
       File.exists?("Test/Gemfile").should be_false
       File.exists?("Test/macros/.gitkeep").should be_true
+      File.exists?("Test/fixtures/.gitkeep").should be_true
       File.exists?("Test/pigscripts/Test.pig").should be_true
       File.exists?("Test/udfs/python/Test.py").should be_true
 
@@ -82,11 +84,13 @@ STDERR
       stderr, stdout = execute("new Test")
       File.exists?("Test").should be_true
       File.exists?("Test/macros").should be_true
+      File.exists?("Test/fixtures").should be_true
       File.exists?("Test/pigscripts").should be_true
       File.exists?("Test/udfs").should be_true
       File.exists?("Test/README.md").should be_true
       File.exists?("Test/Gemfile").should be_false
       File.exists?("Test/macros/.gitkeep").should be_true
+      File.exists?("Test/fixtures/.gitkeep").should be_true
       File.exists?("Test/pigscripts/Test.pig").should be_true
       File.exists?("Test/udfs/python/Test.py").should be_true
 
