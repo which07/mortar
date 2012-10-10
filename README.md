@@ -1,36 +1,31 @@
-# Mortar CLI
+# Mortar Development Framework
 
-The Mortar CLI lets you run Hadoop jobs on the Mortar service.
+Mortar is a platform as a service for Hadoop. With Mortar, you can run jobs on Hadoop using Apache Pig and Python without any special training.
+
+The Mortar Development Framework lets you develop Mortar Hadoop jobs directly on your local computer without installing any Hadoop libraries.  Lots more info can be found on the [Mortar help site](http://help.mortardata.com).  
 
 # Setup
 
-## Ruby
-
-First, install [rvm](https://rvm.io/rvm/install/).
-
-        curl -kL https://get.rvm.io | bash -s stable
-        
-Afterward, add the line recommended by rvm to your bash initialization file.
-
-Then, switch to the directory where you've cloned mortar.  If you don't have the right version of Ruby installed, you will be prompted to upgrade via rvm.
-
 ## Dependencies
 
-Install required gems:
+* [Git](http://git-scm.com/downloads) 1.7.7 or later
+* [Ruby](http://www.ruby-lang.org/en/downloads/) 1.8.7 or later
+* [Gem](https://rubygems.org/pages/download) (included with Ruby 1.9.2+)
 
-        bundle install
+## Installation
 
-# Running
+    gem install mortar
 
-You can run the command line through bundle:
+# Development
 
-        bundle exec mortar <command> <args>
-        
-        # example
-        bundle exec mortar help
+To develop on the gem, install the bundle, and then use bundle exec to run mortar:
 
-# Testing
+    gem install bundler
+    bundle install
+    bundle exec mortar <command> <args>
 
-To run the tests, do:
+# Tests
 
-        rake spec
+You can run all the RSpec tests with rake:
+
+    rake spec
