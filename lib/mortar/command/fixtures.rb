@@ -113,13 +113,15 @@ class Mortar::Command::Fixtures < Mortar::Command::Base
         is_finished) # only display newline on last message
       if is_finished
         display
-        break
+         break
       end
     end
 
     case fixture_result['status_code']
     when Mortar::API::Fixtures::STATUS_FAILED
-      error_message = "TODO: Write error message"
+      error_message = "Fixture generation failed with #{fixture_result['error_type'] || 'error'}"
+      error_context = get_error_message_context(fixture_result['error_message'] || "")
+      error_message += ":\n\n#{fixture_result['error_message']}\n\n#{error_context}"
       error(error_message)
     when Mortar::API::Fixtures::STATUS_CREATED
       fixture_result['sample_s3_urls'].each do |u|

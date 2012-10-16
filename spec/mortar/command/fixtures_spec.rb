@@ -97,6 +97,46 @@ STDOUT
         end
       end
 
+      it "requests and reports on a failed fixtures:head" do
+        with_git_initialized_project do |p|
+          fixture_id = "12345abcde"
+          name = "My_pet_fixture"
+          url = "s3://my_pet_fixture"
+          num_rows = "60"
+
+          sample_s3_urls = [ {'url' => "url1",
+                              'name' => "url1_name"}]
+
+          mock(Mortar::Auth.api).post_fixture_limit(p.name, name, url, num_rows) {Excon::Response.new(:body => {"fixture_id" => fixture_id})}
+          mock(Mortar::Auth.api).get_fixture(fixture_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Fixtures::STATUS_PENDING, "status_description" => "Pending"})).ordered
+          mock(Mortar::Auth.api).get_fixture(fixture_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Fixtures::STATUS_CREATING, "status_description" => "Creating"})).ordered
+          mock(Mortar::Auth.api).get_fixture(fixture_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Fixtures::STATUS_SAVING, "status_description" => "Uploading"})).ordered
+          mock(Mortar::Auth.api).get_fixture(fixture_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Fixtures::STATUS_FAILED, 
+            "status_description" => "Failed", 
+            "name" => name,
+            "error_message" => "This is an error message.",
+            "error_type" => "UserError" })).ordered
+
+          stderr, stdout = execute("fixtures:head #{url} #{num_rows} #{name} --polling_interval 0.05")
+
+          stdout.should == <<-STDOUT
+WARNING: Creating fixtures with more than 50 rows is not recommended.  Large local fixtures may cause slowness when using Mortar.
+
+Requesting fixture creation... done
+
+\r\e[0KStatus: Pending... /\r\e[0KStatus: Creating... -\r\e[0KStatus: Uploading... \\\r\e[0KStatus: Failed \n
+STDOUT
+
+stderr.should == <<-STDERR
+ !    Fixture generation failed with UserError:
+ !    
+ !    This is an error message.
+STDERR
+
+        end
+      end
+
+
       it "tries to create a fixture in an existing directory" do
         with_git_initialized_project do |p|
           fixture_id = "12345abcde"
@@ -114,6 +154,8 @@ STDOUT
 STDERR
         end
       end
+
+
     
     end
   end
