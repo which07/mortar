@@ -37,33 +37,6 @@ STDERR
         end
       end
 
-=begin
-      it "requests and reports on a successful fixtures:sample" do
-        with_git_initialized_project do |p|
-          fixture_id = "12345abcde"
-          name = "My_pet_fixture"
-          url = "s3://my_pet_fixture"
-          pct = "0.1"
-
-          sample_s3_urls = [ {'url' => "url1",
-                              'name' => "url1_name"}]
-
-          mock(Mortar::Auth.api).post_fixture_sample(p.name, name, url, pct) {Excon::Response.new(:body => {"fixture_id" => fixture_id})}
-          mock(Mortar::Auth.api).get_fixture(fixture_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Fixtures::STATUS_PENDING, "status_description" => "Pending"})).ordered
-          mock(Mortar::Auth.api).get_fixture(fixture_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Fixtures::STATUS_CREATING, "status_description" => "Creating"})).ordered
-          mock(Mortar::Auth.api).get_fixture(fixture_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Fixtures::STATUS_SAVING, "status_description" => "Uploading"})).ordered
-          mock(Mortar::Auth.api).get_fixture(fixture_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Fixtures::STATUS_CREATED, "status_description" => "Success", "name" => name, "sample_s3_urls" => sample_s3_urls})).ordered
-
-          any_instance_of(Mortar::Command::Fixtures) do |base|
-            mock(base).download_to_file(sample_s3_urls[0]['url'], "fixtures/#{name}/#{sample_s3_urls[0]['name']}")
-          end
-
-          stderr, stdout = execute("fixtures:sample #{url} #{pct} #{name} --polling_interval 0.05")
-
-        end
-      end
-=end
-
       it "requests and reports on a successful fixtures:head" do
         with_git_initialized_project do |p|
           fixture_id = "12345abcde"

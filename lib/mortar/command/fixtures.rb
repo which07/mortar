@@ -22,39 +22,6 @@ class Mortar::Command::Fixtures < Mortar::Command::Base
 
   WARNING_NUM_ROWS = 50
 
-=begin
-  #fixtures:sample [INPUT_URL] [PERCENT_TO_RETURN] [FIXTURE_NAME]
-  #
-  #Create a reusable fixture [FIXTURE_NAME] made up of [PERCENT_TO_RETURN]
-  #percent of rows from the input file(s) at [INPUT_URL].
-  #
-  # Examples:
-  #
-  # $ mortar fixtures:sample s3n://tbmmsd/*.tsv.* 0.001 samll_song_sample
-  #
-  # TBD
-  def sample
-    input_url = shift_argument
-    sample_percent = shift_argument
-    fixture_name = shift_argument
-    unless input_url && sample_percent && fixture_name
-      error("Usage: mortar fixtures:sample INPUT_URL PERCENT_TO_RETURN FIXTURE_NAME\nMust specifiy INPUT_URL, PERCENT_TO_RETURN, and FIXTURE_NAME.")
-    end
-    if does_fixture_exist(fixture_name)
-      error("Fixture #{fixture_name} already exists.")
-    end
-    validate_arguments!
-    validate_git_based_project!
-
-    fixture_id = nil
-    action("Requesting fixture creation") do
-      fixture_id = api.post_fixture_sample(project.name, fixture_name, input_url, sample_percent).body['fixture_id']
-    end
-
-    poll_for_fixture_results(fixture_id)
-  end
-=end
-
   #fixtures:head [INPUT_URL] [NUM_ROWS] [FIXTURE_NAME]
   #
   #Create a reusable fixture [FIXTURE_NAME] made up of [NUM_ROWS]
