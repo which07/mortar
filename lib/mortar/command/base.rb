@@ -310,6 +310,10 @@ protected
     (options[:polling_interval] || 2.0).to_f
   end
 
+  def no_browser?
+    (options[:no_browser])
+  end
+
 end
 
 module Mortar::Command
