@@ -31,7 +31,6 @@ class Mortar::Command::Fixtures < Mortar::Command::Base
   #
   # $ mortar fixtures:head s3n://tbmmsd/*.tsv.* 100 samll_song_sample
   #
-  # TBD
   def head
     input_url = shift_argument
     num_rows = shift_argument
