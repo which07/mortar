@@ -279,6 +279,8 @@ STASH
     end
     
 =begin
+    #TODO: Fix this.
+
     context "clone" do
       it "clones repo successfully" do
         with_no_git_directory do

@@ -65,6 +65,10 @@ module Mortar
         end
         path
       end
+
+      def fixtures_path
+        path = File.join(@root_path, "fixtures")
+      end
     end
     
     class ProjectEntity

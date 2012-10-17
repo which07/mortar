@@ -129,7 +129,6 @@ module Mortar
     def self.prepare_run(cmd, args=[])
       command = parse(cmd)
 
-
       if args.include?('-h') || args.include?('--help') || args.include?('help')
         args.unshift(cmd) unless cmd =~ /^-.*/
         cmd = 'help'
