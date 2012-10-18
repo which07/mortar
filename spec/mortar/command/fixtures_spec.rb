@@ -23,13 +23,14 @@ module Mortar::Command
   describe Fixtures do
     before(:each) do
       stub_core
+      @git = Mortar::Git::Git.new
     end
 
     context("index") do
 
       it "errors when missing command" do
         with_git_initialized_project do |p|
-          stderr, stdout = execute("fixtures:head s3n://tbmmsd/*.tsv.* 5", p)
+          stderr, stdout = execute("fixtures:head s3n://tbmmsd/*.tsv.* 5", p, @git)
           stderr.should == <<-STDERR
  !    Usage: mortar fixtures:head INPUT_URL NUM_ROWS FIXTURE_NAME
  !    Must specifiy INPUT_URL, NUM_ROWS, and FIXTURE_NAME.
@@ -57,7 +58,7 @@ STDERR
             mock(base).download_to_file(sample_s3_urls[0]['url'], "fixtures/#{name}/#{sample_s3_urls[0]['name']}")
           end
 
-          stderr, stdout = execute("fixtures:head #{url} #{num_rows} #{name} --polling_interval 0.05")
+          stderr, stdout = execute("fixtures:head #{url} #{num_rows} #{name} --polling_interval 0.05", p, @git)
 
           stdout.should == <<-STDOUT
 WARNING: Creating fixtures with more than 50 rows is not recommended.  Large local fixtures may cause slowness when using Mortar.
@@ -90,7 +91,7 @@ STDOUT
             "error_message" => "This is an error message.",
             "error_type" => "UserError" })).ordered
 
-          stderr, stdout = execute("fixtures:head #{url} #{num_rows} #{name} --polling_interval 0.05")
+          stderr, stdout = execute("fixtures:head #{url} #{num_rows} #{name} --polling_interval 0.05", p, @git)
 
           stdout.should == <<-STDOUT
 WARNING: Creating fixtures with more than 50 rows is not recommended.  Large local fixtures may cause slowness when using Mortar.
@@ -120,7 +121,7 @@ STDERR
           fixtures_dir = File.join(Dir.pwd, "fixtures", name)
           FileUtils.mkdir_p(fixtures_dir)
 
-          stderr, stdout = execute("fixtures:head #{url} #{num_rows} #{name} --polling_interval 0.05")
+          stderr, stdout = execute("fixtures:head #{url} #{num_rows} #{name} --polling_interval 0.05", p, @git)
 
           stderr.should == <<-STDERR
  !    Fixture #{name} already exists.
