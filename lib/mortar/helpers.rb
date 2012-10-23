@@ -358,7 +358,7 @@ module Mortar
         Mortar::Helpers.error_with_failure = false
       end
       $stderr.puts(" !    #{message}.")
-      $stderr.puts(" !    Search for help at: https://help.mortardata.com")
+      $stderr.puts(" !    Search for help at: http://help.mortardata.com")
       $stderr.puts(" !    Or report a bug at: https://github.com/mortardata/mortar/issues/new")
       $stderr.puts
       $stderr.puts("    Error:       #{error.message} (#{error.class})")
