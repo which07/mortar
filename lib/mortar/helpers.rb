@@ -19,6 +19,7 @@
 
 require 'fileutils'
 require "vendor/mortar/okjson"
+require "curb"
 
 module Mortar
   module Helpers
@@ -44,9 +45,26 @@ module Mortar
       File.open(path, "w"){|f| f.write(str_data)}
     end
 
+    def download_to_file(url, path, mkdir_p=true)
+      c = Curl::Easy.new(url)
+      c.on_progress {|dl_total, dl_now, ul_total, ul_now| redisplay("Downloading #{path}: #{dl_now.to_i} of #{dl_total.to_i}"); true }
+      c.perform
+      write_to_file(c.body_str, path, mkdir_p)
+    end
+
     def display(msg="", new_line=true)
       if new_line
         puts(msg)
+      else
+        print(msg)
+        $stdout.flush
+      end
+    end
+
+    def warning(msg="", new_line=true)
+      message = "WARNING: #{msg}"
+      if new_line
+        display(message)
       else
         print(msg)
         $stdout.flush
@@ -340,7 +358,7 @@ module Mortar
         Mortar::Helpers.error_with_failure = false
       end
       $stderr.puts(" !    #{message}.")
-      $stderr.puts(" !    Search for help at: https://help.mortardata.com")
+      $stderr.puts(" !    Search for help at: http://help.mortardata.com")
       $stderr.puts(" !    Or report a bug at: https://github.com/mortardata/mortar/issues/new")
       $stderr.puts
       $stderr.puts("    Error:       #{error.message} (#{error.class})")

@@ -419,7 +419,7 @@ STDOUT
             "parameters" => parameters,
             "outputs" => outputs
             }))
-          stderr, stdout = execute("jobs:status c571a8c7f76a4fd4a67c103d753e2dd5 -p", p, @git)
+          stderr, stdout = execute("jobs:status c571a8c7f76a4fd4a67c103d753e2dd5 -p --polling_interval 0.05", p, @git)
           stdout.should == <<-STDOUT
 \r[/] Status: [=>                    ] 0% Complete (0.00 / 4.00 MapReduce jobs finished)\r\e[0K=== myproject: my_script (job_id: c571a8c7f76a4fd4a67c103d753e2dd5)
 cluster_id:              e2790e7e8c7d48e39157238d58191346

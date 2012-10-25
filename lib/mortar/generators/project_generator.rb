@@ -44,6 +44,12 @@ module Mortar
           inside "macros" do
             copy_file "gitkeep", ".gitkeep"
           end
+
+          mkdir "fixtures"
+
+          inside "fixtures" do
+            copy_file "gitkeep", ".gitkeep"
+          end
           
           mkdir "udfs"
           

@@ -27,6 +27,7 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
   #
   # Illustrate the effects and output of a pigscript.
   #
+  # -s, --skippruning          # Don't try to reduce the illustrate results to the smallest size possible.
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
   # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
   # --no_browser                # Don't open the illustrate results automatically in the browser.
@@ -38,6 +39,7 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
   def index
     pigscript_name = shift_argument
     alias_name = shift_argument
+    skip_pruning = options[:skippruning] ||= false
     unless pigscript_name && alias_name
       error("Usage: mortar illustrate PIGSCRIPT ALIAS\nMust specify PIGSCRIPT and ALIAS.")
     end
@@ -48,7 +50,7 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
     
     illustrate_id = nil
     action("Starting illustrate") do
-      illustrate_id = api.post_illustrate(project.name, pigscript.name, alias_name, git_ref, :parameters => pig_parameters).body["illustrate_id"]
+      illustrate_id = api.post_illustrate(project.name, pigscript.name, alias_name, skip_pruning, git_ref, :parameters => pig_parameters).body["illustrate_id"]
     end
         
     illustrate_result = nil
