@@ -1,6 +1,6 @@
-# Mortar CLI
+# Mortar Development Framework
 
-The Mortar CLI lets you run Hadoop jobs on the Mortar service.
+The Mortar Development Framework lets you run Hadoop jobs on the Mortar service.
 
 # Setup
 
