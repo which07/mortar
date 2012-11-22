@@ -88,7 +88,7 @@ module Mortar
         end
         capture_stdout do
           Updater.update_check
-        end.should == "WARNING: There is a new Mortar client available.  Please run 'gem install mortar' to install the latest version.\n\n"
+        end.should == "WARNING: There is a new version of the Mortar development framework available.  Please run 'gem install mortar' to install the latest version.\n\n"
       end
     end
   end

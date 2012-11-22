@@ -45,7 +45,7 @@ module Mortar
       newest_version = self.get_newest_version
 
       if compare_versions(newest_version, local_version) > 0
-        Mortar::Helpers.warning("There is a new Mortar client available.  Please run 'gem install mortar' to install the latest version.\n\n")
+        Mortar::Helpers.warning("There is a new version of the Mortar development framework available.  Please run 'gem install mortar' to install the latest version.\n\n")
       end
     end
   end
