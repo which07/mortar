@@ -22,7 +22,6 @@ require 'mortar/helpers'
 require 'mortar/project'
 require 'mortar/version'
 require 'mortar/api'
-require 'mortar/updater'
 require "optparse"
 
 
