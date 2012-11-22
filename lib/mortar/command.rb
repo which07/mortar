@@ -212,7 +212,6 @@ module Mortar
     def self.run(cmd, arguments=[])
       begin
         object, method = prepare_run(cmd, arguments.dup)
-        Mortar::Updater.update_check
         object.send(method)
       rescue Interrupt, StandardError, SystemExit => error
         # load likely error classes, as they may not be loaded yet due to defered loads
