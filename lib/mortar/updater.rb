@@ -3,10 +3,13 @@ require 'mortar/version'
 
 module Mortar
   module Updater
+    CONNECT_TIMEOUT = 5
+    READ_TIMEOUT = 5
+
     def self.get_newest_version
       begin
         require "excon"
-        gem_data = Mortar::Helpers.json_decode(Excon.get('http://rubygems.org/api/v1/gems/mortar.json').body)
+        gem_data = Mortar::Helpers.json_decode(Excon.get('http://rubygems.org/api/v1/gems/mortar.json', {:connect_timeout => CONNECT_TIMEOUT, :read_timeout => READ_TIMEOUT}).body)
         gem_data.default = "0.0.0"
         gem_data['version']
       rescue Exception => e

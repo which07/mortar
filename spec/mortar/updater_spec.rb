@@ -45,21 +45,21 @@ module Mortar
 
     context "get ruby version" do
       it "makes gem call" do
-        Excon.stub({:method => :get, :path => "/api/v1/gems/mortar.json"}) do
+        Excon.stub({:method => :get, :path => "/api/v1/gems/mortar.json", :connect_timeout => Mortar::Updater::CONNECT_TIMEOUT, :read_timeout => Mortar::Updater::READ_TIMEOUT}) do
           {:body => Mortar::API::OkJson.encode({"version" => "1.0.0"}), :status => 200}
         end
         Updater.get_newest_version.should == "1.0.0"   
       end
 
       it "has no version field" do
-        Excon.stub({:method => :get, :path => "/api/v1/gems/mortar.json"}) do
+        Excon.stub({:method => :get, :path => "/api/v1/gems/mortar.json", :connect_timeout => Mortar::Updater::CONNECT_TIMEOUT, :read_timeout => Mortar::Updater::READ_TIMEOUT}) do
           {:body => Mortar::API::OkJson.encode({"no_version" => "none"}), :status => 200}
         end
         Updater.get_newest_version.should == "0.0.0"
       end
 
       it "has an exception" do
-        Excon.stub({:method => :get, :path => "/api/v1/gems/mortar.json"}) do
+        Excon.stub({:method => :get, :path => "/api/v1/gems/mortar.json", :connect_timeout => Mortar::Updater::CONNECT_TIMEOUT, :read_timeout => Mortar::Updater::READ_TIMEOUT}) do
           raise Exception
         end
         Updater.get_newest_version.should == "0.0.0"
@@ -68,7 +68,7 @@ module Mortar
 
     context "update check" do
       it "displays no message when we have a current version" do
-        Excon.stub({:method => :get, :path => "/api/v1/gems/mortar.json"}) do
+        Excon.stub({:method => :get, :path => "/api/v1/gems/mortar.json", :connect_timeout => Mortar::Updater::CONNECT_TIMEOUT, :read_timeout => Mortar::Updater::READ_TIMEOUT}) do
           {:body => Mortar::API::OkJson.encode({"version" => "1.0.0"}), :status => 200}
         end
         capture_stderr do
@@ -80,7 +80,7 @@ module Mortar
       end
 
       it "displays message when we have an outdated version" do
-        Excon.stub({:method => :get, :path => "/api/v1/gems/mortar.json"}) do
+        Excon.stub({:method => :get, :path => "/api/v1/gems/mortar.json", :connect_timeout => Mortar::Updater::CONNECT_TIMEOUT, :read_timeout => Mortar::Updater::READ_TIMEOUT}) do
           {:body => Mortar::API::OkJson.encode({"version" => "2.0.0"}), :status => 200}
         end
         capture_stderr do
