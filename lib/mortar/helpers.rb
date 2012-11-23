@@ -352,7 +352,7 @@ module Mortar
       display
     end
 
-    def styled_error(error, message='Mortar client internal error.')
+    def styled_error(error, message='Mortar Development Framework internal error.')
       if Mortar::Helpers.error_with_failure
         display("failed")
         Mortar::Helpers.error_with_failure = false
