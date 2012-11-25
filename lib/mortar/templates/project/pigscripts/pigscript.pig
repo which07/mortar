@@ -3,8 +3,8 @@
  *
  * Required parameters:
  *
- * -param INPUT_PATH Input path for script data (e.g. s3n://hawk-example-data/tutorial/excite.log.bz2)
- * -param OUTPUT_PATH Output path for script data (e.g. s3n://my-output-bucket/<%= project_name %>)
+ * - INPUT_PATH Input path for script data (e.g. s3n://hawk-example-data/tutorial/excite.log.bz2)
+ * - OUTPUT_PATH Output path for script data (e.g. s3n://my-output-bucket/<%= project_name %>)
  */
 
 /**
