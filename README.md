@@ -29,3 +29,7 @@ To develop on the gem, install the bundle, and then use bundle exec to run morta
 You can run all the RSpec tests with rake:
 
     rake spec
+
+To run tests for a single file using:
+
+    rspec path/to/test_file
