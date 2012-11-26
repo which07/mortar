@@ -3,5 +3,12 @@ rvm:
   - "1.8.7"
   - "1.9.2"
   - "1.9.3"
+notifications:
+    email: false
+    campfire:
+        on_success: change
+        on_failure: always
+        rooms:
+            - secure: "B5t84zHDbb8hUZ8mwPj4udJERnLO++F/V/NM9JhTJ+vl74UU3lMh3NpIUz/i\n83eiE5gvRU+LxIJ/brC4LNr6gqoOwa4D/64zXSYKPD65f7QD5mp33AvfRVMY\nsmRLcL9l4iNCncFGLs6zANbd3o3SK9zugbGt93sCfhsI5pg3Wtg="
 # uncomment this line if your project needs to run something other than `rake`:
 # script: bundle exec rspec spec
