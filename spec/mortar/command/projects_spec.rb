@@ -103,6 +103,9 @@ STDERR
         mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Projects::STATUS_CREATING})).ordered
         mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Projects::STATUS_ACTIVE,
                                                                                              "git_url" => project_git_url})).ordered
+        
+        mock(@git).has_dot_git?().returns(true)
+        mock(@git).remotes.with_any_args.returns({})
         mock(@git).remote_add("mortar", project_git_url)
 
         stderr, stdout = execute("projects:create #{project_name}  --polling_interval 0.05", nil, @git)
@@ -120,6 +123,9 @@ STDOUT
         mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status_description" => "Creating", "status_code" => Mortar::API::Projects::STATUS_CREATING})).ordered
         mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status_description" => "Active", "status_code" => Mortar::API::Projects::STATUS_ACTIVE,
                                                                                              "git_url" => project_git_url})).ordered
+
+        mock(@git).has_dot_git?().returns(true)
+        mock(@git).remotes.with_any_args.returns({})
         mock(@git).remote_add("mortar", project_git_url)
 
         stderr, stdout = execute("projects:create #{project_name}  --polling_interval 0.05", nil, @git)
