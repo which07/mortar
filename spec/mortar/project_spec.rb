@@ -15,14 +15,10 @@
 #
 
 require "spec_helper"
-require 'fakefs/spec_helpers'
 require "mortar/project"
 
 module Mortar
-  describe Project do
-    # use FakeFS file system
-    include FakeFS::SpecHelpers    
-    
+  describe Project do    
     context "tmp" do
       it "creates a tmp dir if one does not exist" do
         with_blank_project do |p|
