@@ -4,7 +4,7 @@ Mortar is a platform as a service for Hadoop. With Mortar, you can run jobs on H
 
 The Mortar Development Framework lets you develop Mortar Hadoop jobs directly on your local computer without installing any Hadoop libraries.  Lots more info can be found on the [Mortar help site](http://help.mortardata.com).  
 
-[![Build Status](https://travis-ci.org/mortardata/mortar.png?branch=master)](https://travis-ci.org/mortardata/mortar)
+[![Build Status](https://travis-ci.org/mortardata/mortar.png?branch=master)](https://travis-ci.org/mortardata/mortar) [![Dependency Status](https://gemnasium.com/mortardata/mortar.png)](https://gemnasium.com/mortardata/mortar)
 
 # Setup
 
