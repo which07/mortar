@@ -21,7 +21,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency  "launchy",         "~> 2.1.1"
   gem.add_runtime_dependency  "curb",            "~> 0.8.1"
 
-  gem.add_development_dependency "excon", '~>0.15.4'
+  gem.add_development_dependency "excon", '>=0.15.4'
   gem.add_development_dependency "fakefs"
   gem.add_development_dependency "gem-release"
   gem.add_development_dependency "rake"
