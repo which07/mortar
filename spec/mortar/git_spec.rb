@@ -26,13 +26,23 @@ module Mortar
     
     context "has_git?" do
       it "returns false with no git installed" do
-        mock(@git).run_cmd("git --version").returns("-bash: git: command not found")
+        mock(@git).run_cmd("git --version").returns(["-bash: git: command not found",-1])
         @git.has_git?.should be_false
       end
 
       it "returns false with unsupported git version" do
-        mock(@git).run_cmd("git --version").returns("git version 1.7.6")
+        mock(@git).run_cmd("git --version").returns(["git version 1.7.6",0])
         @git.has_git?.should be_false
+      end
+
+      it "returns true with supported git version 2.0.0" do
+        mock(@git).run_cmd("git --version").returns(["git version 2.0.0", 0])
+        @git.has_git?.should be_true
+      end
+
+      it "returns true with supported git version 1.8.0" do
+        mock(@git).run_cmd("git --version").returns(["git version 1.8.0", 0])
+        @git.has_git?.should be_true 
       end
 
       it "returns false with unsupported git version" do
