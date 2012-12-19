@@ -56,5 +56,28 @@ There are no running or recent clusters
 STDOUT
       end
     end
+    
+     context("stop") do
+        it "Stops a running cluster with default message" do
+          cluster_id = "1234abcd"
+          mock(Mortar::Auth.api).stop_cluster(cluster_id) {Excon::Response.new(:body => {"success" => true})}
+
+          stderr, stdout = execute("clusters:stop #{cluster_id}")
+          stdout.should == <<-STDOUT
+Stopping cluster #{cluster_id}.
+STDOUT
+      end
+
+        it "Stops a running cluster with server message" do
+          cluster_id = "1234abcd"
+          message = "some awesome message"
+          mock(Mortar::Auth.api).stop_cluster(cluster_id) {Excon::Response.new(:body => {"success" => true, "message" => message})}
+
+          stderr, stdout = execute("clusters:stop #{cluster_id}")
+          stdout.should == "#{message}\n"
+        end
+      end
+    
   end
+    
 end

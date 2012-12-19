@@ -37,4 +37,23 @@ class Mortar::Command::Clusters < Mortar::Command::Base
     end
     
   end
+  
+   # clusters: stop CLUSTER_ID
+   #
+   # Stop a running cluster.
+   #
+   def stop
+     cluster_id = shift_argument
+     unless cluster_id
+       error("Usage: mortar clusters:stop CLUSTER_ID\nMust specify CLUSTER_ID.")
+     end   
+         
+     response = api.stop_cluster(cluster_id) .body  
+
+     if response['message'].nil?
+        display("Stopping cluster #{cluster_id}.")
+     else
+       display(response['message'])
+     end
+   end
 end
