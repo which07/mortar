@@ -60,6 +60,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   # -1, --singlejobcluster      # Stop the cluster after job completes.  (Default: false—-cluster can be used for other jobs, and will shut down after 1 hour of inactivity)
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
   # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
+  # -d, --donotnotify           # Don't send an email on job completion.  (Default: false--an email will be sent to you once the job completes)
   #
   #Examples:
   #
@@ -88,6 +89,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     validate_git_based_project!
     pigscript = validate_pigscript!(pigscript_name)
     git_ref = create_and_push_snapshot_branch(git, project)
+    notify_on_job_finish = ! options[:donotnotify]
     
     # post job to API
     response = action("Requesting job execution") do
@@ -96,11 +98,13 @@ class Mortar::Command::Jobs < Mortar::Command::Base
         keepalive = ! options[:singlejobcluster]
         api.post_job_new_cluster(project.name, pigscript.name, git_ref, cluster_size, 
           :parameters => pig_parameters,
-          :keepalive => keepalive).body
+          :keepalive => keepalive,
+          :notify_on_job_finish => notify_on_job_finish).body
       else
         cluster_id = options[:clusterid]
         api.post_job_existing_cluster(project.name, pigscript.name, git_ref, cluster_id,
-          :parameters => pig_parameters).body
+          :parameters => pig_parameters,
+          :notify_on_job_finish => notify_on_job_finish).body
       end
     end
 
