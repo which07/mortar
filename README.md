@@ -1,6 +1,6 @@
 # Mortar Development Framework
 
-Mortar is a platform as a service for Hadoop. With Mortar, you can run jobs on Hadoop using Apache Pig and Python without any special training.
+[Mortar](http://www.mortardata.com/) is a platform as a service for Hadoop. With Mortar, you can run jobs on Hadoop using Apache Pig and Python without any special training.
 
 The Mortar Development Framework lets you develop Mortar Hadoop jobs directly on your local computer without installing any Hadoop libraries.  Lots more info can be found on the [Mortar help site](http://help.mortardata.com).  
 
