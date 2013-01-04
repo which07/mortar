@@ -48,7 +48,8 @@ module Mortar::Command
 
           mock(Mortar::Auth.api).post_job_new_cluster("myproject", "my_script", is_a(String), cluster_size, 
             :parameters => match_array([{"name" => "FIRST_PARAM", "value" => "FOO"}, {"name" => "SECOND_PARAM", "value" => "BAR"}]), 
-            :keepalive => false) {Excon::Response.new(:body => {"job_id" => job_id, "web_job_url" => job_url})}
+            :keepalive => false,
+            :notify_on_job_finish => true) {Excon::Response.new(:body => {"job_id" => job_id, "web_job_url" => job_url})}
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
           stderr, stdout = execute("jobs:run my_script -1 --clustersize 5 -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
@@ -79,7 +80,8 @@ STDOUT
 
           mock(Mortar::Auth.api).post_job_new_cluster("myproject", "my_script", is_a(String), cluster_size, 
             :parameters => match_array([{"name" => "FIRST_PARAM", "value" => "FOO"}, {"name" => "SECOND_PARAM", "value" => "BAR"}]), 
-            :keepalive => true) {Excon::Response.new(:body => {"job_id" => job_id, "web_job_url" => job_url})}
+            :keepalive => true,
+            :notify_on_job_finish => true) {Excon::Response.new(:body => {"job_id" => job_id, "web_job_url" => job_url})}
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
           stderr, stdout = execute("jobs:run my_script --clustersize 5 -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
@@ -108,10 +110,10 @@ STDOUT
           job_url = "http://127.0.0.1:5000/jobs/job_detail?job_id=c571a8c7f76a4fd4a67c103d753e2dd5"
           cluster_id = "e2790e7e8c7d48e39157238d58191346"
 
-          mock(Mortar::Auth.api).post_job_existing_cluster("myproject", "my_script", is_a(String), cluster_id, :parameters => []) {Excon::Response.new(:body => {"job_id" => job_id, "web_job_url" => job_url})}
+          mock(Mortar::Auth.api).post_job_existing_cluster("myproject", "my_script", is_a(String), cluster_id, :parameters => [], :notify_on_job_finish => false) {Excon::Response.new(:body => {"job_id" => job_id, "web_job_url" => job_url})}
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("jobs:run my_script --clusterid e2790e7e8c7d48e39157238d58191346", p, @git)
+          stderr, stdout = execute("jobs:run my_script --clusterid e2790e7e8c7d48e39157238d58191346 -d", p, @git)
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
@@ -138,7 +140,8 @@ STDOUT
 
           mock(Mortar::Auth.api).post_job_new_cluster("myproject", "my_script", is_a(String), cluster_size, 
             :parameters => match_array([{"name" => "FIRST", "value" => "FOO"}, {"name" => "SECOND", "value" => "BAR"}, {"name" => "THIRD", "value" => "BEAR\n"}]), 
-            :keepalive => true) {Excon::Response.new(:body => {"job_id" => job_id})}
+            :keepalive => true,
+            :notify_on_job_finish => true) {Excon::Response.new(:body => {"job_id" => job_id})}
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
 
@@ -162,7 +165,8 @@ PARAMS
 
           mock(Mortar::Auth.api).post_job_new_cluster("myproject", "my_script", is_a(String), cluster_size, 
             :parameters => match_array([{"name" => "FIRST", "value" => "FOO"}, {"name" => "SECOND", "value" => "BAR"}, {"name" => "THIRD", "value" => "BEAR\n"}]), 
-            :keepalive => true) {Excon::Response.new(:body => {"job_id" => job_id})}
+            :keepalive => true,
+            :notify_on_job_finish => true) {Excon::Response.new(:body => {"job_id" => job_id})}
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
 
