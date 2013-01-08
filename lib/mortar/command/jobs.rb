@@ -75,7 +75,8 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     validate_arguments!
 
     unless options[:clusterid] || options[:clustersize]
-      error("Please provide either the --clustersize option to run job on a new cluster, or --clusterid to run on an existing one.")
+      options[:clustersize] = 2
+      display("Defaulting to running job on new cluster of size 2")
     end
       
     if options[:clusterid]
