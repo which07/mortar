@@ -1,8 +1,9 @@
 /**
  * <%= project_name %>
- *
+ */
+ 
+/** 
  * Parameters - set default values here; you can override with -p on the command-line.
- *
  */
  
 <%= '%default'%> INPUT_PATH 's3n://hawk-example-data/tutorial/excite.log.bz2'
