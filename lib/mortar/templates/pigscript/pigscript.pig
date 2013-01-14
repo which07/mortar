@@ -1,11 +1,13 @@
 /**
  * <%= script_name %>
- *
- * Required parameters:
- *
- * - INPUT_PATH Input path for script data (e.g. s3n://hawk-example-data/tutorial/excite.log.bz2)
- * - OUTPUT_PATH Output path for script data (e.g. s3n://my-output-bucket/<%= script_name %>)
  */
+ 
+/** 
+ * Parameters - set default values here; you can override with -p on the command-line.
+ */
+ 
+<%= '%default'%> INPUT_PATH 's3n://hawk-example-data/tutorial/excite.log.bz2'
+<%= '%default'%> OUTPUT_PATH 's3n://my-output-bucket/$MORTAR_EMAIL_S3_ESCAPED/<%= script_name %>'
 
 <% if not options[:skip_udf] %>
 /**
