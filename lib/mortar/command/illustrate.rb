@@ -40,9 +40,12 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
     pigscript_name = shift_argument
     alias_name = shift_argument
     skip_pruning = options[:skippruning] ||= false
-    unless pigscript_name
-      error("Usage: mortar illustrate PIGSCRIPT ALIAS\nMust specify PIGSCRIPT")
+    
+    # TODO: When illustrating without alias works, remove the `&& alias_name` to re-enable the feature on CLI
+    unless pigscript_name && alias_name
+      error("Usage: mortar illustrate PIGSCRIPT ALIAS\nMust specify PIGSCRIPT and ALIAS.")
     end
+    
     validate_arguments!
     validate_git_based_project!
     pigscript = validate_pigscript!(pigscript_name)
