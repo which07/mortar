@@ -19,7 +19,7 @@
 
 require 'fileutils'
 require "vendor/mortar/okjson"
-require "curb"
+require 'open-uri'
 
 module Mortar
   module Helpers
@@ -46,10 +46,21 @@ module Mortar
     end
 
     def download_to_file(url, path, mkdir_p=true)
-      c = Curl::Easy.new(url)
-      c.on_progress {|dl_total, dl_now, ul_total, ul_now| redisplay("Downloading #{path}: #{dl_now.to_i} of #{dl_total.to_i}"); true }
-      c.perform
-      write_to_file(c.body_str, path, mkdir_p)
+      content_length = 0
+      
+      set_content_length = lambda do |l|
+        content_length = l
+      end
+      set_progress = lambda do |p|
+        redisplay("Downloading #{path}: #{p.to_i} of #{content_length.to_i}")
+      end
+      
+      open(url,
+        :content_length_proc => set_content_length,
+        :progress_proc => set_progress) do |f|
+          write_to_file(f.read, path, mkdir_p)
+      end
+      
     end
 
     def display(msg="", new_line=true)
