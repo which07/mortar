@@ -54,6 +54,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
     git.git("commit -m \"Mortar project skeleton\"")
     Mortar::Command::run("projects:register", [name])
     git.git("push mortar master")
+    FileUtils.cd("..")
   end
   
   # projects:register PROJECT
