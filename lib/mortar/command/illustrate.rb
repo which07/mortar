@@ -49,13 +49,14 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
     validate_arguments!
     validate_git_based_project!
     pigscript = validate_pigscript!(pigscript_name)
-    git_ref = create_and_push_snapshot_branch(git, project)
+    #git_ref = create_and_push_snapshot_branch(git, project)
     
     illustrate_id = nil
     action("Starting illustrate") do
-      illustrate_id = api.post_illustrate(project.name, pigscript.name, alias_name, skip_pruning, git_ref, :parameters => pig_parameters).body["illustrate_id"]
+      #illustrate_id = api.post_illustrate(project.name, pigscript.name, alias_name, skip_pruning, git_ref, :parameters => pig_parameters).body["illustrate_id"]
+      api.do_local_illustrate(pigscript.name, alias_name)
     end
-        
+=begin     
     illustrate_result = nil
     display
     ticking(polling_interval) do |ticks|
@@ -100,5 +101,6 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
     else
       raise RuntimeError, "Unknown illustrate status: #{illustrate_result['status_code']} for illustrate_id: #{illustrate_id}"
     end
+=end
   end
 end
