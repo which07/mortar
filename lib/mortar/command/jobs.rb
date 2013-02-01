@@ -67,7 +67,6 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   #    Run the generate_regression_model_coefficients script on a 3 node cluster.
   #        $ mortar jobs:run generate_regression_model_coefficients --clustersize 3
   def run
-    # arguemnts
     pigscript_name = shift_argument
     unless pigscript_name
       error("Usage: mortar jobs:run PIGSCRIPT\nMust specify PIGSCRIPT.")
@@ -77,12 +76,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     unless options[:clusterid] || options[:clustersize]
       clusters = api.get_clusters().body['clusters']
 
-      largest_free_cluster = nil
-      clusters.each do |c|
-        if c['running_job_ids'].length == 0 and (largest_free_cluster.nil? or c['size'] > largest_free_cluster['size'])
-          largest_free_cluster = c
-        end
-      end
+      largest_free_cluster = clusters.select{ |c| c['running_job_ids'].length == 0 }.max_by{|c| c['size']}
 
       if largest_free_cluster.nil?
         options[:clustersize] = 2
