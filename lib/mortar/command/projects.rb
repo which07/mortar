@@ -40,7 +40,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
 
   # projects:create PROJECTNAME
   #
-  # create a mortar project in a new directory with the name PROJECTNAME
+  # Generate and register a new Mortar project for code in the current directory, with the name PROJECTNAME.
   def create
     name = shift_argument
     unless name
@@ -51,10 +51,9 @@ class Mortar::Command::Projects < Mortar::Command::Base
     FileUtils.cd(name)
     git.git_init
     git.git("add .")
-    git.git("commit -m \"Mortar project skeleton\"")
+    git.git("commit -m \"Mortar project scaffolding\"")
     Mortar::Command::run("projects:register", [name])
     git.git("push mortar master")
-    FileUtils.cd("..")
   end
   
   # projects:register PROJECT

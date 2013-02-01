@@ -79,24 +79,23 @@ STDOUT
 
         # if the git stuff doesn't work, the registration will fail, so we can pretend it does work here
         mock(@git).git("add .").returns(true)
-        mock(@git).git("commit -m \"Mortar project skeleton\"").returns(true)
+        mock(@git).git("commit -m \"Mortar project scaffolding\"").returns(true)
         mock(@git).git("push mortar master").returns(true)
 
         stderr, stdout = execute("projects:create #{project_name}", nil, @git)
+        Dir.pwd.end_with?("some_new_project").should be_true
+        File.exists?("macros").should be_true
+        File.exists?("fixtures").should be_true
+        File.exists?("pigscripts").should be_true
+        File.exists?("udfs").should be_true
+        File.exists?("README.md").should be_true
+        File.exists?("Gemfile").should be_false
+        File.exists?("macros/.gitkeep").should be_true
+        File.exists?("fixtures/.gitkeep").should be_true
+        File.exists?("pigscripts/some_new_project.pig").should be_true
+        File.exists?("udfs/python/some_new_project.py").should be_true
 
-        File.exists?("some_new_project").should be_true
-        File.exists?("some_new_project/macros").should be_true
-        File.exists?("some_new_project/fixtures").should be_true
-        File.exists?("some_new_project/pigscripts").should be_true
-        File.exists?("some_new_project/udfs").should be_true
-        File.exists?("some_new_project/README.md").should be_true
-        File.exists?("some_new_project/Gemfile").should be_false
-        File.exists?("some_new_project/macros/.gitkeep").should be_true
-        File.exists?("some_new_project/fixtures/.gitkeep").should be_true
-        File.exists?("some_new_project/pigscripts/some_new_project.pig").should be_true
-        File.exists?("some_new_project/udfs/python/some_new_project.py").should be_true
-
-        File.read("some_new_project/pigscripts/some_new_project.pig").each_line { |line| line.match(/<%.*%>/).should be_nil }
+        File.read("pigscripts/some_new_project.pig").each_line { |line| line.match(/<%.*%>/).should be_nil }
 
         stdout.should == <<-STDOUT
 \e[1;32m      create\e[0m  
