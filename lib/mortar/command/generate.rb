@@ -28,16 +28,18 @@ class Mortar::Command::Generate < Mortar::Command::Base
   #
   # Generate the files and directory structure necessary for a Mortar project.
   # 
-  def project
+  def _project
     project_name = shift_argument
     unless project_name
-      error("Usage: mortar new PROJECTNAME\nMust specify PROJECTNAME.")
+      error("Usage: mortar generate:project PROJECTNAME\nMust specify PROJECTNAME.")
     end
     pigscript_name = project_name
     app_generator = Mortar::Generators::ProjectGenerator.new
     app_generator.generate_project(project_name, options)
   end
-
+  alias_command "new", "generate:_project"
+  alias_command "generate:project", "generate:_project"
+  
   # generate:python_udf [UDFNAME]
   #
   # Generate a new python user defined function
