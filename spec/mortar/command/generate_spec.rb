@@ -48,7 +48,7 @@ describe Mortar::Command::Generate do
     it "error when name isn't provided" do
       stderr, stdout = execute("generate:project")
       stderr.should == <<-STDERR
- !    Usage: mortar new PROJECTNAME
+ !    Usage: mortar generate:project PROJECTNAME
  !    Must specify PROJECTNAME.
 STDERR
     end
@@ -76,33 +76,6 @@ STDERR
         e.message.should == 'Bad Copy'
       end
       File.exists?("Test").should be_true
-    end
-  end
-
-  describe "new" do
-    it "create new project using alias" do
-      stderr, stdout = execute("new Test")
-      File.exists?("Test").should be_true
-      File.exists?("Test/macros").should be_true
-      File.exists?("Test/fixtures").should be_true
-      File.exists?("Test/pigscripts").should be_true
-      File.exists?("Test/udfs").should be_true
-      File.exists?("Test/README.md").should be_true
-      File.exists?("Test/Gemfile").should be_false
-      File.exists?("Test/macros/.gitkeep").should be_true
-      File.exists?("Test/fixtures/.gitkeep").should be_true
-      File.exists?("Test/pigscripts/Test.pig").should be_true
-      File.exists?("Test/udfs/python/Test.py").should be_true
-
-      File.read("Test/pigscripts/Test.pig").each_line { |line| line.match(/<%.*%>/).should be_nil }
-    end
-
-    it "error when name isn't provided" do
-      stderr, stdout = execute("new")
-      stderr.should == <<-STDERR
- !    Usage: mortar new PROJECTNAME
- !    Must specify PROJECTNAME.
-STDERR
     end
   end
 

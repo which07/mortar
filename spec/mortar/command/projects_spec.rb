@@ -28,6 +28,11 @@ module Mortar::Command
       stub_core      
       @git = Mortar::Git::Git.new
     end
+
+    before("create") do 
+      @tmpdir = Dir.mktmpdir
+      Dir.chdir(@tmpdir)
+    end
     
     project1 = {'name' => "Project1",
                 'status' => Mortar::API::Projects::STATUS_ACTIVE,
@@ -59,42 +64,122 @@ Project2
 STDOUT
       end
     end
-    
+
     context("create") do
+
+      it "generates and registers a project" do
+        mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [project1, project2]}))
+        project_id = "1234abcd1234abcd1234"
+        project_name = "some_new_project"
+        project_git_url = "git@github.com:mortarcode-dev/#{project_name}"
+        mock(Mortar::Auth.api).post_project("some_new_project") {Excon::Response.new(:body => {"project_id" => project_id})}
+        mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Projects::STATUS_ACTIVE,
+                                                                                             "git_url" => project_git_url})).ordered
+        mock(@git).remotes.with_any_args.returns({})
+        mock(@git).remote_add("mortar", project_git_url)
+
+        # if the git stuff doesn't work, the registration will fail, so we can pretend it does work here
+        mock(@git).git("add .").returns(true)
+        mock(@git).git("commit -m \"Mortar project scaffolding\"").returns(true)
+        mock(@git).git("push mortar master").returns(true)
+
+        stderr, stdout = execute("projects:create #{project_name}", nil, @git)
+        Dir.pwd.end_with?("some_new_project").should be_true
+        File.exists?("macros").should be_true
+        File.exists?("fixtures").should be_true
+        File.exists?("pigscripts").should be_true
+        File.exists?("udfs").should be_true
+        File.exists?("README.md").should be_true
+        File.exists?("Gemfile").should be_false
+        File.exists?("macros/.gitkeep").should be_true
+        File.exists?("fixtures/.gitkeep").should be_true
+        File.exists?("pigscripts/some_new_project.pig").should be_true
+        File.exists?("udfs/python/some_new_project.py").should be_true
+
+        File.read("pigscripts/some_new_project.pig").each_line { |line| line.match(/<%.*%>/).should be_nil }
+
+        stdout.should == <<-STDOUT
+\e[1;32m      create\e[0m  
+\e[1;32m      create\e[0m  README.md
+\e[1;32m      create\e[0m  .gitignore
+\e[1;32m      create\e[0m  pigscripts
+\e[1;32m      create\e[0m  pigscripts/some_new_project.pig
+\e[1;32m      create\e[0m  macros
+\e[1;32m      create\e[0m  macros/.gitkeep
+\e[1;32m      create\e[0m  fixtures
+\e[1;32m      create\e[0m  fixtures/.gitkeep
+\e[1;32m      create\e[0m  udfs
+\e[1;32m      create\e[0m  udfs/python
+\e[1;32m      create\e[0m  udfs/python/some_new_project.py
+Sending request to register project: some_new_project... done\n\n\r\e[0KStatus: ACTIVE  \n\nYour project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n
+STDOUT
+      end
+
+    end
+    
+    context("register") do
       
       it "show appropriate error message when user doesn't include project name" do
-        stderr, stdout = execute("projects:create")
+        stderr, stdout = execute("projects:register")
         stderr.should == <<-STDERR
- !    Usage: mortar projects:create PROJECT
+ !    Usage: mortar projects:register PROJECT
  !    Must specify PROJECT.
 STDERR
       end
 
-      it "try to create project in directory that doesn't have a git repository" do
+      it "tells you to cd to the directory if one exists with the project name" do
         with_no_git_directory do
-          stderr, stdout = execute("projects:create some_new_project")
+          # create the project, but a level down from current directory
+          project_name = "existing_project_one_level_down"
+          FileUtils.mkdir_p(File.join(Dir.pwd, project_name))
+          stderr, stdout = execute("projects:register #{project_name}")
           stderr.should == <<-STDERR
- !    Can only create a mortar project for an existing git project.  Please run:
+ !    mortar projects:register must be run from within the project directory.
+ !    Please "cd existing_project_one_level_down" and rerun this command.
+STDERR
+        end
+      end
+
+      it "tells you to create the git project in directory that doesn't have a git repository" do
+        with_no_git_directory do
+          stderr, stdout = execute("projects:register some_new_project")
+          stderr.should == <<-STDERR
+ !    No git repository found in the current directory.
+ !    Please initialize a git repository for this project, and then rerun the register command.
+ !    To initialize your project in git, use:
  !    
  !    git init
  !    git add .
  !    git commit -a -m "first commit"
- !    
- !    to initialize your project in git.
 STDERR
         end
       end
-      
-      it "show appropriate error message when user tries to create a project inside of an existing project" do
+
+      it "errors when a project already exists with the name requested" do
+        mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [project1, project2]}))
+        with_git_initialized_project do |p|           
+          stderr, stdout = execute("projects:register Project1", nil, @git)
+          stderr.should == <<-STDERR
+ !    Your account already contains a project named Project1.
+ !    Please choose a different name for your new project, or clone the existing Project1 code using:
+ !    
+ !    mortar projects:clone Project1
+STDERR
+        end
+      end
+
+      it "show appropriate error message when user tries to register a project inside of an existing project" do
+         mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [project1, project2]}))
          with_git_initialized_project do |p|           
-           stderr, stdout = execute("projects:create some_new_project", nil, @git)
+           stderr, stdout = execute("projects:register some_new_project", nil, @git)
            stderr.should == <<-STDERR
- !    Currently in project: myproject.  You can not create a new project inside of an existing mortar project.
+ !    Currently in project: myproject.  You can not register a new project inside of an existing mortar project.
 STDERR
          end
       end
       
-      it "create a new project successfully - with status" do
+      it "register a new project successfully - with status" do
+        mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [project1, project2]}))
         project_id = "1234abcd1234abcd1234"
         project_name = "some_new_project"
         project_git_url = "git@github.com:mortarcode-dev/#{project_name}"
@@ -108,13 +193,14 @@ STDERR
         mock(@git).remotes.with_any_args.returns({})
         mock(@git).remote_add("mortar", project_git_url)
 
-        stderr, stdout = execute("projects:create #{project_name}  --polling_interval 0.05", nil, @git)
+        stderr, stdout = execute("projects:register #{project_name}  --polling_interval 0.05", nil, @git)
         stdout.should == <<-STDOUT
-Sending request to create project: some_new_project... done\n\n\r\e[0KStatus: PENDING... /\r\e[0KStatus: CREATING... -\r\e[0KStatus: ACTIVE  \n\nYour project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n
+Sending request to register project: some_new_project... done\n\n\r\e[0KStatus: PENDING... /\r\e[0KStatus: CREATING... -\r\e[0KStatus: ACTIVE  \n\nYour project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n
 STDOUT
       end
 
-      it "create a new project successfully - with status_code and status_description" do
+      it "register a new project successfully - with status_code and status_description" do
+        mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [project1, project2]}))
         project_id = "1234abcd1234abcd1234"
         project_name = "some_new_project"
         project_git_url = "git@github.com:mortarcode-dev/#{project_name}"
@@ -128,9 +214,9 @@ STDOUT
         mock(@git).remotes.with_any_args.returns({})
         mock(@git).remote_add("mortar", project_git_url)
 
-        stderr, stdout = execute("projects:create #{project_name}  --polling_interval 0.05", nil, @git)
+        stderr, stdout = execute("projects:register #{project_name}  --polling_interval 0.05", nil, @git)
         stdout.should == <<-STDOUT
-Sending request to create project: some_new_project... done\n\n\r\e[0KStatus: Pending... /\r\e[0KStatus: Creating... -\r\e[0KStatus: Active  \n\nYour project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n
+Sending request to register project: some_new_project... done\n\n\r\e[0KStatus: Pending... /\r\e[0KStatus: Creating... -\r\e[0KStatus: Active  \n\nYour project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n
 STDOUT
       end
       

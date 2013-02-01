@@ -41,6 +41,12 @@ module Mortar
         end
         has_git && is_ok_version
       end
+      
+      def ensure_has_git
+        unless has_git?
+          raise GitError, "git 1.7.7 or higher must be installed"
+        end
+      end
 
       def run_cmd(cmd)
         begin
@@ -54,12 +60,14 @@ module Mortar
       def has_dot_git?
         File.directory?(".git")
       end
+
+      def git_init
+        ensure_has_git
+        run_cmd("git init")
+      end
       
       def git(args, check_success=true, check_git_directory=true)
-        unless has_git?
-          raise GitError, "git 1.7.7 or higher must be installed"
-        end
-        
+        ensure_has_git
         if check_git_directory && !has_dot_git?
           raise GitError, "No .git directory found"
         end
