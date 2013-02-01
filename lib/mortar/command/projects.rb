@@ -55,6 +55,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
     Mortar::Command::run("projects:register", [name])
     git.git("push mortar master")
   end
+  alias_command "new", "projects:create"
   
   # projects:register PROJECT
   #

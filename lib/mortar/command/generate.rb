@@ -37,7 +37,6 @@ class Mortar::Command::Generate < Mortar::Command::Base
     app_generator = Mortar::Generators::ProjectGenerator.new
     app_generator.generate_project(project_name, options)
   end
-  alias_command "new", "generate:_project"
   alias_command "generate:project", "generate:_project"
   
   # generate:python_udf [UDFNAME]
