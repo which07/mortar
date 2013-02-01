@@ -48,7 +48,7 @@ describe Mortar::Command::Generate do
     it "error when name isn't provided" do
       stderr, stdout = execute("generate:project")
       stderr.should == <<-STDERR
- !    Usage: mortar new PROJECTNAME
+ !    Usage: mortar generate:project PROJECTNAME
  !    Must specify PROJECTNAME.
 STDERR
     end

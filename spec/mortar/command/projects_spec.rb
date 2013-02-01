@@ -68,6 +68,7 @@ STDOUT
     context("create") do
 
       it "generates and registers a project" do
+        mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [project1, project2]}))
         project_id = "1234abcd1234abcd1234"
         project_name = "some_new_project"
         project_git_url = "git@github.com:mortarcode-dev/#{project_name}"
@@ -126,22 +127,49 @@ STDOUT
 STDERR
       end
 
-      it "try to register project in directory that doesn't have a git repository" do
+      it "tells you to cd to the directory if one exists with the project name" do
+        with_no_git_directory do
+          # create the project, but a level down from current directory
+          project_name = "existing_project_one_level_down"
+          FileUtils.mkdir_p(File.join(Dir.pwd, project_name))
+          stderr, stdout = execute("projects:register #{project_name}")
+          stderr.should == <<-STDERR
+ !    mortar projects:register must be run from within the project directory.
+ !    Please "cd existing_project_one_level_down" and rerun this command.
+STDERR
+        end
+      end
+
+      it "tells you to create the git project in directory that doesn't have a git repository" do
         with_no_git_directory do
           stderr, stdout = execute("projects:register some_new_project")
           stderr.should == <<-STDERR
- !    Can only register a mortar project for an existing git project.  Please run:
+ !    No git repository found in the current directory.
+ !    Please initialize a git repository for this project, and then rerun the register command.
+ !    To initialize your project in git, use:
  !    
  !    git init
  !    git add .
  !    git commit -a -m "first commit"
- !    
- !    to initialize your project in git.
 STDERR
         end
       end
-      
+
+      it "errors when a project already exists with the name requested" do
+        mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [project1, project2]}))
+        with_git_initialized_project do |p|           
+          stderr, stdout = execute("projects:register Project1", nil, @git)
+          stderr.should == <<-STDERR
+ !    Your account already contains a project named Project1.
+ !    Please choose a different name for your new project, or clone the existing Project1 code using:
+ !    
+ !    mortar projects:clone Project1
+STDERR
+        end
+      end
+
       it "show appropriate error message when user tries to register a project inside of an existing project" do
+         mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [project1, project2]}))
          with_git_initialized_project do |p|           
            stderr, stdout = execute("projects:register some_new_project", nil, @git)
            stderr.should == <<-STDERR
@@ -151,6 +179,7 @@ STDERR
       end
       
       it "register a new project successfully - with status" do
+        mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [project1, project2]}))
         project_id = "1234abcd1234abcd1234"
         project_name = "some_new_project"
         project_git_url = "git@github.com:mortarcode-dev/#{project_name}"
@@ -171,6 +200,7 @@ STDOUT
       end
 
       it "register a new project successfully - with status_code and status_description" do
+        mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [project1, project2]}))
         project_id = "1234abcd1234abcd1234"
         project_name = "some_new_project"
         project_git_url = "git@github.com:mortarcode-dev/#{project_name}"

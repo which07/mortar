@@ -67,7 +67,18 @@ class Mortar::Command::Projects < Mortar::Command::Base
     validate_arguments!
     
     unless git.has_dot_git?
-      error("Can only register a mortar project for an existing git project.  Please run:\n\ngit init\ngit add .\ngit commit -a -m \"first commit\"\n\nto initialize your project in git.")
+      # check if we're in the parent directory
+      if File.exists? name
+        error("mortar projects:register must be run from within the project directory.\nPlease \"cd #{name}\" and rerun this command.")
+      else
+        error("No git repository found in the current directory.\nPlease initialize a git repository for this project, and then rerun the register command.\nTo initialize your project in git, use:\n\ngit init\ngit add .\ngit commit -a -m \"first commit\"")
+      end
+    end
+    
+    # ensure the project name does not already exist
+    project_names = api.get_projects().body["projects"].collect{|p| p['name']}
+    if project_names.include? name
+      error("Your account already contains a project named #{name}.\nPlease choose a different name for your new project, or clone the existing #{name} code using:\n\nmortar projects:clone #{name}")
     end
     
     unless git.remotes(git_organization).empty?
@@ -104,7 +115,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
     
     case project_status
     when Mortar::API::Projects::STATUS_FAILED
-      error("Project creation failed.\nError message: #{project_result['error_message']}")
+      error("Project registration failed.\nError message: #{project_result['error_message']}")
     when Mortar::API::Projects::STATUS_ACTIVE
       git.remote_add("mortar", project_result['git_url'])
       display "Your project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n\n"
@@ -113,6 +124,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
     end
     
   end
+  alias_command "register", "projects:register"
 
   # projects:set_remote PROJECT
   #
