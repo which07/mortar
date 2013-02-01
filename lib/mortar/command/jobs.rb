@@ -75,8 +75,23 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     validate_arguments!
 
     unless options[:clusterid] || options[:clustersize]
-      options[:clustersize] = 2
-      display("Defaulting to running job on new cluster of size 2")
+      clusters = api.get_clusters().body['clusters']
+
+      largest_free_cluster = nil
+      clusters.each do |c|
+        if c['running_job_ids'].length == 0 and (largest_free_cluster.nil? or c['size'] > largest_free_cluster['size'])
+          largest_free_cluster = c
+        end
+      end
+
+      if largest_free_cluster.nil?
+        options[:clustersize] = 2
+        display("Defaulting to running job on new cluster of size 2")
+      else
+        options[:clusterid] = largest_free_cluster['cluster_id']
+        display("Defaulting to running job on largest existing free cluster, id = " + 
+                largest_free_cluster['cluster_id'] + ", size = " + largest_free_cluster['size'].to_s)
+      end
     end
       
     if options[:clusterid]
