@@ -37,7 +37,25 @@ class Mortar::Command::Projects < Mortar::Command::Base
       display("You have no projects.")
     end
   end
-
+  
+  # projects:delete PROJECTNAME
+  #
+  # Delete a mortar project
+  def delete
+    name = shift_argument
+    unless name
+      error("Usage: mortar projects:delete PROJECTNAME\nMust specify PROJECTNAME.")
+    end
+    validate_arguments!
+    
+    project_id = nil
+    action("Sending request to delete project: #{name}") do
+      api.delete_project(name).body["project_id"]
+    end
+    display "\nYour project has been deleted."
+    
+  end
+  
   # projects:create PROJECTNAME
   #
   # Generate and register a new Mortar project for code in the current directory, with the name PROJECTNAME.
