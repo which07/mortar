@@ -14,7 +14,11 @@
 # limitations under the License.
 #
 
+require "fileutils"
+
+require "mortar/command"
 require "mortar/command/base"
+require "mortar/git"
 
 # manage projects (create, clone)
 #
@@ -52,30 +56,60 @@ class Mortar::Command::Projects < Mortar::Command::Base
     
   end
   
-  # projects:create PROJECT
+  # projects:create PROJECTNAME
   #
-  # create a mortar project for the current directory with the name PROJECT
+  # Generate and register a new Mortar project for code in the current directory, with the name PROJECTNAME.
   def create
     name = shift_argument
     unless name
-      error("Usage: mortar projects:create PROJECT\nMust specify PROJECT.")
+      error("Usage: mortar projects:create PROJECTNAME\nMust specify PROJECTNAME")
+    end
+    
+    Mortar::Command::run("generate:project", [name])
+    FileUtils.cd(name)
+    git.git_init
+    git.git("add .")
+    git.git("commit -m \"Mortar project scaffolding\"")
+    Mortar::Command::run("projects:register", [name])
+    git.git("push mortar master")
+  end
+  alias_command "new", "projects:create"
+  
+  # projects:register PROJECT
+  #
+  # register a mortar project for the current directory with the name PROJECT
+  def register
+    name = shift_argument
+    unless name
+      error("Usage: mortar projects:register PROJECT\nMust specify PROJECT.")
     end
     validate_arguments!
     
     unless git.has_dot_git?
-      error("Can only create a mortar project for an existing git project.  Please run:\n\ngit init\ngit add .\ngit commit -a -m \"first commit\"\n\nto initialize your project in git.")
+      # check if we're in the parent directory
+      if File.exists? name
+        error("mortar projects:register must be run from within the project directory.\nPlease \"cd #{name}\" and rerun this command.")
+      else
+        error("No git repository found in the current directory.\nPlease initialize a git repository for this project, and then rerun the register command.\nTo initialize your project in git, use:\n\ngit init\ngit add .\ngit commit -a -m \"first commit\"")
+      end
+    end
+    
+    # ensure the project name does not already exist
+    project_names = api.get_projects().body["projects"].collect{|p| p['name']}
+    if project_names.include? name
+      error("Your account already contains a project named #{name}.\nPlease choose a different name for your new project, or clone the existing #{name} code using:\n\nmortar projects:clone #{name}")
     end
     
     unless git.remotes(git_organization).empty?
       begin
-        error("Currently in project: #{project.name}.  You can not create a new project inside of an existing mortar project.")
+        error("Currently in project: #{project.name}.  You can not register a new project inside of an existing mortar project.")
       rescue Mortar::Command::CommandFailed => cf
-        error("Currently in an existing Mortar project.  You can not create a new project inside of an existing mortar project.")
+        error("Currently in an existing Mortar project.  You can not register a new project inside of an existing mortar project.")
       end
     end
     
     project_id = nil
-    action("Sending request to create project: #{name}") do
+    action("Sending request to register project: #{name}") do
       project_id = api.post_project(name).body["project_id"]
     end
     
@@ -100,7 +134,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
     
     case project_status
     when Mortar::API::Projects::STATUS_FAILED
-      error("Project creation failed.\nError message: #{project_result['error_message']}")
+      error("Project registration failed.\nError message: #{project_result['error_message']}")
     when Mortar::API::Projects::STATUS_ACTIVE
       git.remote_add("mortar", project_result['git_url'])
       display "Your project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n\n"
@@ -109,6 +143,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
     end
     
   end
+  alias_command "register", "projects:register"
 
   # projects:set_remote PROJECT
   #

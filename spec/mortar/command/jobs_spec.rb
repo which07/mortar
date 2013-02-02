@@ -109,6 +109,7 @@ STDOUT
           job_url = "http://127.0.0.1:5000/jobs/job_detail?job_id=c571a8c7f76a4fd4a67c103d753e2dd5"
           cluster_size = 2
 
+          mock(Mortar::Auth.api).get_clusters() {Excon::Response.new(:body => {'clusters' => []})}
           mock(Mortar::Auth.api).post_job_new_cluster("myproject", "my_script", is_a(String), cluster_size, 
             :parameters => [], 
             :keepalive => true,
@@ -162,6 +163,61 @@ Or by running:
   mortar jobs:status c571a8c7f76a4fd4a67c103d753e2dd5 --poll
 
 STDOUT
+        end
+      end
+
+      it "runs a job by default on the largest existing running cluster" do
+        with_git_initialized_project do |p|
+          job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
+          job_url = "http://127.0.0.1:5000/jobs/job_detail?job_id=c571a8c7f76a4fd4a67c103d753e2dd5"
+
+          small_cluster_id = '510beb6b3004860820ab6538'
+          small_cluster_size = 2
+          small_cluster_status = Mortar::API::Clusters::STATUS_RUNNING
+          large_cluster_id = '510bf0db3004860820ab6590'
+          large_cluster_size = 5
+          large_cluster_status = Mortar::API::Clusters::STATUS_RUNNING
+          starting_cluster_id = '510bf0db3004860820abaaaa'
+          starting_cluster_size = 10
+          starting_cluster_status = Mortar::API::Clusters::STATUS_STARTING
+          huge_busy_cluster_id = '510bf0db3004860820ab6621'
+          huge_busy_cluster_size = 20
+          huge_busy_cluster_status = Mortar::API::Clusters::STATUS_RUNNING
+          
+
+          mock(Mortar::Auth.api).get_clusters() {
+            Excon::Response.new(:body => { 
+              'clusters' => [
+                  { 'cluster_id' => small_cluster_id, 'size' => small_cluster_size, 'running_job_ids' => [], 'status_code' => small_cluster_status }, 
+                  { 'cluster_id' => large_cluster_id, 'size' => large_cluster_size, 'running_job_ids' => [], 'status_code' => large_cluster_status },
+                  { 'cluster_id' => starting_cluster_id, 'size' => starting_cluster_size, 'running_job_ids' => [], 'status_code' => starting_cluster_status },
+                  { 'cluster_id' => huge_busy_cluster_id, 'size' => huge_busy_cluster_size, 
+                    'running_job_ids' => ['c571a8c7f76a4fd4a67c103d753e2ee6'], 'status_code' => huge_busy_cluster_status  }
+              ]})
+          }
+          mock(Mortar::Auth.api).post_job_existing_cluster("myproject", "my_script", is_a(String), large_cluster_id, 
+            :parameters => [], 
+            :notify_on_job_finish => true) {Excon::Response.new(:body => {"job_id" => job_id, "web_job_url" => job_url})}
+
+          write_file(File.join(p.pigscripts_path, "my_script.pig"))
+          stderr, stdout = execute("jobs:run my_script ", p, @git)
+          stdout.should == <<-STDOUT
+Defaulting to running job on largest existing free cluster, id = 510bf0db3004860820ab6590, size = 5
+Taking code snapshot... done
+Sending code snapshot to Mortar... done
+Requesting job execution... done
+job_id: c571a8c7f76a4fd4a67c103d753e2dd5
+
+Job status can be viewed on the web at:
+
+ http://127.0.0.1:5000/jobs/job_detail?job_id=c571a8c7f76a4fd4a67c103d753e2dd5
+
+Or by running:
+
+  mortar jobs:status c571a8c7f76a4fd4a67c103d753e2dd5 --poll
+
+STDOUT
+
         end
       end
 

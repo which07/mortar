@@ -67,7 +67,6 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   #    Run the generate_regression_model_coefficients script on a 3 node cluster.
   #        $ mortar jobs:run generate_regression_model_coefficients --clustersize 3
   def run
-    # arguemnts
     pigscript_name = shift_argument
     unless pigscript_name
       error("Usage: mortar jobs:run PIGSCRIPT\nMust specify PIGSCRIPT.")
@@ -75,8 +74,20 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     validate_arguments!
 
     unless options[:clusterid] || options[:clustersize]
-      options[:clustersize] = 2
-      display("Defaulting to running job on new cluster of size 2")
+      clusters = api.get_clusters().body['clusters']
+
+      largest_free_cluster = clusters.select{ |c| \
+        c['running_job_ids'].length == 0 && c['status_code'] == Mortar::API::Clusters::STATUS_RUNNING }.
+        max_by{|c| c['size']}
+
+      if largest_free_cluster.nil?
+        options[:clustersize] = 2
+        display("Defaulting to running job on new cluster of size 2")
+      else
+        options[:clusterid] = largest_free_cluster['cluster_id']
+        display("Defaulting to running job on largest existing free cluster, id = " + 
+                largest_free_cluster['cluster_id'] + ", size = " + largest_free_cluster['size'].to_s)
+      end
     end
       
     if options[:clusterid]
