@@ -20,7 +20,7 @@ require "mortar/command"
 require "mortar/command/base"
 require "mortar/git"
 
-# manage projects (create, clone)
+# manage projects (create, register, clone, delete, set_remote)
 #
 class Mortar::Command::Projects < Mortar::Command::Base
   
