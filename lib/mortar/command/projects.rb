@@ -40,40 +40,16 @@ class Mortar::Command::Projects < Mortar::Command::Base
   def delete
     name = shift_argument
     unless name
-      error("Usage: mortar projects:delete PROJECTNAME\nMust specify PROJECTNAME")
+      error("Usage: mortar projects:delete PROJECTNAME\nMust specify PROJECTNAME.")
     end
     validate_arguments!
     
     project_id = nil
     action("Sending request to delete project: #{name}") do
-      project_id = api.delete_project(name).body["project_id"]
+      api.delete_project(name).body["project_id"]
     end
+    display "\nYour project has been deleted."
     
-    project_result = nil
-    project_status = nil
-    ticking(polling_interval) do |ticks|
-      project_result = api.get_project(project_id).body
-      project_status = project_result.fetch("status_code", project_result["status"])
-      project_description = project_result.fetch("status_description", project_status)
-      is_finished = Mortar::API::Projects::STATUSES_DELETE_COMPLETE.include?(project_status)
-      
-      redisplay("Status: %s %s" % [
-        project_description + (is_finished ? "" : "..."),
-        is_finished ? " " : spinner(ticks)],
-        is_finished) # only display newline on last message
-      if is_finished
-        display
-        break
-      end
-    end
-    case project_status
-    when Mortar::API::Projects::STATUS_ACTIVE
-      error("Failed to delete project.\nError message: #{project_result['error_message']}")
-    when Mortar::API::Projects::STATUS_DELETED
-      display "Your project has been deleted."
-    else
-      raise RuntimeError, "Unknown project status: #{project_status} for project_id: #{project_id}"
-    end
   end
   
   # projects:create PROJECT

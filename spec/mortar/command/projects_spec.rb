@@ -60,6 +60,29 @@ STDOUT
       end
     end
     
+    context("delete") do
+      it "shows error message when user doesn't include project name" do
+        stderr, stdout = execute("projects:delete")
+        stderr.should == <<-STDERR
+ !    Usage: mortar projects:delete PROJECTNAME
+ !    Must specify PROJECTNAME.
+STDERR
+      end
+      
+      it "deletes project" do
+        project_name = "COMMANDO"
+
+        mock(Mortar::Auth.api).delete_project(project_name).returns(Excon::Response.new(:body => {}, :status => 200 )) 
+        stderr, stdout = execute("projects:delete COMMANDO")
+        stdout.should == <<-STDOUT
+Sending request to delete project: COMMANDO... done
+
+Your project has been deleted.
+STDOUT
+      end
+      
+    end
+    
     context("create") do
       
       it "show appropriate error message when user doesn't include project name" do
