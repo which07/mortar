@@ -30,7 +30,7 @@ class Mortar::Local
       mortar_params.each{ |name, value|
         cmd += "-param #{name}=#{value} "
       }
-      cmd += "-propertyFile " + File.realpath(".mortar-mud/pig.properties") + " "
+      cmd += "-propertyFile " + realpath(".mortar-mud/pig.properties") + " "
       cmd += "-file " + pig_script.path
 
       # Throw in the environment variables
@@ -40,7 +40,7 @@ class Mortar::Local
 
       # Now, put us in the right directory (paths in mortar
       # projects are relative to the pigscripts directory)
-      cmd = "cd " + File.realpath("pigscripts") + " && " + cmd
+      cmd = "cd " + realpath("pigscripts") + " && " + cmd
 
       # Let's run this sucker!
       system(cmd)
@@ -51,6 +51,10 @@ class Mortar::Local
       # os and release number.  Also, verify that JAVA_HOME actually
       # exists.
       if ENV['JAVA_HOME']
+        return true
+      elsif File.exists?("/usr/libexec/java_home")
+        # OSX has a nice little tool for finding this value
+        ENV['JAVA_HOME'] = `/usr/libexec/java_home`
         return true
       else
         return false
@@ -103,16 +107,16 @@ class Mortar::Local
       # once the mud installer does so.  Also, do these need to be absolute
       # paths?
       pigenv = {
-        'PIG_HOME' => File.realpath(".mortar-mud/pig"),
-        'PIG_CLASSPATH' => File.realpath(".mortar-mud/pig/piglib") + "/*",
-        'CLASSPATH' => File.realpath(".mortar-mud/pig/lib")  + "/*"
+        'PIG_HOME' => realpath(".mortar-mud/pig"),
+        'PIG_CLASSPATH' => realpath(".mortar-mud/pig/piglib") + "/*",
+        'CLASSPATH' => realpath(".mortar-mud/pig/lib")  + "/*"
       }
       return pigenv
     end
 
     # Path to the mortar installed pig executable
     def pig_exec_path
-      return File.realpath(".mortar-mud/pig/bin/pig")
+      return realpath(".mortar-mud/pig/bin/pig")
     end
 
     def mortar_params
@@ -121,6 +125,14 @@ class Mortar::Local
         'MORTAR_EMAIL_S3_ESCAPED' => Mortar::Auth.user_s3_safe
       }
       return params
+    end
+
+    def realpath(relpath)
+      if defined? File.realpath
+        return File.realpath(relpath)
+      else
+        return Pathname.new(relpath).realpath
+      end
     end
 
   end
