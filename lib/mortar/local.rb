@@ -104,7 +104,7 @@ class Mortar::Local
       # paths?
       pigenv = {
         'PIG_HOME' => File.realpath(".mortar-mud/pig"),
-        'PIG_CLASSPATH' => File.realpath(".mortar-mud/pig/lib") + "/*",
+        'PIG_CLASSPATH' => File.realpath(".mortar-mud/pig/piglib") + "/*",
         'CLASSPATH' => File.realpath(".mortar-mud/pig/lib")  + "/*"
       }
       return pigenv
