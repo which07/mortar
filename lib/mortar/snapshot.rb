@@ -20,10 +20,14 @@ module Mortar
     extend self
     
     def create_and_push_snapshot_branch(git, project)
-      # create / push a snapshot branch
-      snapshot_branch = action("Taking code snapshot") do
+      curdir = Dir.pwd
+
+      # create a snapshot branch in a temporary directory
+      tmpdir, snapshot_branch = action("Taking code snapshot") do
         git.create_snapshot_branch()
       end
+
+      Dir.chdir(tmpdir)
 
       git_ref = action("Sending code snapshot to Mortar") do
         # push the code
@@ -34,6 +38,10 @@ module Mortar
         git.branch_delete(snapshot_branch)
         ref
       end
+
+      Dir.chdir(curdir)
+      FileUtils.remove_entry_secure(tmpdir)
+      return git_ref
     end
   end
 end

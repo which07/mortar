@@ -91,6 +91,12 @@ module Mortar
         unless has_commits?
           raise GitError, "No commits found in repository.  You must do an initial commit to initialize the repository."
         end
+
+        # Copy code into a temp directory so we don't confuse editors while snapshotting
+        curdir = Dir.pwd
+        tmpdir = Dir.mktmpdir
+        FileUtils.cp_r(Dir.glob('*', File::FNM_DOTMATCH) - ['.', '..'], tmpdir)
+        Dir.chdir(tmpdir)
       
         starting_branch = current_branch
         snapshot_branch = "mortar-snapshot-#{Mortar::UUID.create_random.to_s}"
@@ -122,7 +128,8 @@ module Mortar
           end
         end
       
-        snapshot_branch
+        Dir.chdir(curdir)
+        return tmpdir, snapshot_branch
       end
 
       #    
