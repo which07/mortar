@@ -84,6 +84,10 @@ class Mortar::Auth
       get_credentials[0]
     end
 
+    def user_s3_safe
+      return user.gsub(/[^0-9a-zA-Z]/i, '-')
+    end
+
     def password    # :nodoc:
       get_credentials[1]
     end

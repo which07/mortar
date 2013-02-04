@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright 2012 Mortar Data Inc.
 #
@@ -16,6 +17,7 @@
 
 require "mortar/command/base"
 require "mortar/snapshot"
+require "mortar/local"
 require "time"
 
 # run and view status of pig jobs (run, status)
@@ -50,7 +52,44 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     columns = [ 'job_id', 'display_name', 'status_description', 'start_timestamp', 'duration', 'cluster_size', 'cluster_id']
     display_table(jobs, columns, headers)
   end
-    
+
+
+  # jobs:run_local PIGSCRIPT
+  #
+  # Run a job locally
+  #
+  # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
+  # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
+  #
+  #Examples:
+  #
+  #    Run the generate_regression_model_coefficients script locally
+  #        $ mortar jobs:run_local generate_regression_model_coefficients
+  def run_local
+    pigscript_name = shift_argument
+    unless pigscript_name
+      error("Usage: mortar jobs:run PIGSCRIPT\nMust specify PIGSCRIPT.")
+    end
+    validate_arguments!
+    pigscript = validate_pigscript!(pigscript_name)
+
+    unless Mortar::Local.check_java()
+      error("You do not appear to have a usable java install.  Please install java and/or set JAVA_HOME")
+    end
+
+    unless Mortar::Local.check_python()
+      error("You do not appear to have a usable python install.")
+    end
+
+    # This function is idempotent and so a no-op if
+    # pig is already setup locally
+    Mortar::Local.install_pig()
+
+    # Actually run the script in local mode
+    Mortar::Local.run(pigscript)
+  end
+
+
   # jobs:run PIGSCRIPT
   #
   # Run a job on a Mortar Hadoop cluster.
