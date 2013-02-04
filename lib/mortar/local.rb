@@ -67,6 +67,22 @@ class Mortar::Local
       end
     end
 
+    def check_aws_access
+      FileUtils.mkdir_p(".mortar-mud")
+      if File.exists?(".mortar-mud/pig.properties")
+        return true
+      else
+        if (!(ENV['AWS_ACCESS_KEY'] and ENV['AWS_SECRET_KEY'])) then
+          return false
+        else
+          File.open(".mortar-mud/pig.properties", 'w') { |f|
+            f.write("fs.s3n.awsAccessKeyId=#{ENV['AWS_ACCESS_KEY']}\n")
+            f.write("fs.s3n.awsSecretAccessKey=#{ENV['AWS_SECRET_KEY']}\n")
+          }
+        end
+      end
+    end
+
     def install_pig
 
       FileUtils.mkdir_p(".mortar-mud")

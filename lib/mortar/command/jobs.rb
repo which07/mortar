@@ -81,6 +81,12 @@ class Mortar::Command::Jobs < Mortar::Command::Base
       error("You do not appear to have a usable python install.")
     end
 
+    unless Mortar::Local.check_aws_access()
+      msg =  "Please specify your aws access key via enviroment variable AWS_ACCESS_KEY\n"
+      msg += "and your aws secret key via enviroment variable AWS_SECRET_KEY"
+      error(msg)
+    end
+
     # This function is idempotent and so a no-op if
     # pig is already setup locally
     Mortar::Local.install_pig()
