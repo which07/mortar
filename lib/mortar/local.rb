@@ -75,6 +75,18 @@ class Mortar::Local
     end
 
     def check_python
+      if os_platform_name().start_with?('darwin')
+        check_python_osx()
+      else
+        check_python_nix()
+      end
+    end
+
+    def check_python_osx
+      return download_and_extract("https://s3.amazonaws.com/mortar-public-artifacts/mortar-python-osx.tgz", 'python')
+    end
+
+    def check_python_nix
       # Todo: be much more robost.  Possibly check for the appropriate version.
       path_to_python = `which python`
       if path_to_python
@@ -101,23 +113,8 @@ class Mortar::Local
     end
 
     def install_pig
-
       FileUtils.mkdir_p(".mortar-mud")
-
-      if not File.exists?(".mortar-mud/pig")
-        # todo: there's almost certainly a ruby call we can make to grab this and/or untar it, the url
-        # should be configurable so we can override for development, and we should have error handling
-        # in case the shell out fails
-        `cd .mortar-mud;
-         if [ -z "$(which wget)" ]; then
-             curl -s https://s3.amazonaws.com/mortar-public-artifacts/mortar-mud.tgz | tar xz
-         else
-             wget -qO- https://s3.amazonaws.com/mortar-public-artifacts/mortar-mud.tgz | tar xz
-         fi`
-      end
-
-      # todo: write out .mortar-mud/pig.properties with s3 keys, prompt the user
-      # for these or pull the from the api?
+      download_and_extract("https://s3.amazonaws.com/mortar-public-artifacts/mortar-mud.tgz", "pig")
     end
 
     def pig_env
@@ -129,6 +126,10 @@ class Mortar::Local
         'PIG_CLASSPATH' => realpath(".mortar-mud/pig/piglib") + "/*",
         'CLASSPATH' => realpath(".mortar-mud/pig/lib")  + "/*"
       }
+      if has_mortar_python
+        pigenv['PATH'] = realpath(".mortar-mud/python/bin") + ":" + ENV['PATH']
+      end
+
       return pigenv
     end
 
@@ -152,6 +153,36 @@ class Mortar::Local
         p = Pathname.new(relpath).realpath
         return p.to_s
       end
+    end
+
+    def download_and_extract(url, subdirectory)
+      FileUtils.mkdir_p(".mortar-mud")
+      if File.exists?(".mortar-mud/#{subdirectory}")
+        return true
+      else
+        # todo: there's almost certainly a ruby call we can make to grab this and/or untar it, the urls
+        # should be configurable so we can override for development, and we should have error handling
+        # in case the shell out fails
+        `cd .mortar-mud;
+         if [ -z "$(which wget)" ]; then
+             curl -s #{url} | tar xz
+         else
+             wget -qO- #{url} | tar xz
+         fi`
+        return ($?.to_i == 0)
+      end
+    end
+
+    def os_platform_name
+      if defined? RbConfig
+        return RbConfig::CONFIG['target_os']
+      else
+        return Config::CONFIG['target_os']
+      end
+    end
+
+    def has_mortar_python
+      return File.directory?(".mortar-mud/python")
     end
 
   end
