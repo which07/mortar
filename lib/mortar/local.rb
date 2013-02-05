@@ -95,7 +95,12 @@ class Mortar::Local
         # todo: there's almost certainly a ruby call we can make to grab this and/or untar it, the url
         # should be configurable so we can override for development, and we should have error handling
         # in case the shell out fails
-        `cd .mortar-mud && wget -qO- https://s3.amazonaws.com/mortar-public-artifacts/mortar-mud.tgz | tar xz`
+        `cd .mortar-mud;
+         if [ -z "$(which wget)" ]; then
+             curl -s https://s3.amazonaws.com/mortar-public-artifacts/mortar-mud.tgz | tar xz
+         else
+             wget -qO- https://s3.amazonaws.com/mortar-public-artifacts/mortar-mud.tgz | tar xz
+         fi`
       end
 
       # todo: write out .mortar-mud/pig.properties with s3 keys, prompt the user
