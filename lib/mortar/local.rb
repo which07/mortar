@@ -149,7 +149,8 @@ class Mortar::Local
       if defined? File.realpath
         return File.realpath(relpath)
       else
-        return Pathname.new(relpath).realpath
+        p = Pathname.new(relpath).realpath
+        return p.to_s
       end
     end
 
