@@ -17,6 +17,7 @@
 # used under an MIT license (https://github.com/heroku/heroku/blob/master/LICENSE).
 #
 
+require "tempfile"
 require "mortar"
 require "mortar/helpers"
 require "mortar/errors"
@@ -26,24 +27,36 @@ class Mortar::Local
     include Mortar::Helpers
 
     def run(pig_script)
-      cmd = pig_exec_path + " -exectype local "
-      mortar_params.each{ |name, value|
-        cmd += "-param #{name}=#{value} "
-      }
-      cmd += "-propertyFile " + realpath(".mortar-mud/pig.properties") + " "
-      cmd += "-file " + pig_script.path
+
+      cmd = "#!/bin/sh\n\n"
 
       # Throw in the environment variables
       pig_env.each{ |name, value|
-        cmd = "#{name}=#{value} " + cmd
+        cmd += "export #{name}=#{value}\n"
       }
-
       # Now, put us in the right directory (paths in mortar
       # projects are relative to the pigscripts directory)
-      cmd = "cd " + realpath("pigscripts") + " && " + cmd
+      cmd += "cd " + realpath("pigscripts") + "\n"
+
+
+      cmd += pig_exec_path + " -exectype local \\\n"
+      mortar_params.each{ |name, value|
+        cmd += "-param #{name}=#{value} \\\n"
+      }
+      cmd += "-propertyFile " + realpath(".mortar-mud/pig.properties") + " \\\n"
+      cmd += "-file " + pig_script.path
+      cmd += "\n\n"
+
+      script = Tempfile.new("mortar-mud-")
+      script.write(cmd)
+      script.close(false)
+      FileUtils.chmod(0755, script.path)
 
       # Let's run this sucker!
-      system(cmd)
+      system(script.path)
+
+      # Now be polite and clean after yourself
+      script.unlink
     end
 
     def check_java
