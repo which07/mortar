@@ -38,6 +38,7 @@ class Mortar::Local
       # projects are relative to the pigscripts directory)
       cmd += "cd " + realpath("pigscripts") + "\n"
 
+      cmd += ". " + realpath(".mortar-mud/pythonenv/bin/activate") + "\n"
 
       cmd += pig_exec_path + " -exectype local \\\n"
       mortar_params.each{ |name, value|
@@ -80,6 +81,57 @@ class Mortar::Local
       else
         check_python_nix()
       end
+    end
+
+    def check_python_virtenv()
+      FileUtils.mkdir_p(".mortar-mud")
+      if File.exists?(".mortar-mud/pythonenv")
+        return true
+      else
+        `python -m virtualenv --help`
+        if (0 != $?.to_i)
+          return false
+        else
+          `#{python_exec_path} -m virtualenv .mortar-mud/pythonenv`
+          return (0 == $?.to_i)
+        end
+      end
+    end
+
+    # Installs pip and any dependencies
+    def check_python_env
+      if !check_install_pip()
+        return false
+      end
+      if !File.exists?("requirements.txt")
+        return true
+      end
+      `. .mortar-mud/pythonenv/bin/activate
+       .mortar-mud/pythonenv/bin/pip install --requirement requirements.txt`
+      return (0 == $?.to_i)
+    end
+
+    def check_install_pip
+      if File.exists?(".mortar-mud/pythonenv/bin/pip")
+        return true
+      end
+      FileUtils.mkdir_p(".mortar-mud/pythonenv/bin")
+      url = "https://raw.github.com/pypa/pip/master/contrib/get-pip.py"
+      `cd .mortar-mud;
+       if [ -z "$(which wget)" ]; then
+           curl -O #{url}
+       else
+           wget #{url}
+       fi`
+      if (0 != $?.to_i)
+        return false
+      end
+      `cd .mortar-mud;
+       . pythonenv/bin/activate
+       #{python_exec_path} get-pip.py`
+      result = $?
+      File.delete(".mortar-mud/get-pip.py")
+      return (0 == result.to_i)
     end
 
     def check_python_osx
@@ -136,6 +188,10 @@ class Mortar::Local
     # Path to the mortar installed pig executable
     def pig_exec_path
       return realpath(".mortar-mud/pig/bin/pig")
+    end
+
+    def python_exec_path
+      return realpath(".mortar-mud/pythonenv/bin/python")
     end
 
     def mortar_params

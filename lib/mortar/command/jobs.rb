@@ -81,6 +81,14 @@ class Mortar::Command::Jobs < Mortar::Command::Base
       error("You do not appear to have a usable python install.")
     end
 
+    unless Mortar::Local.check_python_virtenv()
+      error("Please install python-virtualenv")
+    end
+
+    unless Mortar::Local.check_python_env()
+      error("Failed installing dependencies")
+    end
+
     unless Mortar::Local.check_aws_access()
       msg =  "Please specify your aws access key via enviroment variable AWS_ACCESS_KEY\n"
       msg += "and your aws secret key via enviroment variable AWS_SECRET_KEY"
