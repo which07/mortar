@@ -92,7 +92,7 @@ class Mortar::Local
         if (0 != $?.to_i)
           return false
         else
-          `#{python_exec_path} -m virtualenv .mortar-mud/pythonenv`
+          `#{python_exec_path(false)} -m virtualenv .mortar-mud/pythonenv`
           return (0 == $?.to_i)
         end
       end
@@ -190,8 +190,16 @@ class Mortar::Local
       return realpath(".mortar-mud/pig/bin/pig")
     end
 
-    def python_exec_path
-      return realpath(".mortar-mud/pythonenv/bin/python")
+    def python_exec_path(inenv=true)
+      if inenv
+        return realpath(".mortar-mud/pythonenv/bin/python")
+      else
+        if has_mortar_python
+          return realpath(".mortar-mud/python/bin/python")
+        else
+          return 'python'
+        end
+      end
     end
 
     def mortar_params
