@@ -88,7 +88,7 @@ class Mortar::Local
       if File.exists?(".mortar-mud/pythonenv")
         return true
       else
-        `python -m virtualenv --help`
+        `#{python_exec_path(false)} -m virtualenv --help`
         if (0 != $?.to_i)
           return false
         else
