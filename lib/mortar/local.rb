@@ -28,6 +28,24 @@ class Mortar::Local
 
     def run(pig_script)
 
+log4jproperties = "
+log4j.rootLogger=fatal, PIGCONSOLE
+log4j.appender.PIGCONSOLE=org.apache.log4j.ConsoleAppender
+log4j.appender.PIGCONSOLE.target=System.err
+log4j.appender.PIGCONSOLE.layout=org.apache.log4j.PatternLayout
+log4j.appender.PIGCONSOLE.layout.ConversionPattern=%m%n
+log4j.appender.PIGCONSOLE.encoding=UTF-8
+log4j.logger.org.apache.hadoop=fatal, PIGCONSOLE
+log4j.logger.com.mortardata.hawk.progress.HawkProgressEventHandler=info, PIGCONSOLE
+"
+      # Write out the log4j properties file
+      l4jpath = ".mortar-mud/log4j.properties"
+      if File.exists?(l4jpath) then
+        FileUtils.rm(l4jpath)
+      end
+      File.open(l4jpath, 'w') {|f| f.write(log4jproperties) }
+
+
       cmd = "#!/bin/sh\n\n"
 
       # Throw in the environment variables
@@ -41,6 +59,10 @@ class Mortar::Local
       cmd += ". " + realpath(".mortar-mud/pythonenv/bin/activate") + "\n"
 
       cmd += pig_exec_path + " -exectype local \\\n"
+
+      cmd += "-log4jconf " + realpath(".mortar-mud/log4j.properties") + " \\\n"
+
+
       mortar_params.each{ |name, value|
         cmd += "-param #{name}=#{value} \\\n"
       }
@@ -170,13 +192,12 @@ class Mortar::Local
     end
 
     def pig_env
-      # todo: separate out classpath and pig_classpath to two diff diretories
-      # once the mud installer does so.  Also, do these need to be absolute
-      # paths?
       pigenv = {
         'PIG_HOME' => realpath(".mortar-mud/pig"),
         'PIG_CLASSPATH' => realpath(".mortar-mud/pig/piglib") + "/*",
-        'CLASSPATH' => realpath(".mortar-mud/pig/lib")  + "/*"
+        'CLASSPATH' => realpath(".mortar-mud/log4j.properties") + ":",
+        'PIG_MAIN_CLASS' => "com.mortardata.hawk.HawkMain",
+        'PIG_OPTS' => '-Dpig.events.logformat=humanreadable',
       }
       if has_mortar_python
         pigenv['PATH'] = realpath(".mortar-mud/python/bin") + ":" + ENV['PATH']
