@@ -73,34 +73,28 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     validate_arguments!
     pigscript = validate_pigscript!(pigscript_name)
 
-    unless Mortar::Local.check_java()
-      error("You do not appear to have a usable java install.  Please install java and/or set JAVA_HOME")
-    end
-
-    unless Mortar::Local.check_python()
-      error("You do not appear to have a usable python install.")
-    end
-
-    unless Mortar::Local.check_python_virtenv()
-      error("Please install python-virtualenv")
-    end
-
-    unless Mortar::Local.check_python_env()
-      error("Failed installing dependencies")
-    end
-
-    unless Mortar::Local.check_aws_access()
-      msg =  "Please specify your aws access key via enviroment variable AWS_ACCESS_KEY\n"
-      msg += "and your aws secret key via enviroment variable AWS_SECRET_KEY"
-      error(msg)
-    end
-
-    # This function is idempotent and so a no-op if
-    # pig is already setup locally
-    Mortar::Local.install_pig()
+    Mortar::Local.check_install()
 
     # Actually run the script in local mode
     Mortar::Local.run(pigscript)
+  end
+
+  def run_illustrate
+    pigscript_name = shift_argument
+    unless pigscript_name
+      error("Usage: mortar jobs:run_illustrate PIGSCRIPT ALIAS\nMust specify PIGSCRIPT.")
+    end
+    pig_alias = shift_argument
+    unless pig_alias
+      error("Usage: mortar jobs:run_illustrate PIGSCRIPT ALIAS\nMust specify ALIAS.")
+    end
+    validate_arguments!
+    pigscript = validate_pigscript!(pigscript_name)
+
+    Mortar::Local.check_install()
+
+    # Actually run the script in local mode
+    Mortar::Local.illustrate(pigscript, pig_alias)
   end
 
 

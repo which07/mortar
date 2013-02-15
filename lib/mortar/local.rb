@@ -26,8 +26,20 @@ class Mortar::Local
   class << self
     include Mortar::Helpers
 
-    def run(pig_script)
+    def illustrate(pig_script, pig_alias)
+      cmd = "-e 'illustrate "
+      mortar_params.each{ |name, value|
+        cmd += "-param #{name}=#{value} "
+      }
+      cmd += "-script #{pig_script.path} #{pig_alias}'"
+      run_pig_process(cmd)
+    end
 
+    def run(pig_script)
+      run_pig_process(" -f #{pig_script.path}")
+    end
+
+    def run_pig_process(pig_command)
 log4jproperties = "
 log4j.rootLogger=fatal, PIGCONSOLE
 log4j.appender.PIGCONSOLE=org.apache.log4j.ConsoleAppender
@@ -62,12 +74,11 @@ log4j.logger.com.mortardata.hawk.progress.HawkProgressEventHandler=info, PIGCONS
 
       cmd += "-log4jconf " + realpath(".mortar-mud/log4j.properties") + " \\\n"
 
-
       mortar_params.each{ |name, value|
         cmd += "-param #{name}=#{value} \\\n"
       }
       cmd += "-propertyFile " + realpath(".mortar-mud/pig.properties") + " \\\n"
-      cmd += "-file " + pig_script.path
+      cmd += pig_command
       cmd += "\n\n"
 
       script = Tempfile.new("mortar-mud-")
@@ -75,12 +86,18 @@ log4j.logger.com.mortardata.hawk.progress.HawkProgressEventHandler=info, PIGCONS
       script.close(false)
       FileUtils.chmod(0755, script.path)
 
+      # DEBUG DEBUG DEBUG
+      `cp #{script.path} #{script.path}.bak`
+      print "Running #{script.path}.bak\n"
+
       # Let's run this sucker!
       system(script.path)
 
       # Now be polite and clean after yourself
       script.unlink
+
     end
+
 
     def check_java
       # Todo: walk around and look for a java install based upon the
@@ -268,6 +285,35 @@ log4j.logger.com.mortardata.hawk.progress.HawkProgressEventHandler=info, PIGCONS
 
     def has_mortar_python
       return File.directory?(".mortar-mud/python")
+    end
+
+
+    def check_install()
+      unless Mortar::Local.check_java()
+        error("You do not appear to have a usable java install.  Please install java and/or set JAVA_HOME")
+      end
+
+      unless Mortar::Local.check_python()
+        error("You do not appear to have a usable python install.")
+      end
+
+      unless Mortar::Local.check_python_virtenv()
+        error("Please install python-virtualenv")
+      end
+
+      unless Mortar::Local.check_python_env()
+        error("Failed installing dependencies")
+      end
+
+      unless Mortar::Local.check_aws_access()
+        msg =  "Please specify your aws access key via enviroment variable AWS_ACCESS_KEY\n"
+        msg += "and your aws secret key via enviroment variable AWS_SECRET_KEY"
+        error(msg)
+      end
+
+      # This function is idempotent and so a no-op if
+      # pig is already setup locally
+      Mortar::Local.install_pig()
     end
 
   end
