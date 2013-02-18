@@ -38,6 +38,7 @@ module Mortar
           is_ok_version = versions[0].to_i >= 2 ||
                           ( versions[0].to_i == 1 && versions[1].to_i >= 8 ) ||
                           ( versions[0].to_i == 1 && versions[1].to_i == 7 && versions[2].to_i >= 7)
+          is_ok_version = true
         end
         has_git && is_ok_version
       end
