@@ -242,9 +242,12 @@ log4j.logger.com.mortardata.hawk.progress.HawkProgressEventHandler=info, PIGCONS
 
     def mortar_params
       # todo: add the remaining automatic parameters that are missing
-      params = {
-        'MORTAR_EMAIL_S3_ESCAPED' => Mortar::Auth.user_s3_safe
-      }
+      params = {}
+      if ENV['MORTAR_EMAIL_S3_ESCAPED']
+        params['MORTAR_EMAIL_S3_ESCAPED'] = ENV['MORTAR_EMAIL_S3_ESCAPED']
+      else
+        params['MORTAR_EMAIL_S3_ESCAPED'] = Mortar::Auth.user_s3_safe
+      end
       return params
     end
 
