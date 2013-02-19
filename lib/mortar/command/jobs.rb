@@ -79,6 +79,10 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     Mortar::Local.run(pigscript)
   end
 
+  def check_dependencies
+    Mortar::Local.check_install()
+  end
+
   def run_illustrate
     pigscript_name = shift_argument
     unless pigscript_name
