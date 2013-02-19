@@ -92,13 +92,22 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     unless pig_alias
       error("Usage: mortar jobs:run_illustrate PIGSCRIPT ALIAS\nMust specify ALIAS.")
     end
+
+    output_directory = shift_argument
+
     validate_arguments!
     pigscript = validate_pigscript!(pigscript_name)
 
     Mortar::Local.check_install()
 
+    
+
     # Actually run the script in local mode
-    Mortar::Local.illustrate(pigscript, pig_alias)
+    if output_directory then
+      Mortar::Local.illustrate(pigscript, pig_alias, output_directory)
+    else
+      Mortar::Local.illustrate(pigscript, pig_alias)
+    end
   end
 
 

@@ -26,13 +26,13 @@ class Mortar::Local
   class << self
     include Mortar::Helpers
 
-    def illustrate(pig_script, pig_alias)
+    def illustrate(pig_script, pig_alias, output_directory = ".")
       cmd = "-e 'illustrate "
       mortar_params.each{ |name, value|
         cmd += "-param #{name}=#{value} "
       }
       cmd += "-script #{pig_script.path} "
-      cmd += "-out ./pig.out #{pig_alias}'"
+      cmd += "-out #{output_directory}/pig.out #{pig_alias}'"
       run_pig_process(cmd)
     end
 
