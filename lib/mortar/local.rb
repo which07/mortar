@@ -52,10 +52,10 @@ log4j.logger.com.mortardata.hawk.progress.HawkProgressEventHandler=info, PIGCONS
 "
       # Write out the log4j properties file
       l4jpath = ".mortar-mud/log4j.properties"
-      if File.exists?(l4jpath) then
-        FileUtils.rm(l4jpath)
+      if not File.exists?(l4jpath) then
+        File.open(l4jpath, 'w') {|f| f.write(log4jproperties) }
       end
-      File.open(l4jpath, 'w') {|f| f.write(log4jproperties) }
+
 
 
       cmd = "#!/bin/sh\n\n"
