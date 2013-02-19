@@ -31,7 +31,8 @@ class Mortar::Local
       mortar_params.each{ |name, value|
         cmd += "-param #{name}=#{value} "
       }
-      cmd += "-script #{pig_script.path} #{pig_alias}'"
+      cmd += "-script #{pig_script.path} "
+      cmd += "-out ./pig.out #{pig_alias}'"
       run_pig_process(cmd)
     end
 
