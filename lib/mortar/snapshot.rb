@@ -23,11 +23,11 @@ module Mortar
       curdir = Dir.pwd
 
       # create a snapshot branch in a temporary directory
-      tmpdir, snapshot_branch = action("Taking code snapshot") do
+      snapshot_dir, snapshot_branch = action("Taking code snapshot") do
         git.create_snapshot_branch()
       end
 
-      Dir.chdir(tmpdir)
+      Dir.chdir(snapshot_dir)
 
       git_ref = action("Sending code snapshot to Mortar") do
         # push the code
@@ -39,8 +39,8 @@ module Mortar
         ref
       end
 
+      FileUtils.remove_entry_secure(snapshot_dir)
       Dir.chdir(curdir)
-      FileUtils.remove_entry_secure(tmpdir)
       return git_ref
     end
   end

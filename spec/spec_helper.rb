@@ -247,7 +247,10 @@ def git_create_untracked_file(project)
   untracked_file
 end
 
-def post_validate_git_snapshot(git, starting_status, snapshot_dir, snapshot_branch)
+def create_and_validate_git_snapshot(git)
+  starting_status = git.status
+  snapshot_dir, snapshot_branch = git.create_snapshot_branch
+
   snapshot_dir.should_not be_nil
   snapshot_branch.should_not be_nil
   snapshot_branch.should_not == "master"
@@ -255,7 +258,7 @@ def post_validate_git_snapshot(git, starting_status, snapshot_dir, snapshot_bran
   git.status.should == starting_status
   git.has_conflicts?.should be_false
 
-  # ensure snapshort is in a temp directory
+  # ensure snapshot is in a temp directory
   File.exists?(snapshot_dir).should be_true
 
   curdir = Dir.pwd
@@ -264,8 +267,8 @@ def post_validate_git_snapshot(git, starting_status, snapshot_dir, snapshot_bran
   # ensure the snapshot branch exists
   git.git("branch").include?(snapshot_branch).should be_true
 
-  FileUtils.remove_entry_secure(snapshot_dir)
   Dir.chdir(curdir)
+  FileUtils.remove_entry_secure(snapshot_dir)
 end
 
 require "mortar/helpers"
