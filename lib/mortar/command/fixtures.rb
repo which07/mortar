@@ -15,11 +15,131 @@
 #
 
 require "mortar/command/base"
+require "mortar/snapshot"
 
 # create a reusable fixture.
 #
 class Mortar::Command::Fixtures < Mortar::Command::Base
+  include Mortar::Snapshot
 
+  # fixtures
+  #
+  # Show available fixtures
+  #
+  # Examples:
+  #
+  # $ mortar fixtures
+  #
+  def fixtures
+  end
+
+  # fixtures:limit PIGSCRIPT ALIAS N
+  #
+  # Generate a fixture of N records from ALIAS.
+  #
+  # -n, --name      NAME        # Specify a name for this fixture. default = PIGSCRIPT_ALIAS_LIMIT_N
+  # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
+  #
+  # Example:
+  #
+  # Take 100 records from alias
+  # $ mortar fixtures:limit my_script alias 100
+  def limit
+    pigscript_name = shift_argument
+    fixture_alias = shift_argument
+    n = shift_argument
+    unless pigscript_name and fixture_alias and n
+      error("Usage: mortar fixtures:limit PIGSCRIPT ALIAS N\nMust specify PIGSCRIPT, ALIAS, N")
+    end
+    validate_arguments!
+
+    pigscript = validate_pigscript!(pigscript_name)
+    unless n.to_i > 0
+      error("N must be a positive integer")
+    end
+
+    fixture_name = options[:name] || (pigscript_name + "_" + fixture_alias + "_limit_" + n)
+    git_ref = create_and_push_snapshot_branch(git, project)
+
+    response = action("Requesting fixture creation") do
+      api.post_fixture_generate(project.name, pigscript.name, git_ref, 
+                                fixture_name, "LIMIT", fixture_alias, n)
+    end
+  end
+
+  # fixtures:sample PIGSCRIPT ALIAS FRACTION
+  #
+  # Generate a fixture from a random sample of FRACTION*100% of the records in ALIAS.
+  #
+  # -n, --name      NAME        # Specify a name for this fixture. default = PIGSCRIPT_ALIAS_SAMPLE_FRACTION
+  # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
+  #
+  # Example:
+  #
+  # Take 1% of the records from alias
+  # $ mortar fixtures:sample my_script alias 0.01
+  #
+  def sample
+    pigscript_name = shift_argument
+    fixture_alias = shift_argument
+    n = shift_argument
+    unless pigscript_name and fixture_alias and n
+      error("Usage: mortar fixtures:sample PIGSCRIPT ALIAS N\nMust specify PIGSCRIPT, ALIAS, N")
+    end
+    validate_arguments!
+
+    pigscript = validate_pigscript!(pigscript_name)
+    unless n.to_f > 0.0 and n.to_f < 1.0
+      error("N must be a decimal between 0 and 1")
+    end
+
+    fixture_name = options[:name] || (pigscript_name + "_" + fixture_alias + "_sample_" + n)
+    git_ref = create_and_push_snapshot_branch(git, project)
+    
+    response = action("Requesting fixture creation") do
+      api.post_fixture_generate(project.name, pigscript.name, git_ref, 
+                                fixture_name, "SAMPLE", fixture_alias, n)
+    end
+  end
+
+  # fixtures:filter PIGSCRIPT ALIAS FILTER
+  #
+  # Generate a fixture from all the records in ALIAS which pass the Pig stament "FILTER ALIAS BY FILTER".
+  # The -n/--name parameter is required.
+  #
+  # -n, --name      NAME        # Specify a name for this fixture.
+  # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
+  #
+  # Example:
+  #
+  # Take records from alias for which f1 > f2
+  # $ mortar fixtures:filter my_script alias "f1 > f2"
+  def filter
+    pigscript_name = shift_argument
+    fixture_alias = shift_argument
+    filter = get_remaining_arguments_as_string
+    unless pigscript_name and fixture_alias and filter
+      error("Usage: mortar fixtures:filter PIGSCRIPT ALIAS FILTER\nMust specify PIGSCRIPT, ALIAS, FILTER")
+    end
+    validate_arguments!
+
+    validate_git_based_project!
+    pigscript = validate_pigscript!(pigscript_name)
+
+    unless options[:name]
+      error("Must specify a fixture name with -n/--name")
+    end
+    git_ref = create_and_push_snapshot_branch(git, project)
+    
+    response = action("Requesting fixture creation") do
+      api.post_fixture_generate(project.name, pigscript.name, git_ref, 
+                                options[:name], "LIMIT", fixture_alias, filter, 
+                                :parameters => pig_parameters).body
+    end
+    puts response
+  end
+
+=begin
   WARNING_NUM_ROWS = 50
 
   #fixtures:head [INPUT_URL] [NUM_ROWS] [FIXTURE_NAME]
@@ -96,5 +216,6 @@ class Mortar::Command::Fixtures < Mortar::Command::Base
       end
     end
   end
+=end
 
 end

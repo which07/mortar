@@ -230,6 +230,10 @@ protected
     Mortar::Command.shift_argument
   end
 
+  def get_remaining_arguments_as_string
+    Mortar::Command.get_remaining_arguments_as_string
+  end
+
   def validate_arguments!
     Mortar::Command.validate_arguments!
   end

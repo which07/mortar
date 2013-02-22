@@ -90,6 +90,12 @@ module Mortar
       @invalid_arguments.shift.dup rescue nil
     end
 
+    def self.get_remaining_arguments_as_string
+      result = @invalid_arguments.join(' ')
+      @invalid_arguments = []
+      result
+    end
+
     def self.validate_arguments!
       unless invalid_arguments.empty?
         arguments = invalid_arguments.map {|arg| "\"#{arg}\""}
