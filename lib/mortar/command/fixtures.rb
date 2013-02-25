@@ -58,7 +58,7 @@ class Mortar::Command::Fixtures < Mortar::Command::Base
       error("N must be a positive integer")
     end
 
-    fixture_name = options[:name] || (pigscript_name + "_" + fixture_alias + "_limit_" + n)
+    fixture_name = options[:name] || ("file:///tmp/fixtures/" + pigscript_name + "__" + fixture_alias + "__limit__" + n)
     git_ref = create_and_push_snapshot_branch(git, project)
 
     response = action("Requesting fixture creation") do
@@ -93,7 +93,7 @@ class Mortar::Command::Fixtures < Mortar::Command::Base
       error("N must be a decimal between 0 and 1")
     end
 
-    fixture_name = options[:name] || (pigscript_name + "_" + fixture_alias + "_sample_" + n)
+    fixture_name = options[:name] || ("file:///tmp/fixtures/" + pigscript_name + "__" + fixture_alias + "__sample__" + n)
     git_ref = create_and_push_snapshot_branch(git, project)
     
     response = action("Requesting fixture creation") do
