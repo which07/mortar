@@ -79,6 +79,20 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     Mortar::Local.run(pigscript)
   end
 
+  def run_map_reduce
+    pigscript_name = shift_argument
+    unless pigscript_name
+      error("Usage: mortar jobs:run PIGSCRIPT\nMust specify PIGSCRIPT.")
+    end
+    validate_arguments!
+    pigscript = validate_pigscript!(pigscript_name)
+
+    Mortar::Local.check_install()
+
+    # Actually run the script in local mode
+    Mortar::Local.run(pigscript, false)
+  end
+
   def check_dependencies
     Mortar::Local.check_install()
   end

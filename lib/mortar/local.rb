@@ -36,11 +36,12 @@ class Mortar::Local
       run_pig_process(cmd)
     end
 
-    def run(pig_script)
-      run_pig_process(" -f #{pig_script.path}")
+    def run(pig_script, local = true)
+      run_pig_process(" -f #{pig_script.path}", local)
     end
 
-    def run_pig_process(pig_command)
+
+    def run_pig_process(pig_command, local)
 log4jproperties = "
 log4j.rootLogger=fatal, PIGCONSOLE
 log4j.appender.PIGCONSOLE=org.apache.log4j.ConsoleAppender
@@ -71,7 +72,11 @@ log4j.logger.com.mortardata.hawk.progress.HawkProgressEventHandler=info, PIGCONS
 
       cmd += ". " + realpath(".mortar-mud/pythonenv/bin/activate") + "\n"
 
-      cmd += pig_exec_path + " -exectype local \\\n"
+      if local then
+        cmd += pig_exec_path + " -exectype local \\\n"
+      else
+        cmd += pig_exec_path + " -exectype mapreduce \\\n"
+      end
 
       cmd += "-log4jconf " + realpath(".mortar-mud/log4j.properties") + " \\\n"
 
