@@ -85,6 +85,12 @@ log4j.logger.com.mortardata.hawk.progress.HawkProgressEventHandler=info, PIGCONS
       }
       cmd += "-propertyFile " + realpath(".mortar-mud/pig.properties") + " \\\n"
       cmd += pig_command
+      if not local then
+        # On the server side run pig in the background and write
+        # out the pid so the controller and communicate with pig
+        cmd += " & \n\n"
+        cmd += "echo $! > pig.pid\n\n"
+      end
       cmd += "\n\n"
 
       script = Tempfile.new("mortar-mud-")
