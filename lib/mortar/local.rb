@@ -63,7 +63,7 @@ log4j.logger.com.mortardata.hawk.progress.HawkProgressEventHandler=info, PIGCONS
       cmd = "#!/bin/sh\n\n"
 
       # Throw in the environment variables
-      pig_env.each{ |name, value|
+      pig_env(local).each{ |name, value|
         cmd += "export #{name}=#{value}\n"
       }
       # Now, put us in the right directory (paths in mortar
@@ -214,14 +214,17 @@ log4j.logger.com.mortardata.hawk.progress.HawkProgressEventHandler=info, PIGCONS
       download_and_extract("https://s3.amazonaws.com/mortar-public-artifacts/mortar-mud.tgz", "pig")
     end
 
-    def pig_env
+    def pig_env(local_run = true)
       pigenv = {
         'PIG_HOME' => realpath(".mortar-mud/pig"),
         'PIG_CLASSPATH' => realpath(".mortar-mud/pig/piglib") + "/*",
         'CLASSPATH' => realpath(".mortar-mud/log4j.properties") + ":",
         'PIG_MAIN_CLASS' => "com.mortardata.hawk.HawkMain",
-        'PIG_OPTS' => '-Dpig.events.logformat=humanreadable',
       }
+
+      if local_run then
+        pigenv['PIG_OPTS'] = '-Dpig.events.logformat=humanreadable'
+      end
       if has_mortar_python
         pigenv['PATH'] = realpath(".mortar-mud/python/bin") + ":" + ENV['PATH']
       end
