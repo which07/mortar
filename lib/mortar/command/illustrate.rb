@@ -15,13 +15,12 @@
 #
 
 require "mortar/command/base"
-require "mortar/snapshot"
 
 # sample and show data flowing through a pigscript
 #
 class Mortar::Command::Illustrate < Mortar::Command::Base
   
-  include Mortar::Snapshot
+  include Mortar::Git
     
   # illustrate [PIGSCRIPT] [ALIAS]
   #
@@ -49,7 +48,7 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
     validate_arguments!
     validate_git_based_project!
     pigscript = validate_pigscript!(pigscript_name)
-    git_ref = create_and_push_snapshot_branch(git, project)
+    git_ref = git.create_and_push_snapshot_branch(project)
     
     illustrate_id = nil
     action("Starting illustrate") do

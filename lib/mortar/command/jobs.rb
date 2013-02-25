@@ -15,14 +15,13 @@
 #
 
 require "mortar/command/base"
-require "mortar/snapshot"
 require "time"
 
 # run and view status of pig jobs (run, status)
 #
 class Mortar::Command::Jobs < Mortar::Command::Base
 
-  include Mortar::Snapshot
+  include Mortar::Git
 
   # jobs
   #
@@ -100,7 +99,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
  
     validate_git_based_project!
     pigscript = validate_pigscript!(pigscript_name)
-    git_ref = create_and_push_snapshot_branch(git, project)
+    git_ref = git.create_and_push_snapshot_branch(project)
     notify_on_job_finish = ! options[:donotnotify]
     
     # post job to API

@@ -15,6 +15,7 @@
 #
 
 require "vendor/mortar/uuid"
+require "mortar/helpers"
 require "set"
 
 module Mortar
@@ -130,6 +131,31 @@ module Mortar
       
         Dir.chdir(curdir)
         return tmpdir, snapshot_branch
+      end
+
+      def create_and_push_snapshot_branch(project)
+        curdir = Dir.pwd
+
+        # create a snapshot branch in a temporary directory
+        snapshot_dir, snapshot_branch = Helpers.action("Taking code snapshot") do
+          create_snapshot_branch()
+        end
+
+        Dir.chdir(snapshot_dir)
+
+        git_ref = Helpers.action("Sending code snapshot to Mortar") do
+          # push the code
+          push(project.remote, snapshot_branch)
+
+          # grab the commit hash and clean out the branch from the local branches
+          ref = git_ref(snapshot_branch)
+          branch_delete(snapshot_branch)
+          ref
+        end
+
+        FileUtils.remove_entry_secure(snapshot_dir)
+        Dir.chdir(curdir)
+        return git_ref
       end
 
       #    
