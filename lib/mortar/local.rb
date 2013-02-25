@@ -224,7 +224,7 @@ log4j.logger.com.mortardata.hawk.progress.HawkProgressEventHandler=info, PIGCONS
       pigenv = {
         'PIG_HOME' => realpath(".mortar-mud/pig"),
         'PIG_CLASSPATH' => realpath(".mortar-mud/pig/piglib") + "/*",
-        'CLASSPATH' => realpath(".mortar-mud/log4j.properties") + ":",
+        'CLASSPATH' => realpath(".mortar-mud/log4j.properties") + ":" + realpath(".mortar-mud/pig/lib"),
         'PIG_MAIN_CLASS' => "com.mortardata.hawk.HawkMain",
       }
 
