@@ -262,27 +262,21 @@ STASH
       
       it "creates a snapshot branch for a clean working directory" do
         with_git_initialized_project do |p|
-          starting_status = @git.status
-          snapshot_branch = @git.create_snapshot_branch
-          post_validate_git_snapshot(@git, starting_status, snapshot_branch)
+          create_and_validate_git_snapshot(@git)
         end
       end
       
       it "creates a snapshot branch for an added file" do
         with_git_initialized_project do |p|
           git_add_file(@git, p)
-          starting_status = @git.status
-          snapshot_branch = @git.create_snapshot_branch
-          post_validate_git_snapshot(@git, starting_status, snapshot_branch)
+          create_and_validate_git_snapshot(@git)
         end
       end
       
       it "creates a snapshot branch for an untracked file" do
         with_git_initialized_project do |p|
           git_create_untracked_file(p)
-          starting_status = @git.status
-          snapshot_branch = @git.create_snapshot_branch
-          post_validate_git_snapshot(@git, starting_status, snapshot_branch)
+          create_and_validate_git_snapshot(@git)
         end
       end
       

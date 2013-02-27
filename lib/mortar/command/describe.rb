@@ -15,13 +15,12 @@
 #
 
 require "mortar/command/base"
-require "mortar/snapshot"
 
 # show data schema for pigscript
 #
 class Mortar::Command::Describe < Mortar::Command::Base
   
-  include Mortar::Snapshot
+  include Mortar::Git
     
   # describe [PIGSCRIPT] [ALIAS]
   #
@@ -43,7 +42,7 @@ class Mortar::Command::Describe < Mortar::Command::Base
     validate_arguments!
     validate_git_based_project!
     pigscript = validate_pigscript!(pigscript_name)
-    git_ref = create_and_push_snapshot_branch(git, project)
+    git_ref = git.create_and_push_snapshot_branch(project)
     
     describe_id = nil
     action("Starting describe") do

@@ -15,6 +15,7 @@
 #
 
 require "vendor/mortar/uuid"
+require "mortar/helpers"
 require "set"
 
 module Mortar
@@ -91,6 +92,12 @@ module Mortar
         unless has_commits?
           raise GitError, "No commits found in repository.  You must do an initial commit to initialize the repository."
         end
+
+        # Copy code into a temp directory so we don't confuse editors while snapshotting
+        curdir = Dir.pwd
+        tmpdir = Dir.mktmpdir
+        FileUtils.cp_r(Dir.glob('*', File::FNM_DOTMATCH) - ['.', '..'], tmpdir)
+        Dir.chdir(tmpdir)
       
         starting_branch = current_branch
         snapshot_branch = "mortar-snapshot-#{Mortar::UUID.create_random.to_s}"
@@ -122,7 +129,33 @@ module Mortar
           end
         end
       
-        snapshot_branch
+        Dir.chdir(curdir)
+        return tmpdir, snapshot_branch
+      end
+
+      def create_and_push_snapshot_branch(project)
+        curdir = Dir.pwd
+
+        # create a snapshot branch in a temporary directory
+        snapshot_dir, snapshot_branch = Helpers.action("Taking code snapshot") do
+          create_snapshot_branch()
+        end
+
+        Dir.chdir(snapshot_dir)
+
+        git_ref = Helpers.action("Sending code snapshot to Mortar") do
+          # push the code
+          push(project.remote, snapshot_branch)
+
+          # grab the commit hash and clean out the branch from the local branches
+          ref = git_ref(snapshot_branch)
+          branch_delete(snapshot_branch)
+          ref
+        end
+
+        FileUtils.remove_entry_secure(snapshot_dir)
+        Dir.chdir(curdir)
+        return git_ref
       end
 
       #    
