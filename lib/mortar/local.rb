@@ -15,36 +15,10 @@
 #
 
 require "mortar"
-require "mortar/local/pig"
-require "mortar/local/java"
-require "mortar/local/python"
-
 
 module Mortar
   module Local
-
-    # Main entry point to perform installation and configuration necessary
-    # to run pig on the users local machine
-    def Local.install_and_configure
-      java = Mortar::Local::Java.new()
-      unless java.check_install
-        error("Please install java and/or set JAVA_HOME before continueing")
-      end
-
-      pig = Mortar::Local::Pig.new()
-      pig.install()
-
-      py = Mortar::Local::Python.new()
-      unless py.check_or_install
-        # todo: how do we communicate that virtualenv isn't installed?
-        error("No suitable python installation found")
-      end
-
-      unless py.setup_project_python_environment
-        error("Unable to setup a python environment with your dependencies")
-      end
-    end
-
   end
 end
+
 

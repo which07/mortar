@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-require "mortar/local"
+require "mortar/local/controller"
 require "mortar/command/base"
 
 class Mortar::Command::Local < Mortar::Command::Base
@@ -27,7 +27,7 @@ class Mortar::Command::Local < Mortar::Command::Base
   # commands will also perform this step automatically.
   #
   def configure
-    Mortar::Local.install_and_configure
+    Mortar::Local::Controller.install_and_configure
   end
 
 
