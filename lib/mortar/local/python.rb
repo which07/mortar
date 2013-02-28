@@ -40,17 +40,29 @@ class Mortar::Local::Python
   # Performs an installation of python specific to this project, this
   # install includes pip and virtualenv
   def install_python_osx
+    @command = "#{local_install_directory}/python/bin/python"
     if should_do_python_install?
       FileUtils.mkdir_p(local_install_directory)
       progress_message "Installing python" do
         download_file(python_archive_url, local_install_directory)
         extract_tgz(local_install_directory + "/" + python_archive_file, local_install_directory)
+
+        # This has been seening coming out of the tgz w/o +x so we do
+        # here to be sure it has the necessary permissions
+        FileUtils.chmod(0755, @command)
         File.delete(local_install_directory + "/" + python_archive_file)
         note_install("python")
-        @command = "#{local_install_directory}/python/bin/python"
       end
     end
+    return true
   end
+
+  # Determines if a python install needs to occur, true if no
+  # python install present or a newer version is available
+  def should_do_python_install?
+    return (osx? and (not (File.exists?(python_directory))))
+  end
+
 
   # Checks if there is a usable versionpython already installed
   def check_system_python
@@ -107,6 +119,19 @@ class Mortar::Local::Python
 
   def python_env_dir
     return "#{local_install_directory}/pythonenv"
+  end
+
+  def python_directory
+    return "#{local_install_directory}/python"
+  end
+
+  def python_archive_url
+    # todo: this should be user overridable
+    return "https://s3.amazonaws.com/mortar-public-artifacts/mortar-python-osx.tgz"
+  end
+
+  def python_archive_file
+    File.basename(python_archive_url)
   end
 
   # Creates a virtualenv in a well known location and installs any packages
