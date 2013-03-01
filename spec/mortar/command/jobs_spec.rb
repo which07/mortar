@@ -188,11 +188,12 @@ STDOUT
           mock(Mortar::Auth.api).get_clusters() {
             Excon::Response.new(:body => { 
               'clusters' => [
-                  { 'cluster_id' => small_cluster_id, 'size' => small_cluster_size, 'running_job_ids' => [], 'status_code' => small_cluster_status }, 
-                  { 'cluster_id' => large_cluster_id, 'size' => large_cluster_size, 'running_job_ids' => [], 'status_code' => large_cluster_status },
-                  { 'cluster_id' => starting_cluster_id, 'size' => starting_cluster_size, 'running_job_ids' => [], 'status_code' => starting_cluster_status },
+                  { 'cluster_id' => small_cluster_id, 'size' => small_cluster_size, 'running_jobs' => [], 'status_code' => small_cluster_status }, 
+                  { 'cluster_id' => large_cluster_id, 'size' => large_cluster_size, 'running_jobs' => [], 'status_code' => large_cluster_status },
+                  { 'cluster_id' => starting_cluster_id, 'size' => starting_cluster_size, 'running_jobs' => [], 'status_code' => starting_cluster_status },
                   { 'cluster_id' => huge_busy_cluster_id, 'size' => huge_busy_cluster_size, 
-                    'running_job_ids' => ['c571a8c7f76a4fd4a67c103d753e2ee6'], 'status_code' => huge_busy_cluster_status  }
+                    'running_jobs' => [ { 'job_id' => 'c571a8c7f76a4fd4a67c103d753e2dd5',
+                       'job_name' => "", 'start_timestamp' => ""} ], 'status_code' => huge_busy_cluster_status  }
               ]})
           }
           mock(Mortar::Auth.api).post_job_existing_cluster("myproject", "my_script", is_a(String), large_cluster_id, 
