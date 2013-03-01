@@ -66,8 +66,6 @@ module Mortar
             File.open(entry_path, "wb") do |entry_file|
               entry_file.write(entry.read)
             end
-          else
-            # todo: should probably log.warn this?
           end
         end
       end
@@ -91,6 +89,15 @@ module Mortar
         return os_platform_name.start_with?('darwin')
       end
 
+      # Given an environment variable and a default value return
+      # the environment variable if specified, otherwise the default
+      def env_or_default(env_var, default)
+        if ENV[env_var].to_s != ""
+          return ENV[env_var]
+        else
+          return default
+        end
+      end
 
     end
   end

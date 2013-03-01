@@ -91,12 +91,9 @@ class Mortar::Local::Python
     [ "python#{desired_python_minor_version}", "python" ].each{ |cmd|
       path_to_python = `which #{cmd}`.to_s.strip
       if path_to_python != ''
-        # todo: should we also check for a minimum version? (in the case of 'python')
+        # todo: check for a minimum version (in the case of 'python')
         if check_virtualenv_installed(path_to_python)
           return path_to_python
-        else
-          # todo: should we notify the user we can't use this python since virtualenv
-          # isn't installed?  should we try and install it?
         end
       end
     }
@@ -109,8 +106,7 @@ class Mortar::Local::Python
   end
 
   def pip_requirements_path
-    # todo: users can override this location
-    return Dir.getwd + "/udfs/python/requirements.txt"
+    return env_or_default('PIP_REQ_FILE', Dir.getwd + "/udfs/python/requirements.txt")
   end
 
   def has_python_requirements
@@ -126,8 +122,8 @@ class Mortar::Local::Python
   end
 
   def python_archive_url
-    # todo: this should be user overridable
-    return "https://s3.amazonaws.com/mortar-public-artifacts/mortar-python-osx.tgz"
+    return env_or_default('PYTHON_DISTRO_URL',
+                  "https://s3.amazonaws.com/mortar-public-artifacts/mortar-python-osx.tgz")
   end
 
   def python_archive_file
@@ -146,13 +142,20 @@ class Mortar::Local::Python
         pip_output = `. #{python_env_dir}/bin/activate &&
           #{python_env_dir}/bin/pip install --requirement #{pip_requirements_path}`
           if 0 != $?.to_i
-            # todo: what do we do with the output of pip here? Write it to a file?
+            File.open(pip_error_log_path, 'w') { |f|
+              f.write(pip_output)
+            }
             return false
           end
         note_install("pythonenv")
       end
     end
     return true
+  end
+
+  def pip_error_log_path
+    return env_or_default('PIP_ERROR_LOG',
+           "dependency_install.log")
   end
 
   # Whether or not we need to do a `pip install -r requirements.txt` because

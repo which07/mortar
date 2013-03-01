@@ -28,8 +28,8 @@ class Mortar::Local::Pig
   end
 
   def pig_archive_url
-    # todo: make this configurable
-    return "https://s3.amazonaws.com/mortar-public-artifacts/mortar-mud.tgz"
+    return env_or_default('PIG_DISTRO_URL',
+                  "https://s3.amazonaws.com/mortar-public-artifacts/mortar-mud.tgz")
   end
 
   def pig_archive_file

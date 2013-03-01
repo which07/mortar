@@ -38,12 +38,13 @@ class Mortar::Local::Controller
 
       py = Mortar::Local::Python.new()
       unless py.check_or_install
-        # todo: how do we communicate that virtualenv isn't installed?
-        error("No suitable python installation found")
+        error("Could not find a suitable python installation with virtualenv installed")
       end
 
       unless py.setup_project_python_environment
-        error("Unable to setup a python environment with your dependencies")
+        msg = "\nUnable to setup a python environment with your dependencies, "
+        msg += "see #{py.pip_error_log_path} for more details"
+        error(msg)
       end
     end
 
