@@ -63,11 +63,14 @@ class Mortar::Local::Pig
     end
   end
 
+  # run the pig script with user supplied pig parameters
   def run_script(pig_script, pig_parameters)
     run_pig_command(" -f #{pig_script.path}", pig_parameters)
-    # puts script_for_command("-f #{pig_script.path}", pig_parameters)
   end
 
+  # Run pig with the specified command ('command' is anything that
+  # can be appended to the command line invocation of Pig that will
+  # get it to do something interesting, such as '-f some-file.pig'
   def run_pig_command(cmd, parameters = nil)
     # Generate the script for running the command, then
     # write it to a temp script which will be exectued
@@ -77,24 +80,23 @@ class Mortar::Local::Pig
     script.close(false)
     FileUtils.chmod(0755, script.path)
     system(script.path)
-
-    # DEBUG DEBUG DEBUG
-    `cp #{script.path} #{script.path}.bak`
-    # DEBUG DEBUG DEBUG
-
     script.unlink
   end
 
+  # Generates a bash script which sets up the necessary environment and
+  # then runs the pig command
   def script_for_command(cmd, parameters)
     template_params = pig_command_script_template_parameters(cmd, parameters)
     erb = ERB.new(File.read(pig_command_script_template_path), 0, "%<>")
     return erb.result(BindingClazz.new(template_params).get_binding)
   end
 
+  # Path to the template which generates the bash script for running pig
   def pig_command_script_template_path
     return File.expand_path("../../templates/script/runpig.sh", __FILE__)
   end
 
+  # Parameters necessary for rendering the bash script template
   def pig_command_script_template_parameters(cmd, pig_parameters)
     template_params = {}
     mortar_pig_params = automatic_pig_parameters
@@ -110,7 +112,8 @@ class Mortar::Local::Pig
     return template_params
   end
 
-  # Supplied directly from Mortar
+  # Pig Paramenters that are supplied directly from Mortar when
+  # running on the server side.  We duplicate these here.
   def automatic_pig_parameters
     params = {}
     if ENV['MORTAR_EMAIL_S3_ESCAPED']
@@ -118,6 +121,8 @@ class Mortar::Local::Pig
     else
       params['MORTAR_EMAIL_S3_ESCAPED'] = Mortar::Auth.user_s3_safe
     end
+    # Coerce into the same format as pig parameters that were
+    # passed in via the command line or a parameter file
     param_list = []
     params.each{ |k,v|
       param_list.push({"name" => k, "value" => v})
@@ -125,7 +130,7 @@ class Mortar::Local::Pig
     return param_list
   end
 
-
+  # Allows us to use a hash for template variables
   class BindingClazz
     def initialize(attrs)
       attrs.each{ |k, v|
@@ -133,7 +138,6 @@ class Mortar::Local::Pig
         self.instance_variable_set("@#{k}".to_sym, v)
       }
     end
-
     def get_binding()
       binding
     end

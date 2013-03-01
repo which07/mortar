@@ -56,6 +56,7 @@ class Mortar::Local::Controller
       end
     end
 
+    # Main entry point for user running a pig script
     def run(pig_script, pig_parameters)
       unless verify_aws_keys()
         msg = "Please specify your aws access key via enviroment variable AWS_ACCESS_KEY\n"
