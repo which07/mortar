@@ -14,6 +14,9 @@
 # limitations under the License.
 #
 
+require "erb"
+require 'ostruct'
+require 'tempfile'
 require "mortar/local/installutil"
 
 class Mortar::Local::Pig
@@ -49,9 +52,90 @@ class Mortar::Local::Pig
       progress_message "Installing pig" do
         download_file(pig_archive_url, local_install_directory)
         extract_tgz(local_install_directory + "/" + pig_archive_file, local_install_directory)
+
+        # This has been seening coming out of the tgz w/o +x so we do
+        # here to be sure it has the necessary permissions
+        FileUtils.chmod(0755, command)
+
         File.delete(local_install_directory + "/" + pig_archive_file)
         note_install("pig")
       end
+    end
+  end
+
+  def run_script(pig_script, pig_parameters)
+    run_pig_command(" -f #{pig_script.path}", pig_parameters)
+    # puts script_for_command("-f #{pig_script.path}", pig_parameters)
+  end
+
+  def run_pig_command(cmd, parameters = nil)
+    # Generate the script for running the command, then
+    # write it to a temp script which will be exectued
+    script_text = script_for_command(cmd, parameters)
+    script = Tempfile.new("mortar-")
+    script.write(script_text)
+    script.close(false)
+    FileUtils.chmod(0755, script.path)
+    system(script.path)
+
+    # DEBUG DEBUG DEBUG
+    `cp #{script.path} #{script.path}.bak`
+    # DEBUG DEBUG DEBUG
+
+    script.unlink
+  end
+
+  def script_for_command(cmd, parameters)
+    template_params = pig_command_script_template_parameters(cmd, parameters)
+    erb = ERB.new(File.read(pig_command_script_template_path), 0, "%<>")
+    return erb.result(BindingClazz.new(template_params).get_binding)
+  end
+
+  def pig_command_script_template_path
+    return File.expand_path("../../templates/script/runpig.sh", __FILE__)
+  end
+
+  def pig_command_script_template_parameters(cmd, pig_parameters)
+    template_params = {}
+    mortar_pig_params = automatic_pig_parameters
+    template_params['pig_params'] = mortar_pig_params.concat(pig_parameters)
+    template_params['pig_home'] = pig_directory
+    template_params['pig_classpath'] = "#{pig_directory}/piglib/*"
+    template_params['classpath'] = "#{pig_directory}/lib/*"
+    template_params['project_home'] = File.expand_path("..", local_install_directory)
+    template_params['local_install_dir'] = local_install_directory
+    template_params['pig_sub_command'] = cmd
+    template_params['AWS_ACCESS_KEY'] = ENV['AWS_ACCESS_KEY']
+    template_params['AWS_SECRET_KEY'] = ENV['AWS_SECRET_KEY']
+    return template_params
+  end
+
+  # Supplied directly from Mortar
+  def automatic_pig_parameters
+    params = {}
+    if ENV['MORTAR_EMAIL_S3_ESCAPED']
+      params['MORTAR_EMAIL_S3_ESCAPED'] = ENV['MORTAR_EMAIL_S3_ESCAPED']
+    else
+      params['MORTAR_EMAIL_S3_ESCAPED'] = Mortar::Auth.user_s3_safe
+    end
+    param_list = []
+    params.each{ |k,v|
+      param_list.push({"name" => k, "value" => v})
+    }
+    return param_list
+  end
+
+
+  class BindingClazz
+    def initialize(attrs)
+      attrs.each{ |k, v|
+        # set an intstance variable with the key name so the binding will find it in scope
+        self.instance_variable_set("@#{k}".to_sym, v)
+      }
+    end
+
+    def get_binding()
+      binding
     end
   end
 

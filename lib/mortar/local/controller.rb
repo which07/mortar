@@ -48,5 +48,24 @@ class Mortar::Local::Controller
       end
     end
 
+    def verify_aws_keys()
+      if (!(ENV['AWS_ACCESS_KEY'] and ENV['AWS_SECRET_KEY'])) then
+        return false
+      else
+        return true
+      end
+    end
+
+    def run(pig_script, pig_parameters)
+      unless verify_aws_keys()
+        msg = "Please specify your aws access key via enviroment variable AWS_ACCESS_KEY\n"
+        msg += "and your aws secret key via enviroment variable AWS_SECRET_KEY"
+        error(msg)
+      end
+      install_and_configure
+      pig = Mortar::Local::Pig.new()
+      pig.run_script(pig_script, pig_parameters)
+    end
+
   end
 end

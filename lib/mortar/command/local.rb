@@ -29,5 +29,28 @@ class Mortar::Command::Local < Mortar::Command::Base
     Mortar::Local::Controller.install_and_configure
   end
 
+  # local:run PIGSCRIPT
+  #
+  # Run a job on your local machine
+  #
+  # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
+  # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
+  #
+  #Examples:
+  #
+  #    Run the generate_regression_model_coefficients script locally.
+  #        $ mortar local:run generate_regression_model_coefficients
+  def run
+    pigscript_name = shift_argument
+    unless pigscript_name
+      error("Usage: mortar local:run PIGSCRIPT\nMust specify PIGSCRIPT.")
+    end
+    validate_arguments!
+
+    pigscript = validate_pigscript!(pigscript_name)
+
+    Mortar::Local::Controller.run(pigscript, pig_parameters)
+
+  end
 
 end
