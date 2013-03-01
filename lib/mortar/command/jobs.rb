@@ -76,7 +76,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
       clusters = api.get_clusters().body['clusters']
 
       largest_free_cluster = clusters.select{ |c| \
-        c['running_job_ids'].length == 0 && c['status_code'] == Mortar::API::Clusters::STATUS_RUNNING }.
+        c['running_jobs'].length == 0 && c['status_code'] == Mortar::API::Clusters::STATUS_RUNNING }.
         max_by{|c| c['size']}
 
       if largest_free_cluster.nil?
