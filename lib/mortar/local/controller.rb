@@ -25,6 +25,24 @@ class Mortar::Local::Controller
   class << self
     include Mortar::Helpers
 
+    # Checks if the user has properly specified their AWS keys
+    def verify_aws_keys()
+      if (!(ENV['AWS_ACCESS_KEY'] and ENV['AWS_SECRET_KEY'])) then
+        return false
+      else
+        return true
+      end
+    end
+
+    # Exits with a helpful message if the user has not setup their aws keys
+    def require_aws_keys()
+      unless verify_aws_keys()
+        msg = "Please specify your aws access key via enviroment variable AWS_ACCESS_KEY\n"
+        msg += "and your aws secret key via enviroment variable AWS_SECRET_KEY"
+        error(msg)
+      end
+    end
+
     # Main entry point to perform installation and configuration necessary
     # to run pig on the users local machine
     def install_and_configure
@@ -48,24 +66,20 @@ class Mortar::Local::Controller
       end
     end
 
-    def verify_aws_keys()
-      if (!(ENV['AWS_ACCESS_KEY'] and ENV['AWS_SECRET_KEY'])) then
-        return false
-      else
-        return true
-      end
-    end
-
     # Main entry point for user running a pig script
     def run(pig_script, pig_parameters)
-      unless verify_aws_keys()
-        msg = "Please specify your aws access key via enviroment variable AWS_ACCESS_KEY\n"
-        msg += "and your aws secret key via enviroment variable AWS_SECRET_KEY"
-        error(msg)
-      end
+      require_aws_keys
       install_and_configure
       pig = Mortar::Local::Pig.new()
       pig.run_script(pig_script, pig_parameters)
+    end
+
+    # Main entry point for illustrating a pig alias
+    def illustrate(pig_script, pig_alias, pig_parameters, skip_pruning)
+      require_aws_keys
+      install_and_configure
+      pig = Mortar::Local::Pig.new()
+      pig.illustrate_alias(pig_script, pig_alias, skip_pruning, pig_parameters)
     end
 
   end

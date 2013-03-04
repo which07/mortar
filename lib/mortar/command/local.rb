@@ -46,11 +46,37 @@ class Mortar::Command::Local < Mortar::Command::Base
       error("Usage: mortar local:run PIGSCRIPT\nMust specify PIGSCRIPT.")
     end
     validate_arguments!
+    pigscript = validate_pigscript!(pigscript_name)
+    Mortar::Local::Controller.run(pigscript, pig_parameters)
+  end
 
+  # illustrate [PIGSCRIPT] [ALIAS]
+  #
+  # Locallay illustrate the effects and output of a pigscript.
+  #
+  # -s, --skippruning           # Don't try to reduce the illustrate results to the smallest size possible.
+  # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
+  # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
+  # --no_browser                # Don't open the illustrate results automatically in the browser.
+  #
+  # Examples:
+  #
+  #     Illustrate the songs_sample relation in the generate_regression_model_coefficients script.
+  #         $ mortar illustrate generate_regression_model_coefficients songs_sample
+  def illustrate
+    pigscript_name = shift_argument
+    alias_name = shift_argument
+    skip_pruning = options[:skippruning] ||= false
+
+    unless pigscript_name && alias_name
+      error("Usage: mortar local:illustrate PIGSCRIPT ALIAS\nMust specify PIGSCRIPT and ALIAS.")
+    end
+
+    validate_arguments!
     pigscript = validate_pigscript!(pigscript_name)
 
-    Mortar::Local::Controller.run(pigscript, pig_parameters)
-
+    Mortar::Local::Controller.illustrate(pigscript, alias_name, pig_parameters, skip_pruning)
   end
+
 
 end

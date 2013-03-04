@@ -32,7 +32,7 @@ class Mortar::Local::Pig
 
   def pig_archive_url
     return env_or_default('PIG_DISTRO_URL',
-                  "https://s3.amazonaws.com/mortar-public-artifacts/mortar-mud.tgz")
+                  "https://s3.amazonaws.com/mortar-public-artifacts/pig.tgz")
   end
 
   def pig_archive_file
@@ -66,6 +66,25 @@ class Mortar::Local::Pig
   # run the pig script with user supplied pig parameters
   def run_script(pig_script, pig_parameters)
     run_pig_command(" -f #{pig_script.path}", pig_parameters)
+  end
+
+  def illustrate_alias(pig_script, pig_alias, skip_pruning, pig_parameters)
+    cmd = "-e 'illustrate "
+
+    # Parameters have to be entered before the script or the script will
+    # be parsed w/o the parameter values being set, resulting in an
+    # 'Undefined parameter' error.
+    mortar_pig_params = automatic_pig_parameters
+    mortar_pig_params.concat(pig_parameters).each{ |param|
+        cmd += "-param #{param['name']}=#{param['value']} "
+      }
+
+    cmd += "-script #{pig_script.path} -out illustrate.out #{pig_alias} "
+    if skip_pruning
+      cmd += " -skipPruning "
+    end
+    cmd += "'"
+    run_pig_command(cmd, [])
   end
 
   # Run pig with the specified command ('command' is anything that
