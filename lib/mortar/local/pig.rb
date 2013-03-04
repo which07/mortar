@@ -126,9 +126,18 @@ class Mortar::Local::Pig
     template_params['project_home'] = File.expand_path("..", local_install_directory)
     template_params['local_install_dir'] = local_install_directory
     template_params['pig_sub_command'] = cmd
-    template_params['AWS_ACCESS_KEY'] = ENV['AWS_ACCESS_KEY']
-    template_params['AWS_SECRET_KEY'] = ENV['AWS_SECRET_KEY']
+    template_params['pig_opts'] = pig_options
     return template_params
+  end
+
+  # Returns a hash of settings that need to be passed
+  # in via pig options
+  def pig_options
+    opts = {}
+    opts['fs.s3n.awsAccessKeyId'] = ENV['AWS_ACCESS_KEY']
+    opts['fs.s3n.awsSecretAccessKey'] = ENV['AWS_SECRET_KEY']
+    opts['pig.events.logformat'] = 'humanreadable'
+    return opts
   end
 
   # Pig Paramenters that are supplied directly from Mortar when
