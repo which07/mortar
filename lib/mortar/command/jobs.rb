@@ -51,7 +51,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     display_table(jobs, columns, headers)
   end
     
-  # jobs:run PIGSCRIPT
+  # jobs:run SCRIPT
   #
   # Run a job on a Mortar Hadoop cluster.
   #
@@ -67,9 +67,9 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   #    Run the generate_regression_model_coefficients script on a 3 node cluster.
   #        $ mortar jobs:run generate_regression_model_coefficients --clustersize 3
   def run
-    pigscript_name = shift_argument
-    unless pigscript_name
-      error("Usage: mortar jobs:run PIGSCRIPT\nMust specify PIGSCRIPT.")
+    script_name = shift_argument
+    unless script_name
+      error("Usage: mortar jobs:run SCRIPT\nMust specify SCRIPT.")
     end
     validate_arguments!
 
@@ -99,7 +99,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     end
  
     validate_git_based_project!
-    pigscript = validate_pigscript!(pigscript_name)
+    script = validate_script!(script_name)
     git_ref = create_and_push_snapshot_branch(git, project)
     notify_on_job_finish = ! options[:donotnotify]
     
@@ -108,13 +108,13 @@ class Mortar::Command::Jobs < Mortar::Command::Base
       if options[:clustersize]
         cluster_size = options[:clustersize].to_i
         keepalive = ! options[:singlejobcluster]
-        api.post_job_new_cluster(project.name, pigscript.name, git_ref, cluster_size, 
+        api.post_controlscript_job_new_cluster(project.name, script.name, git_ref, cluster_size, 
           :parameters => pig_parameters,
           :keepalive => keepalive,
           :notify_on_job_finish => notify_on_job_finish).body
       else
         cluster_id = options[:clusterid]
-        api.post_job_existing_cluster(project.name, pigscript.name, git_ref, cluster_id,
+        api.post_controlscript_job_existing_cluster(project.name, script.name, git_ref, cluster_id,
           :parameters => pig_parameters,
           :notify_on_job_finish => notify_on_job_finish).body
       end

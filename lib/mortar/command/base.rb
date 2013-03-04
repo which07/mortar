@@ -243,6 +243,22 @@ protected
       error("Unable to find git remote for project #{project.name}")
     end
   end
+
+  def validate_script!(script_name)
+    pigscript = project.pigscripts[script_name]
+    controlscript = project.controlscripts[script_name]
+    unless pigscript || controlscript
+      available_pigscripts = project.pigscripts.none? ? "No pigscripts found" : "Available pigscripts:\n#{project.pigscripts.keys.sort.join("\n")}"
+      available_controlscripts = project.controlscripts.none? ? "No controlscripts found" : "Available controlscripts:\n#{project.controlscripts.keys.sort.join("\n")}"
+      error("Unable to find a pigscript or controlscript for #{script_name}\n\n#{available_pigscripts}\n\n#{available_controlscripts}")
+    end
+
+    if pigscript && controlscript
+      error("Naming conflict.  #{script_name} refers to both a pigscript and a controlscript.  Please rename scripts to avoid conflicts.")
+    end
+
+    pigscript or controlscript
+  end
   
   def validate_pigscript!(pigscript_name)
     unless pigscript = project.pigscripts[pigscript_name]

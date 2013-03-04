@@ -57,6 +57,18 @@ module Mortar
           ".pig")
         @pigscripts
       end
+
+      def controlscripts_path
+        File.join(@root_path, "controlscripts")
+      end
+
+      def controlscripts
+        @controlscripts ||= ControlScripts.new(
+          controlscripts_path,
+          "controlscripts",
+          ".py")
+        @controlscripts
+      end
       
       def tmp_path
         path = File.join(@root_path, "tmp")
@@ -123,6 +135,12 @@ module Mortar
     end
     
     class PigScripts < ProjectEntity
+      def element(name, path)
+        Script.new(name, path)
+      end
+    end
+
+    class ControlScripts < ProjectEntity
       def element(name, path)
         Script.new(name, path)
       end
