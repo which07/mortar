@@ -25,7 +25,7 @@ class Mortar::Local::Controller
 
   # Checks if the user has properly specified their AWS keys
   def verify_aws_keys()
-    if (!(ENV['AWS_ACCESS_KEY'] and ENV['AWS_SECRET_KEY'])) then
+    if (not (ENV['AWS_ACCESS_KEY'] and ENV['AWS_SECRET_KEY'])) then
       return false
       else
       return true
