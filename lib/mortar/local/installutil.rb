@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 
+require "excon"
 require 'zlib'
 require 'rubygems/package'
 
@@ -62,7 +63,7 @@ module Mortar
       def extract_tgz(tgz_path, dest_dir)
         FileUtils.mkdir_p(dest_dir)
         Gem::Package::TarReader.new(Zlib::GzipReader.open(tgz_path)).each do |entry|
-          entry_path = dest_dir + "/" + entry.full_name
+          entry_path = File.join(dest_dir, entry.full_name)
           if entry.directory?
             FileUtils.mkdir_p(entry_path)
           elsif entry.file?
@@ -77,9 +78,8 @@ module Mortar
       def download_file(url, dest_dir)
         dest_file_path = dest_dir + "/" + File.basename(url)
         File.open(dest_file_path, "wb") do |dest_file|
-          open(url, 'rb') do |url_file|
-            dest_file.write(url_file.read)
-          end
+          contents = Excon.get(url).body
+          dest_file.write(contents)
         end
       end
 
