@@ -28,7 +28,7 @@ module Mortar
       # Drops a marker file for an installed package, used
       # to help determine if updates should be performed
       def note_install(subdirectory)
-        install_file = File.join(local_install_directory, subdirectory, "install-date.txt")
+        install_file = install_file_for(subdirectory)
         File.open(install_file, "w") do |install_file|
           # Write out the current epoch so we know when this
           # dependency was installed
@@ -37,7 +37,7 @@ module Mortar
       end
 
       def install_date(subsection)
-        install_file = local_install_directory + "/" + subsection + "/install-date.txt"
+        install_file = install_file_for(subdirectory)
         if !File.exists?(install_file)
           return nil
         else
@@ -46,6 +46,10 @@ module Mortar
             return file_contents.strip.to_i
           end
         end
+      end
+
+      def install_file_for(subdirectory)
+        File.join(local_install_directory, subdirectory, "install-date.txt")
       end
 
       def progress_message(msg, &action)
