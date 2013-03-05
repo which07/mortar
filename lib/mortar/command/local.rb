@@ -26,7 +26,8 @@ class Mortar::Command::Local < Mortar::Command::Base
   # commands will also perform this step automatically.
   #
   def configure
-    Mortar::Local::Controller.install_and_configure
+    ctrl = Mortar::Local::Controller.new
+    ctrl.install_and_configure
   end
 
   # local:run PIGSCRIPT
