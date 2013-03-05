@@ -46,7 +46,16 @@ class Mortar::Local::Controller
   def install_and_configure
       java = Mortar::Local::Java.new()
     unless java.check_install
-      error("Please install java and/or set JAVA_HOME before continueing")
+      msg = <<EOF
+A suitable java installation could not be found.  If you already have java installed
+please set your JAVA_HOME environment variable before continuing.  Otherwise, a
+suitable java installation will need to be added to your local system.
+
+Installing Java
+On OSX run `javac` from the command line.  This will intiate the installation.  For
+Linux systems please consult the documentation on your relevant package manager.
+EOF
+      error(msg)
     end
 
     pig = Mortar::Local::Pig.new()
