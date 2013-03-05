@@ -15,13 +15,13 @@
 #
 
 require "erb"
-require 'ostruct'
 require 'tempfile'
 require "mortar/local/installutil"
 
 class Mortar::Local::Pig
   include Mortar::Local::InstallUtil
 
+  PIG_LOG_FORMAT = "humanreadable"
   PIG_TAR_DEFAULT_URL = "https://s3.amazonaws.com/mortar-public-artifacts/pig.tgz"
 
   def command
@@ -109,12 +109,12 @@ class Mortar::Local::Pig
   def script_for_command(cmd, parameters)
     template_params = pig_command_script_template_parameters(cmd, parameters)
     erb = ERB.new(File.read(pig_command_script_template_path), 0, "%<>")
-    return erb.result(BindingClazz.new(template_params).get_binding)
+    erb.result(BindingClazz.new(template_params).get_binding)
   end
 
   # Path to the template which generates the bash script for running pig
   def pig_command_script_template_path
-    return File.expand_path("../../templates/script/runpig.sh", __FILE__)
+    File.expand_path("../../templates/script/runpig.sh", __FILE__)
   end
 
   # Parameters necessary for rendering the bash script template
@@ -129,7 +129,7 @@ class Mortar::Local::Pig
     template_params['local_install_dir'] = local_install_directory
     template_params['pig_sub_command'] = cmd
     template_params['pig_opts'] = pig_options
-    return template_params
+    template_params
   end
 
   # Returns a hash of settings that need to be passed
@@ -138,7 +138,7 @@ class Mortar::Local::Pig
     opts = {}
     opts['fs.s3n.awsAccessKeyId'] = ENV['AWS_ACCESS_KEY']
     opts['fs.s3n.awsSecretAccessKey'] = ENV['AWS_SECRET_KEY']
-    opts['pig.events.logformat'] = 'humanreadable'
+    opts['pig.events.logformat'] = PIG_LOG_FORMAT
     return opts
   end
 
@@ -164,7 +164,7 @@ class Mortar::Local::Pig
   class BindingClazz
     def initialize(attrs)
       attrs.each{ |k, v|
-        # set an intstance variable with the key name so the binding will find it in scope
+        # set an instance variable with the key name so the binding will find it in scope
         self.instance_variable_set("@#{k}".to_sym, v)
       }
     end

@@ -19,6 +19,7 @@ require "mortar/local/installutil"
 class Mortar::Local::Python
   include Mortar::Local::InstallUtil
 
+  PYTHON_DEFAULT_TGZ_URL = "https://s3.amazonaws.com/mortar-public-artifacts/mortar-python-osx.tgz"
 
   # Path to the python binary that should be used
   # for running UDFs
@@ -54,7 +55,7 @@ class Mortar::Local::Python
         note_install("python")
       end
     end
-    return true
+    true
   end
 
   # Determines if a python install needs to occur, true if no
@@ -68,10 +69,10 @@ class Mortar::Local::Python
   def check_system_python
     py_cmd = path_to_local_python()
     if not py_cmd
-      return false
+      false
     else
       @command = py_cmd
-      return true
+      true
     end
   end
 
@@ -80,13 +81,14 @@ class Mortar::Local::Python
   def check_virtualenv_installed(python)
     `#{python} -m virtualenv --help`
     if (0 != $?.to_i)
-      return false
+      false
     else
-      return true
+      true
     end
   end
 
   def path_to_local_python
+    return false
     # Check several python commands in decending level of desirability
     [ "python#{desired_python_minor_version}", "python" ].each{ |cmd|
       path_to_python = `which #{cmd}`.to_s.strip
@@ -106,7 +108,7 @@ class Mortar::Local::Python
   end
 
   def pip_requirements_path
-    return ENV.fetch('PIP_REQ_FILE', Dir.getwd + "/udfs/python/requirements.txt")
+    return ENV.fetch('PIP_REQ_FILE', File.join(Dir.getwd, "udfs", "python", "requirements.txt"))
   end
 
   def has_python_requirements
@@ -122,8 +124,7 @@ class Mortar::Local::Python
   end
 
   def python_archive_url
-    return ENV.fetch('PYTHON_DISTRO_URL',
-                  "https://s3.amazonaws.com/mortar-public-artifacts/mortar-python-osx.tgz")
+    return ENV.fetch('PYTHON_DISTRO_URL', PYTHON_DEFAULT_TGZ_URL)
   end
 
   def python_archive_file
