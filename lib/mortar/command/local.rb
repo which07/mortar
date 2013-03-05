@@ -47,7 +47,8 @@ class Mortar::Command::Local < Mortar::Command::Base
     end
     validate_arguments!
     pigscript = validate_pigscript!(pigscript_name)
-    Mortar::Local::Controller.run(pigscript, pig_parameters)
+    ctrl = Mortar::Local::Controller.new
+    ctrl.run(pigscript, pig_parameters)
   end
 
   # illustrate [PIGSCRIPT] [ALIAS]
@@ -75,7 +76,8 @@ class Mortar::Command::Local < Mortar::Command::Base
     validate_arguments!
     pigscript = validate_pigscript!(pigscript_name)
 
-    Mortar::Local::Controller.illustrate(pigscript, alias_name, pig_parameters, skip_pruning)
+    ctrl = Mortar::Local::Controller.new
+    ctrl.illustrate(pigscript, alias_name, pig_parameters, skip_pruning)
   end
 
 
