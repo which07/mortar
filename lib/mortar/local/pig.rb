@@ -23,11 +23,11 @@ class Mortar::Local::Pig
   include Mortar::Local::InstallUtil
 
   def command
-    return "#{pig_directory}/bin/pig"
+    return File.join(pig_directory, "bin", "pig")
   end
 
   def pig_directory
-    return local_install_directory + "/pig"
+    return File.join(local_install_directory, "pig")
   end
 
   def pig_archive_url
