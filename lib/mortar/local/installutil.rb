@@ -14,6 +14,9 @@
 # limitations under the License.
 #
 
+require 'zlib'
+require 'rubygems/package'
+
 require 'mortar/helpers'
 
 module Mortar
