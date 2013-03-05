@@ -15,14 +15,13 @@
 #
 
 require "mortar/command/base"
-require "mortar/snapshot"
 require "time"
 
 # run and view status of pig jobs (run, status)
 #
 class Mortar::Command::Jobs < Mortar::Command::Base
 
-  include Mortar::Snapshot
+  include Mortar::Git
 
   # jobs
   #
@@ -77,7 +76,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
       clusters = api.get_clusters().body['clusters']
 
       largest_free_cluster = clusters.select{ |c| \
-        c['running_job_ids'].length == 0 && c['status_code'] == Mortar::API::Clusters::STATUS_RUNNING }.
+        c['running_jobs'].length == 0 && c['status_code'] == Mortar::API::Clusters::STATUS_RUNNING }.
         max_by{|c| c['size']}
 
       if largest_free_cluster.nil?
@@ -100,7 +99,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
  
     validate_git_based_project!
     script = validate_script!(script_name)
-    git_ref = create_and_push_snapshot_branch(git, project)
+    git_ref = git.create_and_push_snapshot_branch(project)
     notify_on_job_finish = ! options[:donotnotify]
     
     # post job to API

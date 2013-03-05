@@ -247,15 +247,31 @@ def git_create_untracked_file(project)
   untracked_file
 end
 
-def post_validate_git_snapshot(git, starting_status, snapshot_branch)
+def create_and_validate_git_snapshot(git)
+  initial_status = git.status
+  initial_git_branches = git.branches
+  snapshot_dir, snapshot_branch = git.create_snapshot_branch
+
+  snapshot_dir.should_not be_nil
   snapshot_branch.should_not be_nil
   snapshot_branch.should_not == "master"
   git.current_branch.should == "master"
-  git.status.should == starting_status
+  git.status.should == initial_status
   git.has_conflicts?.should be_false
+
+  # ensure snapshot is in a temp directory
+  File.exists?(snapshot_dir).should be_true
+
+  curdir = Dir.pwd
+  Dir.chdir(snapshot_dir)
   
   # ensure the snapshot branch exists
   git.git("branch").include?(snapshot_branch).should be_true
+
+  Dir.chdir(curdir)
+  FileUtils.remove_entry_secure(snapshot_dir)
+
+  git.branches.should == initial_git_branches
 end
 
 require "mortar/helpers"
