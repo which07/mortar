@@ -21,14 +21,14 @@ module Mortar
       def local_install_directory
         # note: assumes that CWD is the project root, is
         # this a safe assumption?
-        return Dir.getwd + "/.mortar-mud"
+        File.join(Dir.getwd, "/.mortar-local")
       end
 
 
       # Drops a marker file for an installed package, used
       # to help determine if updates should be performed
       def note_install(subdirectory)
-      install_file = local_install_directory + "/" + subdirectory + "/install-date.txt"
+        install_file = File.join(local_install_directory, subdirectory, "install-date.txt")
         File.open(install_file, "w") do |install_file|
           # Write out the current epoch so we know when this
           # dependency was installed
