@@ -88,7 +88,6 @@ class Mortar::Local::Python
   end
 
   def path_to_local_python
-    return false
     # Check several python commands in decending level of desirability
     [ "python#{desired_python_minor_version}", "python" ].each{ |cmd|
       path_to_python = `which #{cmd}`.to_s.strip
