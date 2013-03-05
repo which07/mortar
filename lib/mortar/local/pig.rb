@@ -22,6 +22,8 @@ require "mortar/local/installutil"
 class Mortar::Local::Pig
   include Mortar::Local::InstallUtil
 
+  PIG_TAR_DEFAULT_URL = "https://s3.amazonaws.com/mortar-public-artifacts/pig.tgz"
+
   def command
     return File.join(pig_directory, "bin", "pig")
   end
@@ -31,8 +33,7 @@ class Mortar::Local::Pig
   end
 
   def pig_archive_url
-    return ENV.fetch('PIG_DISTRO_URL',
-                  "https://s3.amazonaws.com/mortar-public-artifacts/pig.tgz")
+    ENV.fetch('PIG_DISTRO_URL', PIG_TAR_DEFAULT_URL)
   end
 
   def pig_archive_file
@@ -42,7 +43,7 @@ class Mortar::Local::Pig
   # Determines if a pig install needs to occur, true if no
   # pig install present or a newer version is available
   def should_do_pig_install?
-    return (not (File.exists?(pig_directory)))
+    not (File.exists?(pig_directory))
   end
 
   # Installs pig for this project if it is not already present
@@ -51,13 +52,14 @@ class Mortar::Local::Pig
       FileUtils.mkdir_p(local_install_directory)
        action "Installing pig" do
         download_file(pig_archive_url, local_install_directory)
-        extract_tgz(local_install_directory + "/" + pig_archive_file, local_install_directory)
+        local_tgz = File.join(local_install_directory, pig_archive_file)
+        extract_tgz(local_tgz, local_install_directory)
 
         # This has been seening coming out of the tgz w/o +x so we do
         # here to be sure it has the necessary permissions
         FileUtils.chmod(0755, command)
 
-        File.delete(local_install_directory + "/" + pig_archive_file)
+        File.delete(local_tgz)
         note_install("pig")
       end
     end
