@@ -63,7 +63,13 @@ EOF
 
     py = Mortar::Local::Python.new()
     unless py.check_or_install
-      error("Could not find a suitable python installation with virtualenv installed")
+      msg = <<EOF
+A suitable python installation with virtualenv could not be located.  Please ensure
+you have python 2.6+ installed on your local system.  If you need to obtain a copy
+of virtualenv it can be located here:
+https://pypi.python.org/pypi/virtualenv
+EOF
+      error(msg)
     end
 
     unless py.setup_project_python_environment
