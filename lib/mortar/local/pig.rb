@@ -31,7 +31,7 @@ class Mortar::Local::Pig
   end
 
   def pig_archive_url
-    return env_or_default('PIG_DISTRO_URL',
+    return ENV.fetch('PIG_DISTRO_URL',
                   "https://s3.amazonaws.com/mortar-public-artifacts/pig.tgz")
   end
 

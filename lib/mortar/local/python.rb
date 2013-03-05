@@ -106,7 +106,7 @@ class Mortar::Local::Python
   end
 
   def pip_requirements_path
-    return env_or_default('PIP_REQ_FILE', Dir.getwd + "/udfs/python/requirements.txt")
+    return ENV.fetch('PIP_REQ_FILE', Dir.getwd + "/udfs/python/requirements.txt")
   end
 
   def has_python_requirements
@@ -122,7 +122,7 @@ class Mortar::Local::Python
   end
 
   def python_archive_url
-    return env_or_default('PYTHON_DISTRO_URL',
+    return ENV.fetch('PYTHON_DISTRO_URL',
                   "https://s3.amazonaws.com/mortar-public-artifacts/mortar-python-osx.tgz")
   end
 
@@ -154,8 +154,7 @@ class Mortar::Local::Python
   end
 
   def pip_error_log_path
-    return env_or_default('PIP_ERROR_LOG',
-           "dependency_install.log")
+    return ENV.fetch('PIP_ERROR_LOG', "dependency_install.log")
   end
 
   # Whether or not we need to do a `pip install -r requirements.txt` because
