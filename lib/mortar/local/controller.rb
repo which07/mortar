@@ -23,6 +23,24 @@ require "mortar/local/python"
 class Mortar::Local::Controller
   include Mortar::Helpers
 
+  NO_JAVA_ERROR_MESSAGE = <<EOF
+A suitable java installation could not be found.  If you already have java installed
+please set your JAVA_HOME environment variable before continuing.  Otherwise, a
+suitable java installation will need to be added to your local system.
+
+Installing Java
+On OSX run `javac` from the command line.  This will intiate the installation.  For
+Linux systems please consult the documentation on your relevant package manager.
+EOF
+
+  NO_PYTHON_ERROR_MESSAGE = <<EOF
+pA suitable python installation with virtualenv could not be located.  Please ensure
+you have python 2.6+ installed on your local system.  If you need to obtain a copy
+of virtualenv it can be located here:
+https://pypi.python.org/pypi/virtualenv
+EOF
+
+
   # Checks if the user has properly specified their AWS keys
   def verify_aws_keys()
     if (not (ENV['AWS_ACCESS_KEY'] and ENV['AWS_SECRET_KEY'])) then
@@ -44,18 +62,9 @@ class Mortar::Local::Controller
   # Main entry point to perform installation and configuration necessary
   # to run pig on the users local machine
   def install_and_configure
-      java = Mortar::Local::Java.new()
+    java = Mortar::Local::Java.new()
     unless java.check_install
-      msg = <<EOF
-A suitable java installation could not be found.  If you already have java installed
-please set your JAVA_HOME environment variable before continuing.  Otherwise, a
-suitable java installation will need to be added to your local system.
-
-Installing Java
-On OSX run `javac` from the command line.  This will intiate the installation.  For
-Linux systems please consult the documentation on your relevant package manager.
-EOF
-      error(msg)
+      error(NO_JAVA_ERROR_MESSAGE)
     end
 
     pig = Mortar::Local::Pig.new()
@@ -63,13 +72,7 @@ EOF
 
     py = Mortar::Local::Python.new()
     unless py.check_or_install
-      msg = <<EOF
-A suitable python installation with virtualenv could not be located.  Please ensure
-you have python 2.6+ installed on your local system.  If you need to obtain a copy
-of virtualenv it can be located here:
-https://pypi.python.org/pypi/virtualenv
-EOF
-      error(msg)
+      error(NO_PYTHON_ERROR_MESSAGE)
     end
 
     unless py.setup_project_python_environment
