@@ -38,9 +38,7 @@ module Mortar
 
       def install_date(subsection)
         install_file = install_file_for(subdirectory)
-        if !File.exists?(install_file)
-          return nil
-        else
+        if File.exists?(install_file)
           File.open(install_file, "r") do |f|
             file_contents = f.read()
             return file_contents.strip.to_i
