@@ -49,7 +49,7 @@ class Mortar::Local::Pig
   def install
     if should_do_pig_install?
       FileUtils.mkdir_p(local_install_directory)
-      progress_message "Installing pig" do
+       action "Installing pig" do
         download_file(pig_archive_url, local_install_directory)
         extract_tgz(local_install_directory + "/" + pig_archive_file, local_install_directory)
 

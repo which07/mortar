@@ -14,9 +14,13 @@
 # limitations under the License.
 #
 
+require 'mortar/helpers'
+
 module Mortar
   module Local
     module InstallUtil
+
+      include Mortar::Helpers
 
       def local_install_directory
         # note: assumes that CWD is the project root, is
@@ -48,12 +52,6 @@ module Mortar
 
       def install_file_for(subdirectory)
         File.join(local_install_directory, subdirectory, "install-date.txt")
-      end
-
-      def progress_message(msg, &action)
-        print msg + "... "
-        action.call()
-        print "done\n"
       end
 
       # Given a path to a foo.tgz or foo.tar.gz file, extracts its

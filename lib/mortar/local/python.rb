@@ -43,7 +43,7 @@ class Mortar::Local::Python
     @command = "#{local_install_directory}/python/bin/python"
     if should_do_python_install?
       FileUtils.mkdir_p(local_install_directory)
-      progress_message "Installing python" do
+      action "Installing python" do
         download_file(python_archive_url, local_install_directory)
         extract_tgz(local_install_directory + "/" + python_archive_file, local_install_directory)
 
@@ -138,7 +138,7 @@ class Mortar::Local::Python
       return false
     end
     if should_do_requirements_install
-      progress_message "Installing python UDF dependencies" do
+      action "Installing python UDF dependencies" do
         pip_output = `. #{python_env_dir}/bin/activate &&
           #{python_env_dir}/bin/pip install --requirement #{pip_requirements_path}`
           if 0 != $?.to_i
