@@ -14,7 +14,6 @@
 # limitations under the License.
 #
 
-require "mortar/local"
 require "mortar/helpers"
 require "mortar/local/pig"
 require "mortar/local/java"
