@@ -14,8 +14,9 @@
 # limitations under the License.
 #
 
-require "excon"
 require 'zlib'
+require 'excon'
+require 'rbconfig'
 require 'rubygems/package'
 
 require 'mortar/helpers'
@@ -84,11 +85,7 @@ module Mortar
       end
 
       def osx?
-        if defined? RbConfig
-          os_platform_name = RbConfig::CONFIG['target_os']
-        else
-          os_platform_name = Config::CONFIG['target_os']
-        end
+        os_platform_name = RbConfig::CONFIG['target_os']
         return os_platform_name.start_with?('darwin')
       end
 
