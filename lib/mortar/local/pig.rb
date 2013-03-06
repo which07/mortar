@@ -15,6 +15,7 @@
 #
 
 require "erb"
+require "json"
 require 'tempfile'
 require "mortar/local/installutil"
 
@@ -70,6 +71,62 @@ class Mortar::Local::Pig
     run_pig_command(" -f #{pig_script.path}", pig_parameters)
   end
 
+  # Create a temp file to be used for writing the illustrate
+  # json output, and return it's path. This data file will
+  # later be used to create the result html output. Tempfile
+  # will take care of cleaning up the file when we exit.
+  def create_illustrate_output_path
+    # Using Tempfile for the path generation and so that the
+    # file will be cleaned up on process exit
+    outfile = Tempfile.new("mortar-illustrate-output")
+    outfile.close(false)
+    outfile.path
+  end
+
+  def illustrate_html_path
+    "illustrate-output.html"
+  end
+
+  def illustrate_html_template
+    File.expand_path("../../templates/report/illustrate-report.html", __FILE__)
+  end
+
+  # Given a file path, open it and decode the containing json
+  def decode_illustrate_input_file(illustrate_outpath)
+    JSON.parse(IO.read(illustrate_outpath))
+  end
+
+  def show_illustrate_output(illustrate_outpath)
+    # Pull in the dumped json file
+    illustrate_data = decode_illustrate_input_file(illustrate_outpath)
+
+    # Render a template using it's values
+    template_params = create_illustrate_template_parameters(illustrate_data)
+
+    # template_params = {'tables' => []}
+    erb = ERB.new(File.read(illustrate_html_template), 0, "%<>")
+    html = erb.result(BindingClazz.new(template_params).get_binding)
+
+    # Write the rendered template out to a file
+    File.open(illustrate_html_path, 'w') { |f|
+      f.write(html)
+    }
+
+    # Open a browser pointing to the rendered template output file
+    action("Opening illlustrate results from #{illustrate_html_path} ") do
+      require "launchy"
+      Launchy.open(File.expand_path(illustrate_html_path))
+    end
+
+  end
+
+  def create_illustrate_template_parameters(illustrate_data)
+    params = {}
+    params['tables'] = illustrate_data['tables']
+    params['udf_output'] = illustrate_data['udf_output']
+    return params
+  end
+
   def illustrate_alias(pig_script, pig_alias, skip_pruning, pig_parameters)
     cmd = "-e 'illustrate "
 
@@ -80,13 +137,15 @@ class Mortar::Local::Pig
     cmd += "-param_file #{param_file} "
 
     # Now point us at the script/alias to illustrate
-    cmd += "-script #{pig_script.path} -out illustrate.out #{pig_alias} "
+    illustrate_outpath = create_illustrate_output_path()
+    cmd += "-script #{pig_script.path} -out #{illustrate_outpath} #{pig_alias} "
     if skip_pruning
       cmd += " -skipPruning "
     end
     cmd += "'"
 
     run_pig_command(cmd, [])
+    show_illustrate_output(illustrate_outpath)
   end
 
   # Run pig with the specified command ('command' is anything that

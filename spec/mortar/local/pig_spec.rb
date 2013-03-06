@@ -67,7 +67,43 @@ module Mortar::Local
 
     end
 
-    
+    context "show_illustrate_output" do
+
+      it "takes a path to a json file, renders the html template, and opens it" do
+        fake_illustrate_data = {
+          "tables" => [
+            {
+              "Op" => "LOStore",
+              "alias" => "some_relation",
+              "notices" => ["things are fouled up", "no just kidding, it's fine"],
+              "fields" => ["person_id", "first_name", "last_name"],
+              "data" => [
+                ["1", "mike", "jones"],
+                ["2", "cleopatra", "jones"],
+                ["3", "john paul", "jones"],
+              ],
+            },
+          ],
+          "udf_output" => "hey, I'm a udf",
+        }
+        pig = Mortar::Local::Pig.new
+        template_contents = File.read(pig.illustrate_html_template)
+        mock(pig).decode_illustrate_input_file("foo/bar/file.json").returns(fake_illustrate_data)
+        mock(Launchy).open(File.expand_path(pig.illustrate_html_path))
+        FakeFS do
+          FileUtils.mkdir_p(File.dirname(pig.illustrate_html_template))
+          File.open(pig.illustrate_html_template, 'w') { |f| f.write(template_contents) }
+          begin
+            previous_stdout, $stdout = $stdout, StringIO.new
+            pig.show_illustrate_output("foo/bar/file.json")
+          ensure
+            $stdout = previous_stdout
+          end
+          expect(File.exists?(pig.illustrate_html_path)).to be_true
+        end
+      end
+
+    end
 
   end
 end
