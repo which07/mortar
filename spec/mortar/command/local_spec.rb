@@ -37,7 +37,7 @@ STDERR
       it "errors when the script doesn't exist" do
         with_git_initialized_project do |p|
           write_file(File.join(p.pigscripts_path, "my_other_script.pig"))
-          stderr, stdout = execute("local:illustrate my_script some_alias")
+          stderr, stdout = execute("local:illustrate my_script some_alias", p)
           stderr.should == <<-STDERR
  !    Unable to find pigscript my_script
  !    Available scripts:
@@ -69,7 +69,7 @@ STDERR
       it "errors when the script doesn't exist" do
         with_git_initialized_project do |p|
           write_file(File.join(p.pigscripts_path, "my_other_script.pig"))
-          stderr, stdout = execute("local:run my_script")
+          stderr, stdout = execute("local:run my_script", p)
           stderr.should == <<-STDERR
  !    Unable to find pigscript my_script
  !    Available scripts:
