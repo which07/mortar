@@ -22,14 +22,14 @@ class Mortar::Local::Java
   @command = nil
 
   def check_install
-    jbin = File.join(ENV['JAVA_HOME'], "bin", "java")
+    jbin = File.join(ENV['JAVA_HOME']||'', "bin", "java")
     if ENV['JAVA_HOME'] and File.exists?(jbin)
       @command = jbin
       return true
     elsif File.exists?("/usr/libexec/java_home")
       # OSX has a nice little tool for finding this value, assuming
       # that it won't give us a bad value
-      java_home = `/usr/libexec/java_home`.to_s.strip
+      java_home = run_java_home
       if java_home != ""
         ENV['JAVA_HOME'] = java_home
         @command = File.join(ENV['JAVA_HOME'], "bin", "java")
@@ -37,6 +37,12 @@ class Mortar::Local::Java
       end
     end
     return false
+  end
+
+  # Runs the java_home command line tool which on osx will
+  # return the appropriate JAVA_home value
+  def run_java_home
+    `/usr/libexec/java_home`.to_s.strip
   end
 
 end
