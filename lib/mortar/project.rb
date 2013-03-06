@@ -136,13 +136,13 @@ module Mortar
     
     class PigScripts < ProjectEntity
       def element(name, path)
-        Script.new(name, path)
+        PigScript.new(name, path)
       end
     end
 
     class ControlScripts < ProjectEntity
       def element(name, path)
-        Script.new(name, path)
+        ControlScript.new(name, path)
       end
     end
 
@@ -172,6 +172,11 @@ module Mortar
       def to_s
         code
       end
+    end
+    
+    class ControlScript < Script
+    end
+    class PigScript < Script
     end
     
   end

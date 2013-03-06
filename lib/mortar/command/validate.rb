@@ -36,8 +36,13 @@ class Mortar::Command::Validate < Mortar::Command::Base
       error("Usage: mortar validate PIGSCRIPT\nMust specify PIGSCRIPT.")
     end
     validate_arguments!
+    pigscript = validate_script!(pigscript_name)
+    
+    if pigscript.is_a? Mortar::Project::ControlScript
+      error "Currently Mortar does not support validating control scripts"
+    end
+    
     validate_git_based_project!
-    pigscript = validate_pigscript!(pigscript_name)
     git_ref = git.create_and_push_snapshot_branch(project)
     
     validate_id = nil
