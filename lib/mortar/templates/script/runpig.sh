@@ -16,9 +16,8 @@ source <%= @local_install_dir %>/pythonenv/bin/activate
 
 # Run Pig
 <%= @local_install_dir %>/pig/bin/pig -exectype local \
-    -log4jconf <%= @local_install_dir %>/pig/conf/log4j.properties \
-    -propertyFile <%= @local_install_dir %>/pig/conf/pig.properties \
+    -log4jconf <%= @local_install_dir %>/pig/conf/log4j-cli-local-dev.properties \
+    -propertyFile <%= @local_install_dir %>/pig/conf/pig-hawk-global.properties \
+    -propertyFile <%= @local_install_dir %>/pig/conf/pig-cli-local-dev.properties \
     -param_file <%= @pig_params_file %> \
     <%= @pig_sub_command %>
-
-
