@@ -73,19 +73,19 @@ class Mortar::Local::Pig
   def illustrate_alias(pig_script, pig_alias, skip_pruning, pig_parameters)
     cmd = "-e 'illustrate "
 
-    # Parameters have to be entered before the script or the script will
-    # be parsed w/o the parameter values being set, resulting in an
+    # Parameters have to be entered with the illustrate command (as
+    # apposed to as a command line argument) or it will result in an
     # 'Undefined parameter' error.
-    mortar_pig_params = automatic_pig_parameters
-    mortar_pig_params.concat(pig_parameters).each{ |param|
-        cmd += "-param #{param['name']}=#{param['value']} "
-      }
+    param_file = make_pig_param_file(pig_parameters)
+    cmd += "-param_file #{param_file} "
 
+    # Now point us at the script/alias to illustrate
     cmd += "-script #{pig_script.path} -out illustrate.out #{pig_alias} "
     if skip_pruning
       cmd += " -skipPruning "
     end
     cmd += "'"
+
     run_pig_command(cmd, [])
   end
 
@@ -120,8 +120,7 @@ class Mortar::Local::Pig
   # Parameters necessary for rendering the bash script template
   def pig_command_script_template_parameters(cmd, pig_parameters)
     template_params = {}
-    mortar_pig_params = automatic_pig_parameters
-    template_params['pig_params'] = mortar_pig_params.concat(pig_parameters)
+    template_params['pig_params_file'] = make_pig_param_file(pig_parameters)
     template_params['pig_home'] = pig_directory
     template_params['pig_classpath'] = "#{pig_directory}/piglib/*"
     template_params['classpath'] = "#{pig_directory}/lib/*"
@@ -158,6 +157,20 @@ class Mortar::Local::Pig
       param_list.push({"name" => k, "value" => v})
     }
     return param_list
+  end
+
+  # Given a set of user specified pig parameters, combine with the
+  # automatic mortar parameters and write out to a tempfile, returning
+  # it's path so it may be referenced later in the process
+  def make_pig_param_file(pig_parameters)
+    mortar_pig_params = automatic_pig_parameters
+    all_parameters = mortar_pig_params.concat(pig_parameters)
+    param_file = Tempfile.new("mortar-pig-parameters")
+    all_parameters.each { |p|
+      param_file.write("#{p['name']}=#{p['value']}\n")
+    }
+    param_file.close(false)
+    param_file.path
   end
 
   # Allows us to use a hash for template variables

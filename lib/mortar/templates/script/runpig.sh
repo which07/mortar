@@ -18,7 +18,7 @@ source <%= @local_install_dir %>/pythonenv/bin/activate
 <%= @local_install_dir %>/pig/bin/pig -exectype local \
     -log4jconf <%= @local_install_dir %>/pig/conf/log4j.properties \
     -propertyFile <%= @local_install_dir %>/pig/conf/pig.properties \
-    <% @pig_params.each do |param| %>-param <%= param['name'] %>=<%= param['value'] %> <% end %>\
-    <%= @pig_sub_command %> 
+    -param_file <%= @pig_params_file %> \
+    <%= @pig_sub_command %>
 
 
