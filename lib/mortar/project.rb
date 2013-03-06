@@ -66,7 +66,8 @@ module Mortar
         @controlscripts ||= ControlScripts.new(
           controlscripts_path,
           "controlscripts",
-          ".py")
+          ".py",
+          :optional => true)
         @controlscripts
       end
       
@@ -87,10 +88,11 @@ module Mortar
       
       include Enumerable
       
-      def initialize(path, name, filename_extension)
+      def initialize(path, name, filename_extension, optional=false)
         @path = path
         @name = name
         @filename_extension = filename_extension
+        @optional = optional
         @elements = elements
       end
       
@@ -119,14 +121,15 @@ module Mortar
       end
 
       def elements
-        unless File.directory? @path
-          raise ProjectError, "Unable to find #{@name} directory in project"
+        if File.directory? @path
+          # get {script_name => full_path}
+          file_paths = Dir[File.join(@path, "**", "*#{@filename_extension}")]
+          file_paths_hsh = file_paths.collect{|element_path| [element_name(element_path), element(element_name(element_path), element_path)]}.flatten
+          return Hash[*file_paths_hsh]
+        else
+          raise ProjectError, "Unable to find #{@name} directory in project" if not @optional
         end
-
-        # get {script_name => full_path}
-        file_paths = Dir[File.join(@path, "**", "*#{@filename_extension}")]
-        file_paths_hsh = file_paths.collect{|element_path| [element_name(element_path), element(element_name(element_path), element_path)]}.flatten
-        Hash[*file_paths_hsh]
+        return Hash[]
       end
       
       def element(path)

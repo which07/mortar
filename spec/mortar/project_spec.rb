@@ -32,6 +32,17 @@ module Mortar
       end
     end
     
+    context "controlscripts" do
+      
+      it "does not raise an error when unable to find controlscripts dir" do
+        with_blank_project do |p|
+          FileUtils.rm_rf p.controlscripts_path
+          lambda { p.controlscripts_path }.should_not raise_error(Mortar::Project::ProjectError)
+        end
+      end
+      
+    end
+    
     context "pigscripts" do
 
       it "raise when unable to find pigscripts dir" do
