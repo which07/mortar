@@ -30,7 +30,7 @@ module Mortar
       def local_install_directory
         # note: assumes that CWD is the project root, is
         # this a safe assumption?
-        File.join(Dir.getwd, "/.mortar-local")
+        File.join(Dir.getwd, ".mortar-local")
       end
 
 

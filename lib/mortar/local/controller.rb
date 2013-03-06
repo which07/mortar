@@ -40,6 +40,11 @@ of virtualenv it can be located here:
 https://pypi.python.org/pypi/virtualenv
 EOF
 
+  NO_AWS_KEYS_ERROR_MESSAGE = <<EOF
+Please specify your aws access key via enviroment variable AWS_ACCESS_KEY
+and your aws secret key via enviroment variable AWS_SECRET_KEY"
+EOF
+
 
   # Checks if the user has properly specified their AWS keys
   def verify_aws_keys()
@@ -53,9 +58,7 @@ EOF
   # Exits with a helpful message if the user has not setup their aws keys
   def require_aws_keys()
     unless verify_aws_keys()
-      msg = "Please specify your aws access key via enviroment variable AWS_ACCESS_KEY\n"
-      msg += "and your aws secret key via enviroment variable AWS_SECRET_KEY"
-      error(msg)
+      error(NO_AWS_KEYS_ERROR_MESSAGE)
     end
   end
 
