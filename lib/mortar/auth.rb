@@ -88,6 +88,10 @@ class Mortar::Auth
       get_credentials[1]
     end
 
+    def user_s3_safe
+      return user.gsub(/[^0-9a-zA-Z]/i, '-')
+    end
+
     def api_key(user = get_credentials[0], password = get_credentials[1])
       require("mortar-api-ruby")
       api = Mortar::API.new(default_params)
