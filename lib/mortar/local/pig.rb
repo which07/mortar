@@ -24,6 +24,19 @@ class Mortar::Local::Pig
   PIG_LOG_FORMAT = "humanreadable"
   PIG_TAR_DEFAULT_URL = "https://s3.amazonaws.com/mortar-public-artifacts/pig.tgz"
 
+  # Tempfile objects have a hook to delete the file when the object is
+  # destroyed by the garbage collector.  In practice this means that a
+  # file we want sitting around could disappear out from under us. To
+  # prevent this behavior, we're keeping references to these objects so
+  # that the garbage collector will not destroy them until the program
+  # exits (and our files won't be deleted until we don't care about them
+  # any more).
+  @temp_file_objects
+
+  def initialize
+    @temp_file_objects = []
+  end
+
   def command
     return File.join(pig_directory, "bin", "pig")
   end
@@ -170,6 +183,12 @@ class Mortar::Local::Pig
       param_file.write("#{p['name']}=#{p['value']}\n")
     }
     param_file.close(false)
+
+    # Keep track a reference the tempfile object so that the
+    # garbage collector does not automatically delete the file
+    # out from under us
+    @temp_file_objects.push(param_file)
+
     param_file.path
   end
 
