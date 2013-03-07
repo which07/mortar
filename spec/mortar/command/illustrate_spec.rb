@@ -57,8 +57,21 @@ STDERR
         with_git_initialized_project do |p|
           stderr, stdout = execute("illustrate does_not_exist my_alias", p, @git)
           stderr.should == <<-STDERR
- !    Unable to find pigscript does_not_exist
+ !    Unable to find a pigscript or controlscript for does_not_exist
+ !    
  !    No pigscripts found
+ !    
+ !    No controlscripts found
+ STDERR
+        end
+      end
+      
+      it "errors when requested with controlscript" do
+        with_git_initialized_project do |p|
+          write_file(File.join(p.controlscripts_path, "my_script.py"))
+          stderr, stdout = execute("illustrate my_script my_alias", p, @git)
+          stderr.should == <<-STDERR
+ !    Currently Mortar does not support illustrating control scripts
  STDERR
         end
       end

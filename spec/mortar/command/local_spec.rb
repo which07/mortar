@@ -51,8 +51,8 @@ STDERR
           script_name = "some_script"
           script_path = File.join(p.pigscripts_path, "#{script_name}.pig")
           write_file(script_path)
-          pigscript = Mortar::Project::Script.new(script_name, script_path)
-          mock(Mortar::Project::Script).new(script_name, script_path).returns(pigscript)
+          pigscript = Mortar::Project::PigScript.new(script_name, script_path)
+          mock(Mortar::Project::PigScript).new(script_name, script_path).returns(pigscript)
           any_instance_of(Mortar::Local::Controller) do |u|
             mock(u).illustrate(pigscript, "some_alias", [], false).returns(nil)
           end
@@ -83,8 +83,8 @@ STDERR
           script_name = "some_script"
           script_path = File.join(p.pigscripts_path, "#{script_name}.pig")
           write_file(script_path)
-          pigscript = Mortar::Project::Script.new(script_name, script_path)
-          mock(Mortar::Project::Script).new(script_name, script_path).returns(pigscript)
+          pigscript = Mortar::Project::PigScript.new(script_name, script_path)
+          mock(Mortar::Project::PigScript).new(script_name, script_path).returns(pigscript)
           any_instance_of(Mortar::Local::Controller) do |u|
             mock(u).run(pigscript, []).returns(nil)
           end

@@ -57,6 +57,19 @@ module Mortar
           ".pig")
         @pigscripts
       end
+
+      def controlscripts_path
+        File.join(@root_path, "controlscripts")
+      end
+
+      def controlscripts
+        @controlscripts ||= ControlScripts.new(
+          controlscripts_path,
+          "controlscripts",
+          ".py",
+          :optional => true)
+        @controlscripts
+      end
       
       def tmp_path
         path = File.join(@root_path, "tmp")
@@ -75,10 +88,11 @@ module Mortar
       
       include Enumerable
       
-      def initialize(path, name, filename_extension)
+      def initialize(path, name, filename_extension, optional=false)
         @path = path
         @name = name
         @filename_extension = filename_extension
+        @optional = optional
         @elements = elements
       end
       
@@ -107,14 +121,15 @@ module Mortar
       end
 
       def elements
-        unless File.directory? @path
-          raise ProjectError, "Unable to find #{@name} directory in project"
+        if File.directory? @path
+          # get {script_name => full_path}
+          file_paths = Dir[File.join(@path, "**", "*#{@filename_extension}")]
+          file_paths_hsh = file_paths.collect{|element_path| [element_name(element_path), element(element_name(element_path), element_path)]}.flatten
+          return Hash[*file_paths_hsh]
+        else
+          raise ProjectError, "Unable to find #{@name} directory in project" if not @optional
         end
-
-        # get {script_name => full_path}
-        file_paths = Dir[File.join(@path, "**", "*#{@filename_extension}")]
-        file_paths_hsh = file_paths.collect{|element_path| [element_name(element_path), element(element_name(element_path), element_path)]}.flatten
-        Hash[*file_paths_hsh]
+        return Hash[]
       end
       
       def element(path)
@@ -124,7 +139,13 @@ module Mortar
     
     class PigScripts < ProjectEntity
       def element(name, path)
-        Script.new(name, path)
+        PigScript.new(name, path)
+      end
+    end
+
+    class ControlScripts < ProjectEntity
+      def element(name, path)
+        ControlScript.new(name, path)
       end
     end
 
@@ -154,6 +175,11 @@ module Mortar
       def to_s
         code
       end
+    end
+    
+    class ControlScript < Script
+    end
+    class PigScript < Script
     end
     
   end
