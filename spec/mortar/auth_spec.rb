@@ -152,5 +152,13 @@ module Mortar
 
       lambda { @cli.check }.should raise_error(Mortar::CLI::Errors::InvalidGithubUsername)
     end
+
+    it "encodes the user email as s3 safe" do
+      user_email = "myemail+dontspam@somedomain.com"
+      stub(@cli).user.returns(user_email)
+      @cli.user().should == user_email
+      @cli.user_s3_safe.should == 'myemail-dontspam-somedomain-com'
+    end
+
   end
 end
