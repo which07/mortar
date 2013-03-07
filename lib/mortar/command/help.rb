@@ -67,24 +67,6 @@ private
     Mortar::Command.commands
   end
 
-  def legacy_help_for_namespace(namespace)
-    instance = Mortar::Command::Help.groups.map do |group|
-      [ group.title, group.select { |c| c.first =~ /^#{namespace}/ }.length ]
-    end.sort_by { |l| l.last }.last
-    return nil unless instance
-    return nil if instance.last.zero?
-    instance.first
-  end
-
-  def legacy_help_for_command(command)
-    Mortar::Command::Help.groups.each do |group|
-      group.each do |cmd, description|
-        return description if cmd.split(" ").first == command
-      end
-    end
-    nil
-  end
-
   def primary_namespaces
     PRIMARY_NAMESPACES.map { |name| namespaces[name] }.compact
   end
@@ -97,7 +79,7 @@ private
     size = longest(namespaces.map { |n| n[:name] })
     namespaces.sort_by {|namespace| namespace[:name]}.each do |namespace|
       name = namespace[:name]
-      namespace[:description] ||= legacy_help_for_namespace(name)
+      namespace[:description] ||= " Help has not yet been completed for these commands"
       puts "  %-#{size}s  # %s" % [ name, namespace[:description] ]
     end
   end
@@ -121,8 +103,7 @@ private
     unless namespace_commands.empty?
       size = longest(namespace_commands.map { |c| c[:banner] })
       namespace_commands.sort_by { |c| c[:banner].to_s }.each do |command|
-        next if command[:help] =~ /DEPRECATED/
-        command[:summary] ||= legacy_help_for_command(command[:command])
+        command[:summary] ||= "Help has not yet been completed for this command"
         puts "  %-#{size}s  # %s" % [ command[:banner], command[:summary] ]
       end
     end
@@ -140,7 +121,7 @@ private
         puts command[:help].split("\n")[1..-1].join("\n")
       else
         puts
-        puts " " + legacy_help_for_command(name).to_s
+        error "Help has not yet been completed for #{command[:command]}"
       end
       puts
     end
