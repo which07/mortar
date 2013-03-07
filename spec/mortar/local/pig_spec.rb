@@ -105,5 +105,25 @@ module Mortar::Local
 
     end
 
+    context "decode_illustrate_input_file" do
+
+      it "decodes the contents of the file" do
+        json = %{[{"alias": "some_relation", "Op": "LOStore"}]}
+        expected_data = [ {
+            "Op" => "LOStore",
+            "alias" => "some_relation",
+          }
+        ]
+        pig = Mortar::Local::Pig.new
+        illustrate_output_file = 'illustrate-output.json'
+        FakeFS do
+          File.open(illustrate_output_file, 'w') { |f| f.write(json) }
+          actual_data = pig.decode_illustrate_input_file(illustrate_output_file)
+          expect(actual_data).to eq(expected_data)
+        end
+      end
+
+    end
+
   end
 end

@@ -15,7 +15,6 @@
 #
 
 require "erb"
-require "json"
 require 'tempfile'
 require "mortar/local/installutil"
 
@@ -93,7 +92,7 @@ class Mortar::Local::Pig
 
   # Given a file path, open it and decode the containing json
   def decode_illustrate_input_file(illustrate_outpath)
-    JSON.parse(IO.read(illustrate_outpath))
+    json_decode(File.read(illustrate_outpath))
   end
 
   def show_illustrate_output(illustrate_outpath)
