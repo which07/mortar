@@ -1,0 +1,79 @@
+
+<html>
+  <head>
+    <title>Illustrate Report</title>
+  </head>
+  
+  <body>
+
+    <% @tables.each_with_index do |table, table_index| %>
+
+      <h3 class="illustrate_alias">
+        <% if (table["op"] == "LOStore") %>
+          Store : 
+        <% end %>
+        <%= table["alias"] %>
+        <% if (table["notices"])   %>
+        &nbsp;*
+        <% end %>
+    </h3>
+
+    <table class="table table-bordered illustrate_table expandable">
+      <tbody>
+        <tr>
+          <% table["fields"].each do |field| %>
+            <th><%= field %></th>
+          <% end %>
+        </tr>
+
+        <% table["data"].each_with_index do |row, row_index| %>
+          <tr>
+            <% row.each_with_index do |value, item_index| %>
+                <% if (value) %>
+                    <td>
+                      <div class="mortar-table-expandable-cell-wrapper">
+                        <div class="mortar-table-expandable-cell-container">
+                          <div class="mortar-table-expandable-cell-preview">
+                            <%# <%- $.mortar_data.truncate.truncate_center(value, 30) %>
+                            <%= value[0..30] %>
+                          </div>
+                          <div class="mortar-table-expandable-cell-content" hidden="true">
+                            <div id="copy-<%= table_index %>-<%= row_index %>-<%= item_index %>" class="illustrate_content_wrapper">
+                              <%= value %>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                <% else  %>
+                    <td><div>&nbsp;</div></td>
+                <% end %>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <% if (table["notices"])  %>
+        <% table["notices"].each do |notice| %>
+            <div class="alert">
+                <a class="close" data-dismiss="alert">&times;</a>
+                * <%= notice %>
+            </div>
+        <% end %>
+    <% end %>
+
+  <% end %>
+
+  <% if (@udf_output and (not @udf_output.empty?))   %>
+    <h3 class="illustrate_alias">UDF Output: </h3>
+    </br>
+    <pre id="illustrate_udf_output">
+      <%= @udf_output %>
+    </pre>
+  <% end %>
+
+    
+  </body>
+
+</html>
