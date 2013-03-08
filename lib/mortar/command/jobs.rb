@@ -197,7 +197,13 @@ class Mortar::Command::Jobs < Mortar::Command::Base
         end]
       end
       
-      styled_header("#{job_status["project_name"]}: #{job_status["pigscript_name"]} (job_id: #{job_status["job_id"]})")
+      if job_status["controlscript_name"]
+        script_name = job_status["controlscript_name"]
+      else 
+        script_name = job_status["pigscript_name"]
+      end
+
+      styled_header("#{job_status["project_name"]}: #{script_name} (job_id: #{job_status["job_id"]})")
       styled_hash(job_display_entries)
     end
     
