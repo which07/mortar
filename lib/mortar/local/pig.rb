@@ -105,7 +105,9 @@ class Mortar::Local::Pig
 
   # Given a file path, open it and decode the containing json
   def decode_illustrate_input_file(illustrate_outpath)
-    json_decode(File.read(illustrate_outpath))
+    data_raw = File.read(illustrate_outpath)
+    data_encoded = data_raw.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '')
+    json_decode(data_encoded)
   end
 
   def show_illustrate_output(illustrate_outpath)
