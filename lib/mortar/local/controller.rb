@@ -49,8 +49,12 @@ EOF
   # Checks if the user has properly specified their AWS keys
   def verify_aws_keys()
     if (not (ENV['AWS_ACCESS_KEY'] and ENV['AWS_SECRET_KEY'])) then
-      return false
+      if not ENV['MORTAR_IGNORE_AWS_KEYS']
+        return false
       else
+        return true
+      end
+    else
       return true
     end
   end
