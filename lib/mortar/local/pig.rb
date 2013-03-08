@@ -106,9 +106,9 @@ class Mortar::Local::Pig
   # Given a file path, open it and decode the containing json
   def decode_illustrate_input_file(illustrate_outpath)
     data_raw = File.read(illustrate_outpath)
-    if data_raw.class.method_defined?(:encode)
-      data_encoded = data_raw.encode('UTF-8', 'binary', {'invalid' => :replace, 'undef'=> :replace, 'replace'=> ''})
-    else
+    begin
+      data_encoded = data_raw.encode('UTF-8', 'binary', :invalid => :replace, :undef => :replace, :replace => '')
+    rescue NoMethodError
       require 'iconv'
       ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
       data_encoded = ic.iconv(data_raw)
