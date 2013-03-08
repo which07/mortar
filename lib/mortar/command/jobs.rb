@@ -159,7 +159,6 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     def display_job_status(job_status)
       job_display_entries = {
         "status" => job_status["status_description"],
-        "progress" => "#{job_status["progress"]}%",
         "cluster_id" => job_status["cluster_id"],
         "job submitted at" => job_status["start_timestamp"],
         "job began running at" => job_status["running_timestamp"],
@@ -180,8 +179,13 @@ class Mortar::Command::Jobs < Mortar::Command::Base
       end
       
       if job_status["num_hadoop_jobs"] && job_status["num_hadoop_jobs_succeeded"]
+        job_display_entries["progress"] = "#{job_status["progress"]}%"
         job_display_entries["hadoop jobs complete"] = 
           '%0.2f / %0.2f' % [job_status["num_hadoop_jobs_succeeded"], job_status["num_hadoop_jobs"]]
+      elsif job_status["num_hadoop_jobs_succeeded"]
+        job_display_entries["progress"] = '%0.2f MapReduce Jobs complete.' % job_status["num_hadoop_jobs_succeeded"]
+      else
+        job_display_entries["progress"] = "#{job_status["progress"]}%"
       end
       
       if job_status["outputs"] && job_status["outputs"].length > 0
@@ -193,7 +197,13 @@ class Mortar::Command::Jobs < Mortar::Command::Base
         end]
       end
       
-      styled_header("#{job_status["project_name"]}: #{job_status["pigscript_name"]} (job_id: #{job_status["job_id"]})")
+      if job_status["controlscript_name"]
+        script_name = job_status["controlscript_name"]
+      else 
+        script_name = job_status["pigscript_name"]
+      end
+
+      styled_header("#{job_status["project_name"]}: #{script_name} (job_id: #{job_status["job_id"]})")
       styled_hash(job_display_entries)
     end
     
@@ -209,7 +219,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
         end
 
         # If the job is running show the progress bar
-        if job_status["status_code"] == Mortar::API::Jobs::STATUS_RUNNING
+        if job_status["status_code"] == Mortar::API::Jobs::STATUS_RUNNING && job_status["num_hadoop_jobs"]
           progressbar = "=" + ("=" * (job_status["progress"].to_i / 5)) + ">"
 
           if job_status["num_hadoop_jobs"] && job_status["num_hadoop_jobs_succeeded"]
@@ -218,6 +228,10 @@ class Mortar::Command::Jobs < Mortar::Command::Base
           end
 
           printf("\r[#{spinner(ticks)}] Status: [%-22s] %s%% Complete (%s MapReduce jobs finished)", progressbar, job_status["progress"], hadoop_jobs_ratio_complete)
+
+        elsif job_status["status_code"] == Mortar::API::Jobs::STATUS_RUNNING
+          jobs_complete = '%0.2f' % job_status["num_hadoop_jobs_succeeded"]
+          printf("\r[#{spinner(ticks)}] #{jobs_complete} MapReduce Jobs complete.")
 
         # If the job is not complete, but not in the running state, just display its status
         else
