@@ -51,6 +51,19 @@ module Mortar::Local
         end
       end
 
+      it "returns if they are not present but override is in place" do
+        ENV.delete('AWS_ACCESS_KEY')
+        ENV['MORTAR_IGNORE_AWS_KEYS'] = 'true'
+        ctrl = Mortar::Local::Controller.new
+        previous_stderr, $stderr = $stderr, StringIO.new
+        begin
+          ctrl.require_aws_keys()
+          $stderr.string.should eq("")
+        ensure
+          $stderr = previous_stderr
+        end
+      end
+
     end
 
     context("run") do
