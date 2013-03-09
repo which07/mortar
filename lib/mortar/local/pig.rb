@@ -16,6 +16,7 @@
 
 require "erb"
 require 'tempfile'
+require "mortar/helpers"
 require "mortar/local/installutil"
 
 class Mortar::Local::Pig
@@ -33,8 +34,35 @@ class Mortar::Local::Pig
   # any more).
   @temp_file_objects
 
+  # We copy some resources to the user's illustrate-output directory
+  # for styling the output. This only happens if they are not already present.
+  @resource_locations
+  @resource_destinations
+
   def initialize
     @temp_file_objects = []
+
+    @resource_locations = { 
+      "illustrate_template" => File.expand_path("../../templates/report/illustrate-report.html", __FILE__),
+      "illustrate_css" => File.expand_path("../../../../css/illustrate.css", __FILE__),
+      "jquery" => File.expand_path("../../../../js/jquery-1.7.1.min.js", __FILE__),
+      "jquery_transit" => File.expand_path("../../../../js/jquery.transit.js", __FILE__),
+      "jquery_stylestack" => File.expand_path("../../../../js/jquery.stylestack.js", __FILE__),
+      "mortar_table" => File.expand_path("../../../../js/mortar-table.js", __FILE__),
+      "zeroclipboard" => File.expand_path("../../../../js/zero_clipboard.js", __FILE__),
+      "zeroclipboard_swf" => File.expand_path("../../../../flash/zeroclipboard.swf", __FILE__)
+  }
+
+  @resource_destinations = {
+      "illustrate_html" => "illustrate-output/illustrate-output.html",
+      "illustrate_css" => "illustrate-output/resources/css/illustrate-output.css",
+      "jquery" => "illustrate-output/resources/js/jquery-1.7.1.min.js",
+      "jquery_transit" => "illustrate-output/resources/js/jquery.transit.js",
+      "jquery_stylestack" => "illustrate-output/resources/js/jquery.stylestack.js",
+      "mortar_table" => "illustrate-output/resources/js/mortar-table.js",
+      "zeroclipboard" => "illustrate-output/resources/js/zero_clipboard.js",
+      "zeroclipboard_swf" => "illustrate-output/resources/flash/zeroclipboard.swf"
+  }
   end
 
   def command
@@ -95,20 +123,24 @@ class Mortar::Local::Pig
     outfile.path
   end
 
-  def illustrate_html_path
-    "illustrate-output.html"
-  end
-
-  def illustrate_html_template
-    File.expand_path("../../templates/report/illustrate-report.html", __FILE__)
-  end
-
   # Given a file path, open it and decode the containing json
   def decode_illustrate_input_file(illustrate_outpath)
     json_decode(File.read(illustrate_outpath))
   end
 
   def show_illustrate_output(illustrate_outpath)
+    ensure_dir_exists("illustrate-output")
+    ensure_dir_exists("illustrate-output/resources")
+    ensure_dir_exists("illustrate-output/resources/css")
+    ensure_dir_exists("illustrate-output/resources/js")
+    ensure_dir_exists("illustrate-output/resources/flash")
+
+    ["illustrate_css", 
+     "jquery", "jquery_transit", "jquery_stylestack", 
+     "mortar_table", "zeroclipboard", "zeroclipboard_swf"].each { |resource|
+      copy_if_not_present_at_dest(@resource_locations[resource], @resource_destinations[resource])
+    }
+
     # Pull in the dumped json file
     illustrate_data = decode_illustrate_input_file(illustrate_outpath)
 
@@ -116,18 +148,18 @@ class Mortar::Local::Pig
     template_params = create_illustrate_template_parameters(illustrate_data)
 
     # template_params = {'tables' => []}
-    erb = ERB.new(File.read(illustrate_html_template), 0, "%<>")
+    erb = ERB.new(File.read(@resource_locations["illustrate_template"]), 0, "%<>")
     html = erb.result(BindingClazz.new(template_params).get_binding)
 
     # Write the rendered template out to a file
-    File.open(illustrate_html_path, 'w') { |f|
+    File.open(@resource_destinations["illustrate_html"], 'w') { |f|
       f.write(html)
     }
 
     # Open a browser pointing to the rendered template output file
-    action("Opening illlustrate results from #{illustrate_html_path} ") do
+    action("Opening illustrate results from #{@resource_destinations["illustrate_html"]} ") do
       require "launchy"
-      Launchy.open(File.expand_path(illustrate_html_path))
+      Launchy.open(File.expand_path(@resource_destinations["illustrate_html"]))
     end
 
   end
