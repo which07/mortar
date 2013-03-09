@@ -39,6 +39,9 @@ class Mortar::Local::Pig
   @resource_locations
   @resource_destinations
 
+  attr_accessor :resource_locations
+  attr_accessor :resource_destinations
+
   def initialize
     @temp_file_objects = []
 

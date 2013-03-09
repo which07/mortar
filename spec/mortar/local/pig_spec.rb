@@ -87,19 +87,32 @@ module Mortar::Local
           "udf_output" => "hey, I'm a udf",
         }
         pig = Mortar::Local::Pig.new
-        template_contents = File.read(pig.illustrate_html_template)
+        template_location = pig.resource_locations["illustrate_template"]
+        template_contents = File.read(template_location)
+        output_path = pig.resource_destinations["illustrate_html"]
         mock(pig).decode_illustrate_input_file("foo/bar/file.json").returns(fake_illustrate_data)
-        mock(Launchy).open(File.expand_path(pig.illustrate_html_path))
+
+        # TODO: test that these files are copied
+        ["illustrate_css", 
+         "jquery", "jquery_transit", "jquery_stylestack", 
+         "mortar_table", "zeroclipboard", "zeroclipboard_swf"].each { |resource|
+          mock(pig).copy_if_not_present_at_dest.with(
+            File.expand_path(pig.resource_locations[resource]),
+            pig.resource_destinations[resource]
+          ).returns(nil)
+        }
+
+        mock(Launchy).open(File.expand_path(output_path))
         FakeFS do
-          FileUtils.mkdir_p(File.dirname(pig.illustrate_html_template))
-          File.open(pig.illustrate_html_template, 'w') { |f| f.write(template_contents) }
+          FileUtils.mkdir_p(File.dirname(template_location))
+          File.open(template_location, 'w') { |f| f.write(template_contents) }
           begin
             previous_stdout, $stdout = $stdout, StringIO.new
             pig.show_illustrate_output("foo/bar/file.json")
           ensure
             $stdout = previous_stdout
           end
-          expect(File.exists?(pig.illustrate_html_path)).to be_true
+          expect(File.exists?(output_path)).to be_true
         end
       end
 
