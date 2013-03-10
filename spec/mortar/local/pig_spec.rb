@@ -123,6 +123,21 @@ module Mortar::Local
         end
       end
 
+      it "handles invalid unicode characters" do
+        json = %{{"tables": [ "hi \255"], "udf_output": [ ]}}
+        expected_data = {
+          'tables' => ['hi '],
+          'udf_output' => [],
+        }
+        pig = Mortar::Local::Pig.new
+        illustrate_output_file = 'illustrate-output.json'
+        FakeFS do
+          File.open(illustrate_output_file, 'w') { |f| f.write(json) }
+          actual_data = pig.decode_illustrate_input_file(illustrate_output_file)
+          expect(actual_data).to eq(expected_data)
+        end
+      end
+
     end
 
   end
