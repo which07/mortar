@@ -58,7 +58,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
   
   # projects:create PROJECTNAME
   #
-  # Generate and register a new Mortar project for code in the current directory, with the name PROJECTNAME.
+  # Used when you want to start a new Mortar project using Mortar generated code.
   def create
     name = shift_argument
     unless name
@@ -75,9 +75,9 @@ class Mortar::Command::Projects < Mortar::Command::Base
   end
   alias_command "new", "projects:create"
   
-  # projects:register PROJECT
+  # projects:register PROJECTNAME
   #
-  # register a mortar project for the current directory with the name PROJECT
+  # Used when you want to start a new Mortar project using your existing code in the current directory.
   def register
     name = shift_argument
     unless name
@@ -145,10 +145,12 @@ class Mortar::Command::Projects < Mortar::Command::Base
   end
   alias_command "register", "projects:register"
 
-  # projects:set_remote PROJECT
+  # projects:set_remote PROJECTNAME
   #
-  # Adds the Mortar remote to the local git project. This is necessary for successfully executing many of the Mortar commands.
-  #
+  # Used after you checkout code for an existing Mortar project from a non-Mortar git repository.  
+  # Adds a remote to your local git repository to the Mortar git repository.  For example if a 
+  # co-worker creates a Mortar project from an internal repository you would clone the internal
+  # repository and then after cloning call mortar projects:set_remote.
   def set_remote
     project_name = shift_argument
 
@@ -176,10 +178,9 @@ class Mortar::Command::Projects < Mortar::Command::Base
 
   end
   
-  # projects:clone PROJECT
+  # projects:clone PROJECTNAME
   #
-  # clone the mortar project PROJECT into the current directory.
-  #
+  # Used when you want to clone an existing Mortar project into the current directory.
   def clone
     name = shift_argument
     unless name
