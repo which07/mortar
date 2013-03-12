@@ -34,6 +34,7 @@ describe Mortar::Command::Generate do
       File.exists?("Test/macros").should be_true
       File.exists?("Test/fixtures").should be_true
       File.exists?("Test/pigscripts").should be_true
+      File.exists?("Test/controlscripts").should be_true
       File.exists?("Test/udfs").should be_true
       File.exists?("Test/README.md").should be_true
       File.exists?("Test/Gemfile").should be_false
@@ -93,6 +94,26 @@ STDERR
         stderr, stdout = execute("generate:pigscript")
         stderr.should == <<-STDERR
  !    Usage: mortar generate:pigscript SCRIPTNAME
+ !    Must specify SCRIPTNAME.
+ STDERR
+      end
+    end
+  end
+
+  describe "generate:controlscript" do
+    it "Generate a new controlscript in a project" do
+      with_blank_project do |p| 
+        stderr, stdout = execute("generate:controlscript Oink", p)
+        File.exists?(File.join(p.root_path, "controlscripts/Oink.py")).should be_true
+        File.read("controlscripts/Oink.py").each_line { |line| line.match(/<%.*%>/).should be_nil }
+      end
+    end
+
+    it "error when controlscript name isn't provided" do
+      with_blank_project do |p|
+        stderr, stdout = execute("generate:controlscript")
+        stderr.should == <<-STDERR
+ !    Usage: mortar generate:controlscript SCRIPTNAME
  !    Must specify SCRIPTNAME.
  STDERR
       end
