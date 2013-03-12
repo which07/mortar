@@ -18,6 +18,7 @@ require "mortar/generators/project_generator"
 require "mortar/generators/udf_generator"
 require "mortar/generators/pigscript_generator"
 require "mortar/generators/macro_generator"
+require "mortar/generators/controlscript_generator"
 require "mortar/command/base"
 
 # generate mortar code (project, pigscript, python_udf, macro)
@@ -50,6 +51,23 @@ class Mortar::Command::Generate < Mortar::Command::Base
     end
     udf_generator = Mortar::Generators::UDFGenerator.new
     udf_generator.generate_python_udf(udf_name, project, options)
+  end
+
+  # generate:controlscript [SCRIPTNAME]
+  #
+  # Generate new control script.
+  #
+  def controlscript
+    script_name = shift_argument
+    unless script_name
+      error("Usage: mortar generate:controlscript SCRIPTNAME\nMust specify SCRIPTNAME.")
+    end
+
+    # Validates the we're in a mortar project
+    project
+
+    script_generator = Mortar::Generators::ControlscriptGenerator.new
+    script_generator.generate_controlscript(script_name, options)
   end
 
   # generate:pigscript [SCRIPTNAME]
