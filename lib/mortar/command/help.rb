@@ -79,7 +79,6 @@ private
     size = longest(namespaces.map { |n| n[:name] })
     namespaces.sort_by {|namespace| namespace[:name]}.each do |namespace|
       name = namespace[:name]
-      namespace[:description] ||= " Help has not yet been completed for these commands"
       puts "  %-#{size}s  # %s" % [ name, namespace[:description] ]
     end
   end
@@ -103,7 +102,6 @@ private
     unless namespace_commands.empty?
       size = longest(namespace_commands.map { |c| c[:banner] })
       namespace_commands.sort_by { |c| c[:banner].to_s }.each do |command|
-        command[:summary] ||= "Help has not yet been completed for this command"
         puts "  %-#{size}s  # %s" % [ command[:banner], command[:summary] ]
       end
     end
@@ -121,7 +119,7 @@ private
         puts command[:help].split("\n")[1..-1].join("\n")
       else
         puts
-        error "Help has not yet been completed for #{command[:command]}"
+        error "No help available for #{command[:command]}. Please contact us at support@mortardata.com for assistance."
       end
       puts
     end
