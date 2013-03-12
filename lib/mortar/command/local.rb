@@ -17,6 +17,8 @@
 require "mortar/local/controller"
 require "mortar/command/base"
 
+# run select pig commands on your local machine
+#
 class Mortar::Command::Local < Mortar::Command::Base
 
 
