@@ -26,7 +26,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
   
   # projects
   #
-  # Display the available set of projects
+  # Display the available set of Mortar projects.
   def index
     validate_arguments!
     projects = api.get_projects().body["projects"]
@@ -40,7 +40,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
   
   # projects:delete PROJECTNAME
   #
-  # Delete a mortar project
+  # Delete the Mortar project PROJECTNAME.
   def delete
     name = shift_argument
     unless name
