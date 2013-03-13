@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>Illustrate Report</title>
+    <link rel="stylesheet" href="resources/css/illustrate-output.css" type="text/css" />
   </head>
   
   <body>
@@ -14,7 +15,7 @@
         <% end %>
         <%= table["alias"] %>
         <% if (table["notices"])   %>
-        &nbsp;*
+        &nbsp;
         <% end %>
     </h3>
 
@@ -38,9 +39,9 @@
                             <%= value[0..30] %>
                           </div>
                           <div class="mortar-table-expandable-cell-content" hidden="true">
-                            <div id="copy-<%= table_index %>-<%= row_index %>-<%= item_index %>" class="illustrate_content_wrapper">
-                              <%= value %>
-                            </div>
+                            <!-- TODO: get clipboard working -->
+                            <!-- <div data-clipboard-target="copy-<%- table_index %>-<%- row_index %>-<%- item_index %>" class="clipboard" data->Copy to Clipboard</div>  -->
+                            <div id="copy-<%- table_index %>-<%- row_index %>-<%- item_index %>" class="illustrate_content_wrapper"><%= value %></div>
                           </div>
                         </div>
                       </div>
@@ -73,7 +74,23 @@
     </pre>
   <% end %>
 
-    
+  <script src="resources/js/jquery-1.7.1.min.js"></script>
+  <script src="resources/js/jquery.transit.js"></script>
+  <script src="resources/js/jquery.stylestack.js"></script>
+  <script src="resources/js/zero_clipboard.js"></script>
+  <script src="resources/js/mortar-table.js"></script>
+  <script>
+    $('.illustrate_table td').mortarTableExpandableCell();
+    // TODO: get this working
+    /*
+    $('.illustrate_table td .clipboard').each(function() {
+       $(this).data('clippy',  new ZeroClipboard( $(this), {
+            moviePath: "resources/flash/zeroclipboard.swf"
+        })); 
+    });
+    */
+  </script>
+
   </body>
 
 </html>

@@ -494,6 +494,18 @@ module Mortar
       end
     end
 
+    def ensure_dir_exists(dir)
+      unless Dir.exists? dir
+        Dir.mkdir(dir)
+      end
+    end
+
+    def copy_if_not_present_at_dest(res_src, res_dest)
+      unless File.exists?(res_dest)
+        FileUtils.cp(res_src, res_dest)
+      end
+    end
+
     private
 
       def create_display_method(name, colour_code, new_line=true)
