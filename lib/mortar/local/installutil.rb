@@ -16,6 +16,7 @@
 
 require 'zlib'
 require 'excon'
+require 'time'
 require 'rbconfig'
 require 'rubygems/package'
 
@@ -89,7 +90,7 @@ module Mortar
       end
 
       def http_date_to_epoch(date_str)
-        return DateTime.httpdate(date_str).strftime("%s").to_i
+        return Time.httpdate(date_str).to_i
       end
 
       def url_date(url)
