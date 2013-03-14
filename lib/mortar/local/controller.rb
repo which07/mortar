@@ -75,7 +75,7 @@ EOF
     end
 
     pig = Mortar::Local::Pig.new()
-    pig.install()
+    pig.install_or_update()
 
     py = Mortar::Local::Python.new()
     unless py.check_or_install

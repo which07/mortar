@@ -49,6 +49,17 @@ module Mortar::Local
         end
       end
 
+      it "works with file created by note-install" do
+        install_file_path = @installutil.install_file_for("foo")
+        install_date = 1234568
+        stub(Time).now.returns(install_date)
+        FakeFS do
+          FileUtils.mkdir_p(File.dirname(install_file_path))
+          @installutil.note_install('foo')
+          expect(@installutil.install_date('foo')).to eq(install_date)
+        end
+      end
+
     end
 
     context("note-install") do
@@ -62,6 +73,31 @@ module Mortar::Local
           @installutil.note_install("foo")
           expect(File.exists?(install_file_path)).to be_true
         end
+      end
+
+    end
+
+    context "is_newer_version" do
+
+      it "is if remote file is newer" do
+        stub(@installutil).install_date.returns(1)
+        stub(@installutil).url_date.returns(2)
+        expect(@installutil.is_newer_version('foo', 'http://bar')).to be_true
+      end
+
+      it "is not if remote file is older" do
+        stub(@installutil).install_date.returns(2)
+        stub(@installutil).url_date.returns(1)
+        expect(@installutil.is_newer_version('foo', 'http://bar')).to be_false
+      end
+
+    end
+
+    context "parse_http_date" do
+
+      it "returns the appropriate epoch" do
+        epoch = @installutil.http_date_to_epoch("Mon, 11 Mar 2013 15:03:55 GMT")
+        expect(epoch).to eq(1363014235)
       end
 
     end
