@@ -81,6 +81,7 @@ OUT
     end
 
     context "ensure_dir_exists" do
+
       it "does not have an existing directory" do
         FakeFS do
           dir_name = "./foo-bar-dir"
