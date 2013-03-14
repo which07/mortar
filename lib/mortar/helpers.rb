@@ -495,7 +495,7 @@ module Mortar
     end
 
     def ensure_dir_exists(dir)
-      unless Dir.exists? dir
+      unless File.directory? dir
         Dir.mkdir(dir)
       end
     end
