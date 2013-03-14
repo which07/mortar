@@ -19,6 +19,7 @@
 
 require "spec_helper"
 require "mortar/helpers"
+require 'fakefs/spec_helpers'
 
 module Mortar
   describe Helpers do
@@ -78,5 +79,28 @@ OUT
         infile.close()
       end
     end
+
+    context "ensure_dir_exists" do
+      it "does not have an existing directory" do
+        FakeFS do
+          dir_name = "./foo-bar-dir"
+          expect(File.directory?(dir_name)).to be_false
+          ensure_dir_exists(dir_name)
+          expect(File.directory?(dir_name)).to be_true
+        end
+      end
+
+      it "does have an existing directory" do
+        FakeFS do
+          dir_name = "./foo-bar-dir"
+          FileUtils.mkdir_p(dir_name)
+          expect(File.directory?(dir_name)).to be_true
+          ensure_dir_exists(dir_name)
+          expect(File.directory?(dir_name)).to be_true
+        end
+      end
+
+    end
+
   end
 end
