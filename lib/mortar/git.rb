@@ -81,12 +81,45 @@ module Mortar
         end
         output
       end
+
+      def push_master
+        unless has_commits?
+          raise GitError, "No commits found in repository.  You must do an initial commit to initialize the repository."
+        end
+
+        safe_copy do
+          did_stash_changes = stash_working_dir("Stash for push to master")
+          git('push mortar master')
+        end
+
+      end
+
+      #
+      # Create a safe copy of the git directory
+      #
+
+      def safe_copy(&block)
+        # Copy code into a temp directory so we don't confuse editors while snapshotting
+        curdir = Dir.pwd
+        tmpdir = Dir.mktmpdir
+        FileUtils.cp_r(Dir.glob('*', File::FNM_DOTMATCH) - ['.', '..'], tmpdir)
+        Dir.chdir(tmpdir)
+
+        if block
+          yield
+          FileUtils.remove_entry_secure(tmpdir)
+          Dir.chdir(curdir)
+        else
+          return tmpdir
+        end
+      end
     
       #    
       # snapshot
       #
 
       def create_snapshot_branch
+
         # TODO: handle Ctrl-C in the middle
         # TODO: can we do the equivalent of stash without changing the working directory
         unless has_commits?
@@ -95,9 +128,7 @@ module Mortar
 
         # Copy code into a temp directory so we don't confuse editors while snapshotting
         curdir = Dir.pwd
-        tmpdir = Dir.mktmpdir
-        FileUtils.cp_r(Dir.glob('*', File::FNM_DOTMATCH) - ['.', '..'], tmpdir)
-        Dir.chdir(tmpdir)
+        tmpdir = safe_copy
       
         starting_branch = current_branch
         snapshot_branch = "mortar-snapshot-#{Mortar::UUID.create_random.to_s}"
