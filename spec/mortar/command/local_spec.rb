@@ -138,7 +138,7 @@ STDERR
           mock(j).setup_project_python_environment.returns(true)
         end
         any_instance_of(Mortar::Local::Jython) do |j|
-          mock(j).install_if_not_present.returns(true)
+          mock(j).install_or_update.returns(true)
         end
         stderr, stdout = execute("local:configure")
         stderr.should == ""
