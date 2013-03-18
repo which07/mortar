@@ -93,6 +93,17 @@ module Mortar::Local
 
     end
 
+    context "url_date" do
+
+      it "returns an epoch" do
+        excon_response = Excon::Response.new(:headers => {"Last-Modified" => "Mon, 11 Mar 2013 15:03:55 GMT"})
+        mock(Excon).head("http://foo/bar").returns(excon_response)
+        actual_epoch = @installutil.url_date("http://foo/bar")
+        expect(actual_epoch).to eq(1363014235)
+      end
+
+    end
+
     context "parse_http_date" do
 
       it "returns the appropriate epoch" do
