@@ -84,29 +84,43 @@ class Mortar::Local::Pig
     File.basename(pig_archive_url)
   end
 
-  # Determines if a pig install needs to occur, true if no
-  # pig install present or a newer version is available
+  # Determines if a pig install needs to occur, true if no pig install present
   def should_do_pig_install?
     not (File.exists?(pig_directory))
   end
 
-  # Installs pig for this project if it is not already present
-  def install
+  # Determines if a pig install needs to occur, true if server side
+  # pig tgz is newer than date of the existing install
+  def should_do_pig_update?
+    return is_newer_version('pig', pig_archive_url)
+  end
+
+  def install_or_update()
+    call_install = false
     if should_do_pig_install?
-      FileUtils.mkdir_p(local_install_directory)
       action "Installing pig" do
-        download_file(pig_archive_url, local_install_directory)
-        local_tgz = File.join(local_install_directory, pig_archive_file)
-        extract_tgz(local_tgz, local_install_directory)
-
-        # This has been seening coming out of the tgz w/o +x so we do
-        # here to be sure it has the necessary permissions
-        FileUtils.chmod(0755, command)
-
-        File.delete(local_tgz)
-        note_install("pig")
+        install()
+      end
+    elsif should_do_pig_update?
+      action "Updating to latest pig" do
+        install()
       end
     end
+  end
+
+  # Installs pig for this project if it is not already present
+  def install
+    FileUtils.mkdir_p(local_install_directory)
+    download_file(pig_archive_url, local_install_directory)
+    local_tgz = File.join(local_install_directory, pig_archive_file)
+    extract_tgz(local_tgz, local_install_directory)
+
+    # This has been seening coming out of the tgz w/o +x so we do
+    # here to be sure it has the necessary permissions
+    FileUtils.chmod(0755, command)
+
+    File.delete(local_tgz)
+    note_install("pig")
   end
 
   # run the pig script with user supplied pig parameters

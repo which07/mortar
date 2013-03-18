@@ -30,24 +30,12 @@ module Mortar::Local
 
     context("install") do
 
-      it "does nothing if told not to" do
-        pig = Mortar::Local::Pig.new
-        mock(pig).should_do_pig_install?.returns(false)
-        FakeFS do
-          FileUtils.mkdir_p(File.dirname(pig.local_install_directory))
-          FileUtils.rm_rf(pig.local_install_directory, :force => true)
-          pig.install
-          expect(File.exists?(pig.local_install_directory)).to be_false
-        end
-      end
-
       it "handles necessary installation steps" do
         # creates the parent directory, downloads the tgz, extracts it,
         # chmods bin/pig, removes tgz, and notes the installation
         FakeFS do
           pig = Mortar::Local::Pig.new
           local_pig_archive = File.join(pig.local_install_directory, pig.pig_archive_file)
-          mock(pig).should_do_pig_install?.returns(true)
           mock(pig).download_file(pig.pig_archive_url, pig.local_install_directory) do
             # Simulate the tgz file being downloaded, this should be deleted
             # before the method finishes executing
@@ -66,6 +54,42 @@ module Mortar::Local
       end
 
     end
+
+    context "install_or_update" do
+
+      it "does nothing if existing install and no update available" do
+        pig = Mortar::Local::Pig.new
+        mock(pig).should_do_pig_install?.returns(false)
+        mock(pig).should_do_pig_update?.returns(false)
+        FakeFS do
+          FileUtils.mkdir_p(File.dirname(pig.local_install_directory))
+          FileUtils.rm_rf(pig.local_install_directory, :force => true)
+          pig.install_or_update
+          expect(File.exists?(pig.local_install_directory)).to be_false
+        end
+      end
+
+      it "does install if none has been done before" do
+        pig = Mortar::Local::Pig.new
+        mock(pig).should_do_pig_install?.returns(true)
+        mock(pig).install
+        capture_stdout do
+          pig.install_or_update
+        end
+      end
+
+      it "does install if one was done before but there is an update" do
+        pig = Mortar::Local::Pig.new
+        mock(pig).should_do_pig_install?.returns(false)
+        mock(pig).should_do_pig_update?.returns(true)
+        mock(pig).install
+        capture_stdout do
+          pig.install_or_update
+        end
+      end
+
+    end
+
 
     context "show_illustrate_output" do
 
