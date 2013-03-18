@@ -25,7 +25,7 @@ require "mortar/command/base"
 #
 class Mortar::Command::Generate < Mortar::Command::Base
 
-  # generate:project [PROJECTNAME]
+  # generate:project PROJECTNAME
   #
   # Generate the files and directory structure necessary for a Mortar project.
   # 
@@ -40,7 +40,7 @@ class Mortar::Command::Generate < Mortar::Command::Base
   end
   alias_command "generate:project", "generate:_project"
   
-  # generate:python_udf [UDFNAME]
+  # generate:python_udf UDFNAME
   #
   # Generate a new python user defined function
   # 
@@ -53,7 +53,7 @@ class Mortar::Command::Generate < Mortar::Command::Base
     udf_generator.generate_python_udf(udf_name, project, options)
   end
 
-  # generate:controlscript [SCRIPTNAME]
+  # generate:controlscript SCRIPTNAME
   #
   # Generate new control script.
   #
@@ -70,7 +70,7 @@ class Mortar::Command::Generate < Mortar::Command::Base
     script_generator.generate_controlscript(script_name, options)
   end
 
-  # generate:pigscript [SCRIPTNAME]
+  # generate:pigscript SCRIPTNAME
   #
   # Generate new pig script.
   #
@@ -87,7 +87,7 @@ class Mortar::Command::Generate < Mortar::Command::Base
     script_generator.generate_pigscript(script_name, project, options)
   end
 
-  # generate:macro [MACRONAME]
+  # generate:macro MACRONAME
   #
   # Generate a new pig macro.
   #
