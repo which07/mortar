@@ -90,7 +90,7 @@ EOF
     end
 
     jy = Mortar::Local::Jython.new()
-    jy.install_if_not_present()
+    jy.install_or_update()
   end
 
   # Main entry point for user running a pig script

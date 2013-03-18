@@ -250,8 +250,8 @@ class Mortar::Local::Pig
     template_params = {}
     template_params['pig_params_file'] = make_pig_param_file(pig_parameters)
     template_params['pig_home'] = pig_directory
-    template_params['pig_classpath'] = "#{pig_directory}/lib-pig/*:#{local_install_directory}/jython/jython.jar"
-    template_params['classpath'] = "#{pig_directory}/lib/*:#{pig_directory}/conf/jets3t.properties"
+    template_params['pig_classpath'] = "#{pig_directory}/lib-pig/*:#{jython_directory}/jython.jar"
+    template_params['classpath'] = "#{pig_directory}/lib/*:#{jython_directory}/jython.jar:#{pig_directory}/conf/jets3t.properties"
     template_params['project_home'] = File.expand_path("..", local_install_directory)
     template_params['local_install_dir'] = local_install_directory
     template_params['pig_sub_command'] = cmd
@@ -266,6 +266,7 @@ class Mortar::Local::Pig
     opts['fs.s3n.awsAccessKeyId'] = ENV['AWS_ACCESS_KEY']
     opts['fs.s3n.awsSecretAccessKey'] = ENV['AWS_SECRET_KEY']
     opts['pig.events.logformat'] = PIG_LOG_FORMAT
+    opts['python.home'] = jython_directory
     opts['python.cachedir'] = jython_cache_directory
     return opts
   end
