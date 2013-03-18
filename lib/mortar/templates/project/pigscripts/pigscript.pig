@@ -6,7 +6,7 @@
  * Parameters - set default values here; you can override with -p on the command-line.
  */
  
-<%= '%default'%> INPUT_PATH 's3n://hawk-example-data/tutorial/excite.log.bz2'
+<%= '%default'%> INPUT_PATH 's3n://mortar-example-data/tutorial/excite.log.bz2'
 <%= '%default'%> OUTPUT_PATH 's3n://my-output-bucket/$MORTAR_EMAIL_S3_ESCAPED/<%= project_name %>'
 
 /**
