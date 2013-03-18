@@ -207,6 +207,7 @@ class Mortar::Local::Pig
   # can be appended to the command line invocation of Pig that will
   # get it to do something interesting, such as '-f some-file.pig'
   def run_pig_command(cmd, parameters = nil)
+    unset_hadoop_env_vars
     # Generate the script for running the command, then
     # write it to a temp script which will be exectued
     script_text = script_for_command(cmd, parameters)
@@ -216,6 +217,13 @@ class Mortar::Local::Pig
     FileUtils.chmod(0755, script.path)
     system(script.path)
     script.unlink
+  end
+
+  # so Pig doesn't try to load the wrong hadoop jar/configuration
+  # this doesn't mess up the env vars in the terminal, just this process (ruby)
+  def unset_hadoop_env_vars
+    ENV['HADOOP_HOME'] = ''
+    ENV['HADOOP_CONF_DIF'] = ''
   end
 
   # Generates a bash script which sets up the necessary environment and

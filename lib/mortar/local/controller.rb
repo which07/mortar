@@ -89,13 +89,6 @@ EOF
     end
   end
 
-  # so Pig doesn't try to load the wrong hadoop jar/configuration
-  # this doesn't mess up the env vars in the terminal, just this process (ruby)
-  def unset_hadoop_env_vars
-    ENV['HADOOP_HOME'] = ''
-    ENV['HADOOP_CONF_DIF'] = ''
-  end
-
   # Main entry point for user running a pig script
   def run(pig_script, pig_parameters)
     require_aws_keys
