@@ -71,7 +71,6 @@ class Mortar::Command::Projects < Mortar::Command::Base
     git.git("add .")
     git.git("commit -m \"Mortar project scaffolding\"")
     Mortar::Command::run("projects:register", [name])
-    git.git("push mortar master")
   end
   alias_command "new", "projects:create"
   
@@ -137,6 +136,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
       error("Project registration failed.\nError message: #{project_result['error_message']}")
     when Mortar::API::Projects::STATUS_ACTIVE
       git.remote_add("mortar", project_result['git_url'])
+      git.push_master
       display "Your project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n\n"
     else
       raise RuntimeError, "Unknown project status: #{project_status} for project_id: #{project_id}"
