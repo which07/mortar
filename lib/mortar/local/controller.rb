@@ -89,9 +89,17 @@ EOF
     end
   end
 
+  # so Pig doesn't try to load the wrong hadoop jar/configuration
+  # this doesn't mess up the env vars in the terminal, just this process (ruby)
+  def unset_hadoop_env_vars
+    ENV['HADOOP_HOME'] = ''
+    ENV['HADOOP_CONF_DIF'] = ''
+  end
+
   # Main entry point for user running a pig script
   def run(pig_script, pig_parameters)
     require_aws_keys
+    unset_hadoop_env_vars
     install_and_configure
     pig = Mortar::Local::Pig.new()
     pig.run_script(pig_script, pig_parameters)
@@ -100,6 +108,7 @@ EOF
   # Main entry point for illustrating a pig alias
   def illustrate(pig_script, pig_alias, pig_parameters, skip_pruning)
     require_aws_keys
+    unset_hadoop_env_vars
     install_and_configure
     pig = Mortar::Local::Pig.new()
     pig.illustrate_alias(pig_script, pig_alias, skip_pruning, pig_parameters)
