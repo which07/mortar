@@ -223,7 +223,7 @@ class Mortar::Local::Pig
   # this doesn't mess up the env vars in the terminal, just this process (ruby)
   def unset_hadoop_env_vars
     ENV['HADOOP_HOME'] = ''
-    ENV['HADOOP_CONF_DIF'] = ''
+    ENV['HADOOP_CONF_DIR'] = ''
   end
 
   # Generates a bash script which sets up the necessary environment and
