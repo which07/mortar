@@ -16,6 +16,7 @@
 
 require 'zlib'
 require 'excon'
+require 'time'
 require 'rbconfig'
 require 'rubygems/package'
 
@@ -90,6 +91,24 @@ module Mortar
       def osx?
         os_platform_name = RbConfig::CONFIG['target_os']
         return os_platform_name.start_with?('darwin')
+      end
+
+      def http_date_to_epoch(date_str)
+        return Time.httpdate(date_str).to_i
+      end
+
+      def url_date(url)
+        result = Excon.head(url)
+        http_date_to_epoch(result.get_header('Last-Modified'))
+      end
+
+      # Given a subdirectory where we have installed some software
+      # and a url to the tgz file it's sourced from, check if the
+      # remote version is newer than the installed version
+      def is_newer_version(subdir, url)
+        existing_install_date = install_date(subdir)
+        remote_archive_date = url_date(url)
+        return existing_install_date < remote_archive_date
       end
 
     end

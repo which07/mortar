@@ -38,6 +38,8 @@ module Mortar
           inside "pigscripts" do
             generate_file "pigscript.pig", "#{project_name}.pig"
           end
+
+          mkdir "controlscripts"
           
           mkdir "macros"
           

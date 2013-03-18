@@ -31,31 +31,43 @@ class Mortar::Local::Python
   def check_or_install
     if osx?
       # We currently only install python for osx
-      install_python_osx
+      install_or_update_osx
     else
       # Otherwise we check that the system supplied python will be sufficient
       check_system_python
     end
   end
 
+  def should_do_update?
+    return is_newer_version('python', python_archive_url)
+  end
+
   # Performs an installation of python specific to this project, this
   # install includes pip and virtualenv
-  def install_python_osx
+  def install_or_update_osx
     @command = "#{local_install_directory}/python/bin/python"
     if should_do_python_install?
-      FileUtils.mkdir_p(local_install_directory)
       action "Installing python" do
-        download_file(python_archive_url, local_install_directory)
-        extract_tgz(local_install_directory + "/" + python_archive_file, local_install_directory)
-
-        # This has been seening coming out of the tgz w/o +x so we do
-        # here to be sure it has the necessary permissions
-        FileUtils.chmod(0755, @command)
-        File.delete(local_install_directory + "/" + python_archive_file)
-        note_install("python")
+        install_osx
+      end
+    elsif should_do_update?
+      action "Updating to latest python" do
+        install_osx
       end
     end
     true
+  end
+
+  def install_osx
+    FileUtils.mkdir_p(local_install_directory)
+    download_file(python_archive_url, local_install_directory)
+    extract_tgz(local_install_directory + "/" + python_archive_file, local_install_directory)
+
+    # This has been seening coming out of the tgz w/o +x so we do
+    # here to be sure it has the necessary permissions
+    FileUtils.chmod(0755, @command)
+    File.delete(local_install_directory + "/" + python_archive_file)
+    note_install("python")
   end
 
   # Determines if a python install needs to occur, true if no
