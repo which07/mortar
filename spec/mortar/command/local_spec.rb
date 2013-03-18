@@ -69,11 +69,16 @@ STDERR
       it "errors when the script doesn't exist" do
         with_git_initialized_project do |p|
           write_file(File.join(p.pigscripts_path, "my_other_script.pig"))
+          write_file(File.join(p.controlscripts_path, "my_control_script.py"))
           stderr, stdout = execute("local:run my_script", p)
           stderr.should == <<-STDERR
- !    Unable to find pigscript my_script
- !    Available scripts:
+ !    Unable to find a pigscript or controlscript for my_script
+ !    
+ !    Available pigscripts:
  !    my_other_script
+ !    
+ !    Available controlscripts:
+ !    my_control_script
 STDERR
         end
       end
@@ -131,6 +136,9 @@ STDERR
         end
         any_instance_of(Mortar::Local::Python) do |j|
           mock(j).setup_project_python_environment.returns(true)
+        end
+        any_instance_of(Mortar::Local::Jython) do |j|
+          mock(j).install_if_not_present.returns(true)
         end
         stderr, stdout = execute("local:configure")
         stderr.should == ""

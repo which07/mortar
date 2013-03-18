@@ -24,19 +24,19 @@ class Mortar::Local::Jython
   JYTHON_JAR_DIR = "http://s3.amazonaws.com/hawk-dev-software-mirror/jython/jython-2.5.2/"
 
   def install_if_not_present
-    unless File.exists? '/usr/local/jython/jython.jar'
+    unless File.exists?(local_install_directory + '/jython/jython.jar')
       unless File.exists?(local_install_directory + '/' + JYTHON_JAR_NAME)
         display("Downloading jython...")
         download_file(JYTHON_JAR_DIR + JYTHON_JAR_NAME, local_install_directory)
       end
 
-      display("Installing jython...")
-      `java -jar #{local_install_directory + '/' + JYTHON_JAR_NAME} -s -d /usr/local/jython`
+      action("Installing jython") do
+        `echo $JAVA_HOME/bin/java`
+        `$JAVA_HOME/bin/java -jar #{local_install_directory + '/' + JYTHON_JAR_NAME} -s -d #{local_install_directory}/jython`
 
-      FileUtils.mkdir_p '/usr/local/jython/cachedir'
-      FileUtils.chmod_R 0777, '/usr/local/jython/cachedir'
-
-      display("jython installed to /usr/local/jython")
+        FileUtils.mkdir_p jython_cache_directory
+        FileUtils.chmod_R 0777, jython_cache_directory
+      end
     end
   end
 end

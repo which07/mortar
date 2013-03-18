@@ -33,6 +33,9 @@ module Mortar
         File.join(Dir.getwd, ".mortar-local")
       end
 
+      def jython_cache_directory
+        local_install_directory + "/jython/cachedir"
+      end
 
       # Drops a marker file for an installed package, used
       # to help determine if updates should be performed
