@@ -189,12 +189,21 @@ class Mortar::Command::Jobs < Mortar::Command::Base
       end
       
       if job_status["outputs"] && job_status["outputs"].length > 0
-        job_display_entries["outputs"] = Hash[job_status["outputs"].select{|o| o["alias"]}.collect do |output|
+        # job_display_entries["outputs"] = job_status["outputs"].select{|o| o["alias"]}.collect do |output|
+        #   output_hash = {}
+        #   output_hash["location"] = output["location"] if output["location"]
+        #   output_hash["records"] = output["records"] if output["records"]
+        #   { output['alias'] => output_hash }
+        # end
+
+        job_display_entries["outputs"] = Hash.new { |h,k| h[k] = [] }
+
+        job_status["outputs"].select{|o| o["alias"]}.collect{ |output|
           output_hash = {}
           output_hash["location"] = output["location"] if output["location"]
           output_hash["records"] = output["records"] if output["records"]
           [output['alias'], output_hash]
-        end]
+        }.each{ |k,v| job_display_entries["outputs"][k] << v }
       end
       
       if job_status["controlscript_name"]
