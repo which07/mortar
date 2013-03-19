@@ -160,8 +160,8 @@ class Mortar::Local::Pig
     ensure_dir_exists("illustrate-output/resources/js")
     ensure_dir_exists("illustrate-output/resources/flash")
 
-    ["illustrate_css", 
-     "jquery", "jquery_transit", "jquery_stylestack", 
+    ["illustrate_css",
+     "jquery", "jquery_transit", "jquery_stylestack",
      "mortar_table", "zeroclipboard", "zeroclipboard_swf"].each { |resource|
       copy_if_not_present_at_dest(@resource_locations[resource], @resource_destinations[resource])
     }
@@ -213,8 +213,10 @@ class Mortar::Local::Pig
     end
     cmd += " #{pig_alias} '"
 
-    run_pig_command(cmd, [])
-    show_illustrate_output(illustrate_outpath)
+    result = run_pig_command(cmd, [])
+    if result
+      show_illustrate_output(illustrate_outpath)
+    end
   end
 
   # Run pig with the specified command ('command' is anything that
@@ -231,6 +233,7 @@ class Mortar::Local::Pig
     FileUtils.chmod(0755, script.path)
     system(script.path)
     script.unlink
+    return (0 == $?.to_i)
   end
 
   # so Pig doesn't try to load the wrong hadoop jar/configuration
