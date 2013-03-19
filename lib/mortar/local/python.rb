@@ -19,7 +19,7 @@ require "mortar/local/installutil"
 class Mortar::Local::Python
   include Mortar::Local::InstallUtil
 
-  PYTHON_DEFAULT_TGZ_URL = "https://s3.amazonaws.com/mortar-public-artifacts/mortar-python-osx.tgz"
+  PYTHON_DEFAULT_TGZ_URL = "https://s3.amazonaws.com/mhc-software-mirror/cli/mortar-python-osx.tgz"
 
   # Path to the python binary that should be used
   # for running UDFs
