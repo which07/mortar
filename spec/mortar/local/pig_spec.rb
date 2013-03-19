@@ -177,5 +177,29 @@ module Mortar::Local
 
     end
 
+    context "illustrate_alias" do
+
+      it "displays html results if illustrate was successful" do
+        any_instance_of(Mortar::Project::PigScripts, :elements => nil, :path => "/foo/bar/baz.pig")
+        script = Mortar::Project::PigScripts.new('/foo/bar/baz.pig', 'baz', 'pig')
+        pig = Mortar::Local::Pig.new
+        mock(pig).run_pig_command.with_any_args.returns(true)
+        mock(pig).show_illustrate_output.with_any_args
+        stub(pig).make_pig_param_file.returns('param.file')
+        pig.illustrate_alias(script, 'my_alias', false, [])
+      end
+
+      it "skips results if illustrate was unsuccessful" do
+        any_instance_of(Mortar::Project::PigScripts, :elements => nil, :path => "/foo/bar/baz.pig")
+        script = Mortar::Project::PigScripts.new('/foo/bar/baz.pig', 'baz', 'pig')
+        pig = Mortar::Local::Pig.new
+        mock(pig).run_pig_command.with_any_args.returns(false)
+        mock(pig).show_illustrate_output.with_any_args.never
+        stub(pig).make_pig_param_file.returns('param.file')
+        pig.illustrate_alias(script, 'my_alias', false, [])
+      end
+
+    end
+
   end
 end
