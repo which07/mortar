@@ -32,7 +32,7 @@ class Mortar::Command::Local < Mortar::Command::Base
     ctrl.install_and_configure
   end
 
-  # local:run PIGSCRIPT
+  # local:run SCRIPT
   #
   # Run a job on your local machine
   #
@@ -44,14 +44,14 @@ class Mortar::Command::Local < Mortar::Command::Base
   #    Run the generate_regression_model_coefficients script locally.
   #        $ mortar local:run generate_regression_model_coefficients
   def run
-    pigscript_name = shift_argument
-    unless pigscript_name
-      error("Usage: mortar local:run PIGSCRIPT\nMust specify PIGSCRIPT.")
+    script_name = shift_argument
+    unless script_name
+      error("Usage: mortar local:run SCRIPT\nMust specify SCRIPT.")
     end
     validate_arguments!
-    pigscript = validate_pigscript!(pigscript_name)
+    script = validate_script!(script_name)
     ctrl = Mortar::Local::Controller.new
-    ctrl.run(pigscript, pig_parameters)
+    ctrl.run(script, pig_parameters)
   end
 
   # illustrate [PIGSCRIPT] [ALIAS]

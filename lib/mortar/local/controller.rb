@@ -18,6 +18,7 @@ require "mortar/helpers"
 require "mortar/local/pig"
 require "mortar/local/java"
 require "mortar/local/python"
+require "mortar/local/jython"
 
 
 class Mortar::Local::Controller
@@ -34,7 +35,7 @@ Linux systems please consult the documentation on your relevant package manager.
 EOF
 
   NO_PYTHON_ERROR_MESSAGE = <<EOF
-pA suitable python installation with virtualenv could not be located.  Please ensure
+A suitable python installation with virtualenv could not be located.  Please ensure
 you have python 2.6+ installed on your local system.  If you need to obtain a copy
 of virtualenv it can be located here:
 https://pypi.python.org/pypi/virtualenv
@@ -87,6 +88,9 @@ EOF
       msg += "see #{py.pip_error_log_path} for more details"
       error(msg)
     end
+
+    jy = Mortar::Local::Jython.new()
+    jy.install_or_update()
   end
 
   # Main entry point for user running a pig script
