@@ -91,6 +91,15 @@ module Mortar::Local
         expect(@installutil.is_newer_version('foo', 'http://bar')).to be_false
       end
 
+      it "if no version is present" do
+        install_file_path = @installutil.install_file_for("foo")
+        stub(@installutil).url_date.returns(1)
+        FakeFS do
+          FileUtils.rm_rf(File.dirname(install_file_path), :force => true)
+          expect(@installutil.is_newer_version('foo', 'http://bar')).to be_true
+        end
+      end
+
     end
 
     context "url_date" do

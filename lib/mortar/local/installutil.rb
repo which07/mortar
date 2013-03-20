@@ -111,6 +111,10 @@ module Mortar
       # remote version is newer than the installed version
       def is_newer_version(subdir, url)
         existing_install_date = install_date(subdir)
+        if not existing_install_date then
+          # There is no existing install
+          return true
+        end
         remote_archive_date = url_date(url)
         return existing_install_date < remote_archive_date
       end
