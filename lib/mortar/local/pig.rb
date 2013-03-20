@@ -23,7 +23,7 @@ class Mortar::Local::Pig
   include Mortar::Local::InstallUtil
 
   PIG_LOG_FORMAT = "humanreadable"
-  PIG_TAR_DEFAULT_URL = "https://s3.amazonaws.com/mortar-public-artifacts/pig.tgz"
+  PIG_TAR_DEFAULT_URL = "https://s3.amazonaws.com/mhc-software-mirror/cli/pig.tgz"
 
   # Tempfile objects have a hook to delete the file when the object is
   # destroyed by the garbage collector.  In practice this means that a
