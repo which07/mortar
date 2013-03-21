@@ -337,7 +337,67 @@ STDERR
     end
     
     context("status") do
-      
+      it "gets status for a completed, successful job with mutliple outputs with same name" do
+        with_git_initialized_project do |p|
+          job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
+          pigscript_name = "my_script"
+          project_name = "myproject"
+          status_code = Mortar::API::Jobs::STATUS_SUCCESS
+          progress = 100
+          outputs = [{'name'=> 'hottest_songs_of_the_decade', 
+                      'records' => 10, 
+                      'alias' => 'output_data',
+                      'location' => 's3n://my-bucket/my-folder/hottest_songs_of_the_decade/output_data'},
+                     {'name'=> 'hottest_songs_of_the_decade', 
+                      'records' => 100,
+                      'alias' => 'output_data',
+                      'location' => 's3n://my-bucket/my-folder/hottest_songs_of_the_decade/output_data_2'}]
+          cluster_id = "e2790e7e8c7d48e39157238d58191346"
+          start_timestamp = "2012-02-28T03:35:42.831000+00:00"
+          running_timestamp = "2012-02-28T03:41:52.613000+00:00"
+          stop_timestamp = "2012-02-28T03:44:52.613000+00:00"
+          parameters = {"my_param_1" => "value1", "MY_PARAM_2" => "3"}
+
+          mock(Mortar::Auth.api).get_job(job_id) {Excon::Response.new(:body => {"job_id" => job_id,
+            "pigscript_name" => pigscript_name,
+            "project_name" => project_name,
+            "status_code" => status_code,
+            "status_description" => "Success",
+            "progress" => progress,
+            "cluster_id" => cluster_id,
+            "start_timestamp" => start_timestamp,
+            "running_timestamp" => running_timestamp,
+            "stop_timestamp" => stop_timestamp,
+            "duration" => "6 mins",
+            "num_hadoop_jobs" => 4,
+            "num_hadoop_jobs_succeeded" => 4,
+            "parameters" => parameters,
+            "outputs" => outputs
+            })}
+          stderr, stdout = execute("jobs:status c571a8c7f76a4fd4a67c103d753e2dd5", p, @git)
+          stdout.should == <<-STDOUT
+=== myproject: my_script (job_id: c571a8c7f76a4fd4a67c103d753e2dd5)
+cluster_id:              e2790e7e8c7d48e39157238d58191346
+hadoop jobs complete:    4.00 / 4.00
+job began running at:    2012-02-28T03:41:52.613000+00:00
+job finished at:         2012-02-28T03:44:52.613000+00:00
+job run with parameters: 
+  MY_PARAM_2:   3
+  my_param_1:   value1
+job running for:         6 mins
+job submitted at:        2012-02-28T03:35:42.831000+00:00
+outputs:                 
+  output_data:   
+    location:     s3n://my-bucket/my-folder/hottest_songs_of_the_decade/output_data
+    records:      10
+  output_data: 
+    location:     s3n://my-bucket/my-folder/hottest_songs_of_the_decade/output_data_2
+    records:      100
+progress:                100%
+status:                  Success
+STDOUT
+        end
+      end
       it "gets status for a completed, successful job" do
         with_git_initialized_project do |p|
           job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
