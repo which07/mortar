@@ -125,7 +125,7 @@ class Mortar::Local::Pig
 
   # run the pig script with user supplied pig parameters
   def run_script(pig_script, pig_parameters)
-    run_pig_command(" -f #{pig_script.path}", pig_parameters)
+    run_pig_command(" -f #{pig_script.path}", pig_parameters, true)
   end
 
   # Create a temp file to be used for writing the illustrate
@@ -213,7 +213,7 @@ class Mortar::Local::Pig
     end
     cmd += " #{pig_alias} '"
 
-    result = run_pig_command(cmd, [])
+    result = run_pig_command(cmd, [], false)
     if result
       show_illustrate_output(illustrate_outpath)
     end
@@ -222,7 +222,7 @@ class Mortar::Local::Pig
   # Run pig with the specified command ('command' is anything that
   # can be appended to the command line invocation of Pig that will
   # get it to do something interesting, such as '-f some-file.pig'
-  def run_pig_command(cmd, parameters = nil)
+  def run_pig_command(cmd, parameters = nil, jython_output = true)
     unset_hadoop_env_vars
     # Generate the script for running the command, then
     # write it to a temp script which will be exectued
@@ -245,8 +245,9 @@ class Mortar::Local::Pig
 
   # Generates a bash script which sets up the necessary environment and
   # then runs the pig command
-  def script_for_command(cmd, parameters)
+  def script_for_command(cmd, parameters, jython_output = true)
     template_params = pig_command_script_template_parameters(cmd, parameters)
+    template_params['pig_opts']['jython.output'] = jython_output
     erb = ERB.new(File.read(pig_command_script_template_path), 0, "%<>")
     erb.result(BindingClazz.new(template_params).get_binding)
   end
@@ -277,6 +278,8 @@ class Mortar::Local::Pig
     opts['fs.s3n.awsAccessKeyId'] = ENV['AWS_ACCESS_KEY']
     opts['fs.s3n.awsSecretAccessKey'] = ENV['AWS_SECRET_KEY']
     opts['pig.events.logformat'] = PIG_LOG_FORMAT
+    opts['python.verbose'] = 'error'
+    opts['jython.output'] = true
     opts['python.home'] = jython_directory
     opts['python.cachedir'] = jython_cache_directory
     return opts
