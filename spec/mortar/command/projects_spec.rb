@@ -128,6 +128,7 @@ STDOUT
 \e[1;32m      create\e[0m  pigscripts
 \e[1;32m      create\e[0m  pigscripts/some_new_project.pig
 \e[1;32m      create\e[0m  controlscripts
+\e[1;32m      create\e[0m  controlscripts/.gitkeep
 \e[1;32m      create\e[0m  macros
 \e[1;32m      create\e[0m  macros/.gitkeep
 \e[1;32m      create\e[0m  fixtures
