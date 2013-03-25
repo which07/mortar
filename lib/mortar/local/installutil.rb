@@ -28,14 +28,22 @@ module Mortar
 
       include Mortar::Helpers
 
+      def local_install_directory_name
+        ".mortar-local"
+      end
+
       def local_install_directory
         # note: assumes that CWD is the project root, is
         # this a safe assumption?
-        File.join(Dir.getwd, ".mortar-local")
+        File.join(Dir.getwd, local_install_directory_name)
       end
 
       def local_logfile
         local_install_directory + "/../local-pig.log"
+      end
+
+      def local_project_gitignore
+        local_install_directory + "/../.gitignore"
       end
 
       def jython_directory
@@ -44,6 +52,10 @@ module Mortar
 
       def jython_cache_directory
         jython_directory + "/cachedir"
+      end
+
+      def gitignore_template_path
+        File.expand_path("../../templates/project/gitignore", __FILE__)
       end
 
       # Drops a marker file for an installed package, used

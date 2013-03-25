@@ -22,7 +22,7 @@ require "mortar/local/jython"
 
 
 class Mortar::Local::Controller
-  include Mortar::Helpers
+  include Mortar::Local::InstallUtil
 
   NO_JAVA_ERROR_MESSAGE = <<EOF
 A suitable java installation could not be found.  If you already have java installed
@@ -91,6 +91,21 @@ EOF
 
     jy = Mortar::Local::Jython.new()
     jy.install_or_update()
+
+    ensure_local_install_dir_in_gitignore
+  end
+
+  def ensure_local_install_dir_in_gitignore()
+    if File.exists? local_project_gitignore
+      open(local_project_gitignore, 'r+') do |gitignore|
+        unless gitignore.read().include? local_install_directory_name
+          gitignore.seek(0, IO::SEEK_END)
+          gitignore.puts local_install_directory_name
+        end
+      end
+    else
+      FileUtils.cp gitignore_template_path, local_project_gitignore
+    end
   end
 
   # Main entry point for user running a pig script
