@@ -8,7 +8,7 @@ notifications:
     email: 
         recipients:
             - travis-ci@mortardata.com
-        on_success: always # 'always' for testing, 'change' once everything works
+        on_success: change
         on_failure: always
     campfire:
         on_success: change
