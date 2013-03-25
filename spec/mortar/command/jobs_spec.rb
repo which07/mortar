@@ -337,7 +337,7 @@ STDERR
     end
     
     context("status") do
-      it "gets status for a completed, successful job with mutliple outputs with same name" do
+      it "gets status for a completed, successful job with multiple outputs with same name" do
         with_git_initialized_project do |p|
           job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
           pigscript_name = "my_script"
@@ -387,12 +387,12 @@ job run with parameters:
 job running for:         6 mins
 job submitted at:        2012-02-28T03:35:42.831000+00:00
 outputs:                 
-  output_data:   
+  output_data: 
     location:     s3n://my-bucket/my-folder/hottest_songs_of_the_decade/output_data
     records:      10
-  output_data: 
     location:     s3n://my-bucket/my-folder/hottest_songs_of_the_decade/output_data_2
     records:      100
+
 progress:                100%
 status:                  Success
 STDOUT
