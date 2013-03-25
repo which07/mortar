@@ -5,7 +5,11 @@ rvm:
   - "1.9.3"
   - "2.0.0"
 notifications:
-    email: false
+    email: 
+        recipients:
+            - travis-ci@mortardata.com
+        on_success: always # 'always' for testing, 'change' once everything works
+        on_failure: always
     campfire:
         on_success: change
         on_failure: always
