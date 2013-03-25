@@ -34,6 +34,10 @@ module Mortar
         File.join(Dir.getwd, ".mortar-local")
       end
 
+      def local_logfile
+        local_install_directory + "/../local-pig.log"
+      end
+
       def jython_directory
         local_install_directory + "/jython"
       end

@@ -224,6 +224,7 @@ class Mortar::Local::Pig
   # get it to do something interesting, such as '-f some-file.pig'
   def run_pig_command(cmd, parameters = nil)
     unset_hadoop_env_vars
+    delete_local_log_file
     # Generate the script for running the command, then
     # write it to a temp script which will be exectued
     script_text = script_for_command(cmd, parameters)
@@ -241,6 +242,12 @@ class Mortar::Local::Pig
   def unset_hadoop_env_vars
     ENV['HADOOP_HOME'] = ''
     ENV['HADOOP_CONF_DIR'] = ''
+  end
+
+  def delete_local_log_file
+    if File.exists? local_logfile
+      FileUtils.rm local_logfile
+    end
   end
 
   # Generates a bash script which sets up the necessary environment and
@@ -277,6 +284,7 @@ class Mortar::Local::Pig
     opts['fs.s3n.awsAccessKeyId'] = ENV['AWS_ACCESS_KEY']
     opts['fs.s3n.awsSecretAccessKey'] = ENV['AWS_SECRET_KEY']
     opts['pig.events.logformat'] = PIG_LOG_FORMAT
+    opts['pig.logfile'] = local_logfile
     opts['python.home'] = jython_directory
     opts['python.cachedir'] = jython_cache_directory
     return opts
