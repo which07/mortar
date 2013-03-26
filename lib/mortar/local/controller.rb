@@ -42,8 +42,8 @@ https://pypi.python.org/pypi/virtualenv
 EOF
 
   NO_AWS_KEYS_ERROR_MESSAGE = <<EOF
-Please specify your aws access key via enviroment variable AWS_ACCESS_KEY
-and your aws secret key via enviroment variable AWS_SECRET_KEY"
+Please specify your aws access key via environment variable AWS_ACCESS_KEY
+and your aws secret key via environment variable AWS_SECRET_KEY"
 EOF
 
 
