@@ -103,8 +103,6 @@ EOF
           gitignore.puts local_install_directory_name
         end
       end
-    else
-      FileUtils.cp gitignore_template_path, local_project_gitignore
     end
   end
 

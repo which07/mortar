@@ -32,18 +32,22 @@ module Mortar
         ".mortar-local"
       end
 
-      def local_install_directory
+      def project_root
         # note: assumes that CWD is the project root, is
         # this a safe assumption?
-        File.join(Dir.getwd, local_install_directory_name)
+        Dir.getwd
       end
 
-      def local_logfile
-        local_install_directory + "/../local-pig.log"
+      def local_install_directory
+        File.join(project_root, local_install_directory_name)
+      end
+
+      def local_pig_logfile
+        project_root + "/local-pig.log"
       end
 
       def local_project_gitignore
-        local_install_directory + "/../.gitignore"
+        project_root + "/.gitignore"
       end
 
       def jython_directory

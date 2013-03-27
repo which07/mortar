@@ -245,8 +245,8 @@ class Mortar::Local::Pig
   end
 
   def delete_local_log_file
-    if File.exists? local_logfile
-      FileUtils.rm local_logfile
+    if File.exists? local_pig_logfile
+      FileUtils.rm local_pig_logfile
     end
   end
 
@@ -285,7 +285,7 @@ class Mortar::Local::Pig
     opts['fs.s3n.awsAccessKeyId'] = ENV['AWS_ACCESS_KEY']
     opts['fs.s3n.awsSecretAccessKey'] = ENV['AWS_SECRET_KEY']
     opts['pig.events.logformat'] = PIG_LOG_FORMAT
-    opts['pig.logfile'] = local_logfile
+    opts['pig.logfile'] = local_pig_logfile
     opts['python.verbose'] = 'error'
     opts['jython.output'] = true
     opts['python.home'] = jython_directory
