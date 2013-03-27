@@ -140,6 +140,9 @@ STDERR
         any_instance_of(Mortar::Local::Jython) do |j|
           mock(j).install_or_update.returns(true)
         end
+        any_instance_of(Mortar::Local::Controller) do |j|
+          mock(j).ensure_local_install_dir_in_gitignore.returns(true)
+        end
         stderr, stdout = execute("local:configure")
         stderr.should == ""
       end
