@@ -121,6 +121,9 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     # post job to API    
     response = action("Requesting job execution") do
       if options[:clustersize]
+        if options[:singlejobcluster] && options[:permanentcluster]
+          error("Cannot declare cluster as both --singlejobcluster and --permanentcluster")
+        end
         cluster_size = options[:clustersize].to_i
         cluster_type = CLUSTER_TYPE__PERSISTENT
         if options[:singlejobcluster]
