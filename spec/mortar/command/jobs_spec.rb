@@ -104,7 +104,31 @@ Or by running:
           STDOUT
         end
       end
-      
+
+
+      it "throws error on singlejobcluster and permanentcluster" do
+        with_git_initialized_project do |p|
+
+          write_file(File.join(p.pigscripts_path, "my_script.pig"))
+          stderr, stdout = execute("jobs:run my_script -2 -1 --clustersize 5 -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
+          stderr.should == <<-STDERR
+ !    Cannot declare cluster as both --singlejobcluster and --permanentcluster
+STDERR
+        end
+      end
+
+      it "throws error on clusterid and permanentcluster" do
+        with_git_initialized_project do |p|
+          cluster_id = "e2790e7e8c7d48e39157238d58191346"
+
+          write_file(File.join(p.pigscripts_path, "my_script.pig"))
+          stderr, stdout = execute("jobs:run my_script -2 --clusterid e2790e7e8c7d48e39157238d58191346 -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
+          stderr.should == <<-STDERR
+ !    Option permanentcluster cannot be set when running a job on an existing cluster (with --clusterid option)
+          STDERR
+        end
+      end
+
       it "runs a job on a new cluster" do
         with_git_initialized_project do |p|
           # stub api requests
