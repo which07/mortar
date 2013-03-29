@@ -160,5 +160,15 @@ module Mortar
       @cli.user_s3_safe.should == 'myemail-dontspam-somedomain-com'
     end
 
+    it "is true if the user is currently logged in" do
+      # login (aka writing the auth file) is done in setup
+      expect(@cli.has_credentials).to be_true
+    end
+
+    it "is false if the user is not logged in" do
+     @cli.logout
+      expect(@cli.has_credentials).to be_false
+    end
+
   end
 end
