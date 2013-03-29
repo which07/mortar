@@ -98,6 +98,10 @@ class Mortar::Auth
       api.post_login(user, password).body["api_key"]
     end
 
+    def has_credentials
+      (nil != read_credentials)
+    end
+
     def get_credentials    # :nodoc:
       @credentials ||= (read_credentials || ask_for_and_save_credentials)
     end
