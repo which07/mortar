@@ -94,7 +94,7 @@ class Mortar::Command::Local < Mortar::Command::Base
   #Examples:
   #
   #    Check the pig syntax of the generate_regression_model_coefficients script locally.
-  #        $ mortar local:check_syntax generate_regression_model_coefficients
+  #        $ mortar local:validate generate_regression_model_coefficients
   def validate
     script_name = shift_argument
     unless script_name
