@@ -122,4 +122,10 @@ EOF
     pig.illustrate_alias(pig_script, pig_alias, skip_pruning, pig_parameters)
   end
 
+  def validate(pig_script, pig_parameters)
+    install_and_configure
+    pig = Mortar::Local::Pig.new()
+    pig.validate_script(pig_script, pig_parameters)
+  end
+
 end

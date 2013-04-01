@@ -123,6 +123,11 @@ class Mortar::Local::Pig
     note_install("pig")
   end
 
+  def validate_script(pig_script, pig_parameters)
+    run_pig_command(" -check #{pig_script.path}", pig_parameters)
+  end
+
+
   # run the pig script with user supplied pig parameters
   def run_script(pig_script, pig_parameters)
     run_pig_command(" -f #{pig_script.path}", pig_parameters, true)

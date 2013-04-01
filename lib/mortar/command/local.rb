@@ -22,7 +22,7 @@ require "mortar/command/base"
 class Mortar::Command::Local < Mortar::Command::Base
 
 
-  # configure
+  # local:configure
   #
   # Install dependencies for running this pig project locally, other
   # commands will also perform this step automatically.
@@ -54,9 +54,9 @@ class Mortar::Command::Local < Mortar::Command::Base
     ctrl.run(script, pig_parameters)
   end
 
-  # illustrate [PIGSCRIPT] [ALIAS]
+  # local:illustrate [PIGSCRIPT] [ALIAS]
   #
-  # Locallay illustrate the effects and output of a pigscript.
+  # Locally illustrate the effects and output of a pigscript.
   #
   # -s, --skippruning           # Don't try to reduce the illustrate results to the smallest size possible.
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
@@ -83,5 +83,27 @@ class Mortar::Command::Local < Mortar::Command::Base
     ctrl.illustrate(pigscript, alias_name, pig_parameters, skip_pruning)
   end
 
+
+  # local:validate SCRIPT
+  #
+  # Run a job on your local machine
+  #
+  # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
+  # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
+  #
+  #Examples:
+  #
+  #    Check the pig syntax of the generate_regression_model_coefficients script locally.
+  #        $ mortar local:validate generate_regression_model_coefficients
+  def validate
+    script_name = shift_argument
+    unless script_name
+      error("Usage: mortar local:validate SCRIPT\nMust specify SCRIPT.")
+    end
+    validate_arguments!
+    script = validate_script!(script_name)
+    ctrl = Mortar::Local::Controller.new
+    ctrl.validate(script, pig_parameters)
+  end
 
 end
