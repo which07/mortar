@@ -150,6 +150,28 @@ STDERR
     # configure
     end
 
+    context "local:validate" do
+
+      it "Runs pig with the -check command option" do
+        with_git_initialized_project do |p|
+          script_name = "some_script"
+          script_path = File.join(p.pigscripts_path, "#{script_name}.pig")
+          write_file(script_path)
+          pigscript = Mortar::Project::PigScript.new(script_name, script_path)
+          mock(Mortar::Project::PigScript).new(script_name, script_path).returns(pigscript)
+          any_instance_of(Mortar::Local::Controller) do |u|
+            mock(u).install_and_configure
+          end
+          any_instance_of(Mortar::Local::Pig) do |u|
+            mock(u).run_pig_command(" -check #{pigscript.path}", [])
+          end
+          stderr, stdout = execute("local:validate #{script_name}", p)
+          stderr.should == ""
+        end
+      end
+
+    end
+
   end
 end
 
