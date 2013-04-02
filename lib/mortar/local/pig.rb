@@ -296,6 +296,7 @@ class Mortar::Local::Pig
     opts['python.verbose'] = 'error'
     opts['jython.output'] = true
     opts['python.home'] = jython_directory
+    opts['python.path'] = local_install_directory + "/../controlscripts"
     opts['python.cachedir'] = jython_cache_directory
     return opts
   end
