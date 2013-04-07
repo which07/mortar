@@ -107,11 +107,11 @@ EOF
   end
 
   # Main entry point for user running a pig script
-  def run(pig_script, pig_parameters)
+  def run(pig_script, pig_parameters, fixture_argument="")
     require_aws_keys
     install_and_configure
     pig = Mortar::Local::Pig.new()
-    pig.run_script(pig_script, pig_parameters)
+    pig.run_script(pig_script, pig_parameters, fixture_argument)
   end
 
   # Main entry point for illustrating a pig alias

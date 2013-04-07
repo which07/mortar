@@ -129,8 +129,8 @@ class Mortar::Local::Pig
 
 
   # run the pig script with user supplied pig parameters
-  def run_script(pig_script, pig_parameters)
-    run_pig_command(" -f #{pig_script.path}", pig_parameters, true)
+  def run_script(pig_script, pig_parameters, fixture_argument="")
+    run_pig_command(" -f #{pig_script.path} " + fixture_argument, pig_parameters, true)
   end
 
   # Create a temp file to be used for writing the illustrate

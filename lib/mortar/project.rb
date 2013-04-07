@@ -82,6 +82,10 @@ module Mortar
       def fixtures_path
         path = File.join(@root_path, "fixtures")
       end
+
+      def fixture_mappings_path
+        path = File.join(fixtures_path, "fixture_mappings.json")
+      end
     end
     
     class ProjectEntity
