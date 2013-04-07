@@ -26,7 +26,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
   
   # projects
   #
-  # Display the available set of projects
+  # Display the available set of Mortar projects.
   def index
     validate_arguments!
     projects = api.get_projects().body["projects"]
@@ -40,7 +40,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
   
   # projects:delete PROJECTNAME
   #
-  # Delete a mortar project
+  # Delete the Mortar project PROJECTNAME.
   def delete
     name = shift_argument
     unless name
@@ -58,7 +58,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
   
   # projects:create PROJECTNAME
   #
-  # Generate and register a new Mortar project for code in the current directory, with the name PROJECTNAME.
+  # Used when you want to start a new Mortar project using Mortar generated code.
   def create
     name = shift_argument
     unless name
@@ -71,13 +71,12 @@ class Mortar::Command::Projects < Mortar::Command::Base
     git.git("add .")
     git.git("commit -m \"Mortar project scaffolding\"")
     Mortar::Command::run("projects:register", [name])
-    git.git("push mortar master")
   end
   alias_command "new", "projects:create"
   
-  # projects:register PROJECT
+  # projects:register PROJECTNAME
   #
-  # register a mortar project for the current directory with the name PROJECT
+  # Used when you want to start a new Mortar project using your existing code in the current directory.
   def register
     name = shift_argument
     unless name
@@ -137,6 +136,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
       error("Project registration failed.\nError message: #{project_result['error_message']}")
     when Mortar::API::Projects::STATUS_ACTIVE
       git.remote_add("mortar", project_result['git_url'])
+      git.push_master
       display "Your project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n\n"
     else
       raise RuntimeError, "Unknown project status: #{project_status} for project_id: #{project_id}"
@@ -145,10 +145,12 @@ class Mortar::Command::Projects < Mortar::Command::Base
   end
   alias_command "register", "projects:register"
 
-  # projects:set_remote PROJECT
+  # projects:set_remote PROJECTNAME
   #
-  # Adds the Mortar remote to the local git project. This is necessary for successfully executing many of the Mortar commands.
-  #
+  # Used after you checkout code for an existing Mortar project from a non-Mortar git repository.  
+  # Adds a remote to your local git repository to the Mortar git repository.  For example if a 
+  # co-worker creates a Mortar project from an internal repository you would clone the internal
+  # repository and then after cloning call mortar projects:set_remote.
   def set_remote
     project_name = shift_argument
 
@@ -176,10 +178,9 @@ class Mortar::Command::Projects < Mortar::Command::Base
 
   end
   
-  # projects:clone PROJECT
+  # projects:clone PROJECTNAME
   #
-  # clone the mortar project PROJECT into the current directory.
-  #
+  # Used when you want to clone an existing Mortar project into the current directory.
   def clone
     name = shift_argument
     unless name

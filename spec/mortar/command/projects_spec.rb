@@ -104,7 +104,7 @@ STDOUT
         # if the git stuff doesn't work, the registration will fail, so we can pretend it does work here
         mock(@git).git("add .").returns(true)
         mock(@git).git("commit -m \"Mortar project scaffolding\"").returns(true)
-        mock(@git).git("push mortar master").returns(true)
+        mock(@git).push_master
 
         stderr, stdout = execute("projects:create #{project_name}", nil, @git)
         Dir.pwd.end_with?("some_new_project").should be_true
@@ -127,6 +127,8 @@ STDOUT
 \e[1;32m      create\e[0m  .gitignore
 \e[1;32m      create\e[0m  pigscripts
 \e[1;32m      create\e[0m  pigscripts/some_new_project.pig
+\e[1;32m      create\e[0m  controlscripts
+\e[1;32m      create\e[0m  controlscripts/.gitkeep
 \e[1;32m      create\e[0m  macros
 \e[1;32m      create\e[0m  macros/.gitkeep
 \e[1;32m      create\e[0m  fixtures
@@ -215,6 +217,7 @@ STDERR
         mock(@git).has_dot_git?().returns(true)
         mock(@git).remotes.with_any_args.returns({})
         mock(@git).remote_add("mortar", project_git_url)
+        mock(@git).push_master
 
         stderr, stdout = execute("projects:register #{project_name}  --polling_interval 0.05", nil, @git)
         stdout.should == <<-STDOUT
@@ -236,6 +239,7 @@ STDOUT
         mock(@git).has_dot_git?().returns(true)
         mock(@git).remotes.with_any_args.returns({})
         mock(@git).remote_add("mortar", project_git_url)
+        mock(@git).push_master
 
         stderr, stdout = execute("projects:register #{project_name}  --polling_interval 0.05", nil, @git)
         stdout.should == <<-STDOUT

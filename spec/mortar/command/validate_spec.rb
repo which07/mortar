@@ -46,8 +46,21 @@ STDERR
         with_git_initialized_project do |p|
           stderr, stdout = execute("validate does_not_exist", p, @git)
           stderr.should == <<-STDERR
- !    Unable to find pigscript does_not_exist
+ !    Unable to find a pigscript or controlscript for does_not_exist
+ !    
  !    No pigscripts found
+ !    
+ !    No controlscripts found
+ STDERR
+        end
+      end
+      
+      it "errors when requested with controlscript" do
+        with_git_initialized_project do |p|
+          write_file(File.join(p.controlscripts_path, "my_script.py"))
+          stderr, stdout = execute("validate my_script", p, @git)
+          stderr.should == <<-STDERR
+ !    Currently Mortar does not support validating control scripts
  STDERR
         end
       end

@@ -35,12 +35,21 @@ STDOUT
     
   describe "auth:whoami" do
     it "displays the user's email address" do
-      mock(Mortar::Auth).user {"sam@mortardata.com"}
+      mock(Mortar::Auth).has_credentials.returns(true)
+      mock(Mortar::Auth).get_credentials {["sam@mortardata.com", nil]}
       stderr, stdout = execute("auth:whoami")
       stderr.should == ""
       stdout.should == <<-STDOUT
 sam@mortardata.com
 STDOUT
     end
+
+    it "displays nothing if not logged in" do
+      mock(Mortar::Auth).has_credentials.returns(false)
+      stderr, stdout = execute("auth:whoami")
+      stderr.should == ""
+      stdout.should == ""
+    end
+
   end
 end

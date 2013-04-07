@@ -15,13 +15,12 @@
 #
 
 require "mortar/command/base"
-require "mortar/snapshot"
 
 # sample and show data flowing through a pigscript
 #
 class Mortar::Command::Illustrate < Mortar::Command::Base
   
-  include Mortar::Snapshot
+  include Mortar::Git
     
   # illustrate [PIGSCRIPT] [ALIAS]
   #
@@ -41,16 +40,21 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
     alias_name = shift_argument
     skip_pruning = options[:skippruning] ||= false
     
+    validate_arguments!
+    pigscript = validate_script!(pigscript_name)
+          
     # TODO: When illustrating without alias works, remove the `&& alias_name` to re-enable the feature on CLI
     unless pigscript_name && alias_name
       error("Usage: mortar illustrate PIGSCRIPT ALIAS\nMust specify PIGSCRIPT and ALIAS.")
     end
     
-    validate_arguments!
-    validate_git_based_project!
-    pigscript = validate_pigscript!(pigscript_name)
-    git_ref = create_and_push_snapshot_branch(git, project)
+    if pigscript.is_a? Mortar::Project::ControlScript
+      error "Currently Mortar does not support illustrating control scripts"
+    end
     
+    validate_git_based_project!
+    git_ref = git.create_and_push_snapshot_branch(project)
+
     illustrate_id = nil
     action("Starting illustrate") do
       illustrate_id = api.post_illustrate(project.name, pigscript.name, alias_name, skip_pruning, git_ref, :parameters => pig_parameters).body["illustrate_id"]

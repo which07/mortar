@@ -66,7 +66,9 @@ class Mortar::Command::Auth < Mortar::Command::Base
   def whoami
     validate_arguments!
 
-    display Mortar::Auth.user
+    if Mortar::Auth.has_credentials
+      display Mortar::Auth.user
+    end
   end
 
 end

@@ -422,10 +422,14 @@ module Mortar
             next
           else
             elements = value.sort {|x,y| x.to_s <=> y.to_s}
-            display_with_indent(indent, "#{key}: ".ljust(max_key_length), false)
-            display_with_indent(indent, elements[0])
-            elements[1..-1].each do |element|
-              display_with_indent(indent, "#{' ' * max_key_length}#{element}")
+            display_with_indent(indent, "#{key}: ".ljust(max_key_length))
+            elements[0..-1].each do |element|
+              case element
+              when Hash
+                styled_hash(element, nil, indent + 2)
+              else
+                display_with_indent(indent, "#{' ' * max_key_length}#{element}")
+              end
             end
             if elements.length > 1
               display
@@ -491,6 +495,18 @@ module Mortar
         end
       else
         nil
+      end
+    end
+
+    def ensure_dir_exists(dir)
+      unless File.directory? dir
+        Dir.mkdir(dir)
+      end
+    end
+
+    def copy_if_not_present_at_dest(res_src, res_dest)
+      unless File.exists?(res_dest)
+        FileUtils.cp(res_src, res_dest)
       end
     end
 
