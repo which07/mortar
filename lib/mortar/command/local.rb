@@ -39,6 +39,8 @@ class Mortar::Command::Local < Mortar::Command::Base
   #
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
   # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
+  # -F, --usefixtures           # Automatically use all fixtures defined for this pigscript
+  # -x, --fixture FIXTURE_NAME  # Use a specific fixture (can use this option more than once) 
   #
   #Examples:
   #
@@ -50,9 +52,13 @@ class Mortar::Command::Local < Mortar::Command::Base
       error("Usage: mortar local:run SCRIPT\nMust specify SCRIPT.")
     end
     validate_arguments!
+
     script = validate_script!(script_name)
+    fixture_argument = load_fixture_argument(project.fixture_mappings_path, script_name,
+                                             options[:usefixtures], options[:fixture])
+
     ctrl = Mortar::Local::Controller.new
-    ctrl.run(script, pig_parameters)
+    ctrl.run(script, pig_parameters, fixture_argument)
   end
 
   # local:illustrate [PIGSCRIPT] [ALIAS]
@@ -111,8 +117,9 @@ class Mortar::Command::Local < Mortar::Command::Base
   #
   # Generate a fixture of N records from ALIAS.
   #
-  # -f, --overwrite             # If there is an existing fixture with the same name, overwrite it
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
+  # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
+  # -F, --overwrite             # If there is an existing fixture with the same name, overwrite it
   #
   # Example:
   #
@@ -142,16 +149,19 @@ class Mortar::Command::Local < Mortar::Command::Base
 
     ctrl = Mortar::Local::Controller.new
     ctrl.run(pigscript, pig_parameters, fixture_argument)
+
     add_fixture_mapping(project.fixture_mappings_path,
                         fixture_name, pigscript_name, fixture_alias, output_uri)
+    ensure_fixtures_in_gitignore(project.root_path)
   end
 
   # local:fixtures_sample PIGSCRIPT ALIAS FIXTURE_NAME FRACTION
   #
   # Generate a fixture from a random sample of FRACTION*100% of the records in ALIAS.
   #
-  # -f, --overwrite             # If there is an existing fixture with the same name, overwrite it
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
+  # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
+  # -F, --overwrite             # If there is an existing fixture with the same name, overwrite it
   #
   # Example:
   #
@@ -184,6 +194,7 @@ class Mortar::Command::Local < Mortar::Command::Base
     ctrl.run(pigscript, pig_parameters, fixture_argument)
     add_fixture_mapping(project.fixture_mappings_path,
                         fixture_name, pigscript_name, fixture_alias, output_uri)
+    ensure_fixtures_in_gitignore(project.root_path)
   end
 
   # local:fixtures_filter PIGSCRIPT ALIAS FIXTURE_NAME "FILTER_STATEMENT"
@@ -191,8 +202,9 @@ class Mortar::Command::Local < Mortar::Command::Base
   # Generate a fixture from all the records in ALIAS
   # which pass the Pig statement "FILTER ALIAS BY FILTER_STATEMENT".
   #
-  # -f, --overwrite             # If there is an existing fixture with the same name, overwrite it
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
+  # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
+  # -F, --overwrite             # If there is an existing fixture with the same name, overwrite it
   #
   # Example:
   #
@@ -221,6 +233,7 @@ class Mortar::Command::Local < Mortar::Command::Base
     ctrl.run(pigscript, pig_parameters, fixture_argument)
     add_fixture_mapping(project.fixture_mappings_path,
                         fixture_name, pigscript_name, fixture_alias, output_uri)
+    ensure_fixtures_in_gitignore(project.root_path)
   end
 
 end
