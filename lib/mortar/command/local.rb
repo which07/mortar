@@ -54,9 +54,11 @@ class Mortar::Command::Local < Mortar::Command::Base
     ctrl.run(script, pig_parameters)
   end
 
-  # local:illustrate [PIGSCRIPT] [ALIAS]
+  # local:illustrate PIGSCRIPT [ALIAS]
   #
   # Locally illustrate the effects and output of a pigscript.
+  # If an alias is specified, will show data flow from the ancestor LOAD statements to the alias itself.
+  # If no alias is specified, will show data flow through all aliases in the script.
   #
   # -s, --skippruning           # Don't try to reduce the illustrate results to the smallest size possible.
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
@@ -72,8 +74,8 @@ class Mortar::Command::Local < Mortar::Command::Base
     alias_name = shift_argument
     skip_pruning = options[:skippruning] ||= false
 
-    unless pigscript_name && alias_name
-      error("Usage: mortar local:illustrate PIGSCRIPT ALIAS\nMust specify PIGSCRIPT and ALIAS.")
+    unless pigscript_name
+      error("Usage: mortar local:illustrate PIGSCRIPT [ALIAS]\nMust specify PIGSCRIPT.")
     end
 
     validate_arguments!
