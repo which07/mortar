@@ -292,6 +292,7 @@ class Mortar::Local::Pig
     opts['fs.s3.awsAccessKeyId'] = ENV['AWS_ACCESS_KEY']
     opts['fs.s3.awsSecretAccessKey'] = ENV['AWS_SECRET_KEY']
     opts['pig.events.logformat'] = PIG_LOG_FORMAT
+    opts['stop.on.failure'] = true
     opts['pig.logfile'] = local_pig_logfile
     opts['python.verbose'] = 'error'
     opts['jython.output'] = true
