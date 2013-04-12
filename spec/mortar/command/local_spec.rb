@@ -23,17 +23,6 @@ module Mortar::Command
   describe Local do
 
     context("illustrate") do
-      it "errors when an alias is not provided" do
-        with_git_initialized_project do |p|
-          write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("local:illustrate my_script", p)
-          stderr.should == <<-STDERR
- !    Usage: mortar local:illustrate PIGSCRIPT ALIAS
- !    Must specify PIGSCRIPT and ALIAS.
-STDERR
-        end
-      end
-
       it "errors when the script doesn't exist" do
         with_git_initialized_project do |p|
           write_file(File.join(p.pigscripts_path, "my_other_script.pig"))

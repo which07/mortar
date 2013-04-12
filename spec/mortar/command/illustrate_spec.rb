@@ -29,18 +29,6 @@ module Mortar::Command
     end
         
     context("index") do
-      
-      it "errors when an alias is not provided" do
-        with_git_initialized_project do |p|
-          write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("illustrate my_script", p)
-          stderr.should == <<-STDERR
- !    Usage: mortar illustrate PIGSCRIPT ALIAS
- !    Must specify PIGSCRIPT and ALIAS.
-STDERR
-        end
-      end
-
       it "errors when no remote exists in the project" do
         with_git_initialized_project do |p|
           @git.git('remote rm mortar')
