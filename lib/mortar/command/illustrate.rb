@@ -22,7 +22,7 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
   
   include Mortar::Git
     
-  # illustrate [PIGSCRIPT] [ALIAS]
+  # illustrate PIGSCRIPT [ALIAS]
   #
   # Illustrate the effects and output of a pigscript.
   #
@@ -43,9 +43,8 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
     validate_arguments!
     pigscript = validate_script!(pigscript_name)
           
-    # TODO: When illustrating without alias works, remove the `&& alias_name` to re-enable the feature on CLI
-    unless pigscript_name && alias_name
-      error("Usage: mortar illustrate PIGSCRIPT ALIAS\nMust specify PIGSCRIPT and ALIAS.")
+    unless pigscript_name
+      error("Usage: mortar illustrate PIGSCRIPT [ALIAS]\nMust specify PIGSCRIPT.")
     end
     
     if pigscript.is_a? Mortar::Project::ControlScript
