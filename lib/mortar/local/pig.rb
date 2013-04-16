@@ -225,9 +225,20 @@ class Mortar::Local::Pig
     cmd += "'"
 
     result = run_pig_command(cmd, [], false)
-    if result
-      show_illustrate_output(illustrate_outpath)
+
+    if block_given?
+      # Pull in the dumped json file
+      illustrate_data = decode_illustrate_input_file(illustrate_outpath)
+
+      # Render a template using it's values
+      template_params = create_illustrate_template_parameters(illustrate_data)
+      yield(template_params)
+    else
+      if result
+        show_illustrate_output(illustrate_outpath)
+      end
     end
+
   end
 
   # Run pig with the specified command ('command' is anything that

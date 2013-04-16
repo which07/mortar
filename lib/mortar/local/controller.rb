@@ -19,6 +19,7 @@ require "mortar/local/pig"
 require "mortar/local/java"
 require "mortar/local/python"
 require "mortar/local/jython"
+require "mortar/local/watcher"
 
 
 class Mortar::Local::Controller
@@ -128,4 +129,10 @@ EOF
     pig.validate_script(pig_script, pig_parameters)
   end
 
+  def watch(pig_script)
+    require_aws_keys
+    install_and_configure
+    watcher = Mortar::Local::Watcher.new(pig_script)
+    watcher.watch
+  end
 end
