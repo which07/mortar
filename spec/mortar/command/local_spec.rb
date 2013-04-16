@@ -23,17 +23,6 @@ module Mortar::Command
   describe Local do
 
     context("illustrate") do
-      it "errors when an alias is not provided" do
-        with_git_initialized_project do |p|
-          write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("local:illustrate my_script", p)
-          stderr.should == <<-STDERR
- !    Usage: mortar local:illustrate PIGSCRIPT ALIAS
- !    Must specify PIGSCRIPT and ALIAS.
-STDERR
-        end
-      end
-
       it "errors when the script doesn't exist" do
         with_git_initialized_project do |p|
           write_file(File.join(p.pigscripts_path, "my_other_script.pig"))
@@ -46,7 +35,7 @@ STDERR
         end
       end
 
-      it "calls the illustrate command when envoked correctly" do
+      it "calls the illustrate command when envoked with an alias" do
         with_git_initialized_project do |p|
           script_name = "some_script"
           script_path = File.join(p.pigscripts_path, "#{script_name}.pig")
@@ -57,6 +46,21 @@ STDERR
             mock(u).illustrate(pigscript, "some_alias", [], false).returns(nil)
           end
           stderr, stdout = execute("local:illustrate #{script_name} some_alias", p)
+          stderr.should == ""
+        end
+      end
+
+      it "calls the illustrate command when envoked without an alias" do
+        with_git_initialized_project do |p|
+          script_name = "some_script"
+          script_path = File.join(p.pigscripts_path, "#{script_name}.pig")
+          write_file(script_path)
+          pigscript = Mortar::Project::PigScript.new(script_name, script_path)
+          mock(Mortar::Project::PigScript).new(script_name, script_path).returns(pigscript)
+          any_instance_of(Mortar::Local::Controller) do |u|
+            mock(u).illustrate(pigscript, nil, [], false).returns(nil)
+          end
+          stderr, stdout = execute("local:illustrate #{script_name}", p)
           stderr.should == ""
         end
       end

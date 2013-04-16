@@ -213,10 +213,16 @@ class Mortar::Local::Pig
     # Now point us at the script/alias to illustrate
     illustrate_outpath = create_illustrate_output_path()
     cmd += "-script #{pig_script.path} -out #{illustrate_outpath} "
+    
     if skip_pruning
       cmd += " -skipPruning "
     end
-    cmd += " #{pig_alias} '"
+
+    if pig_alias
+      cmd += " #{pig_alias} "
+    end
+
+    cmd += "'"
 
     result = run_pig_command(cmd, [], false)
     if result
