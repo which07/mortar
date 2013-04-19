@@ -16,8 +16,10 @@
 
 require "spec_helper"
 require "mortar/git"
+require "mortar/helpers"
 
 module Mortar
+
   describe Git do
     
     before do
@@ -280,6 +282,24 @@ STASH
         end
       end
       
+      it "retries pushing the snapshot branch if there is a socket error" do
+        with_git_initialized_project do |p|
+          # RR seems to only count a method as being called if it completes
+          # So we expect "never", even though it's actually tried N times (tested below)
+          mock(@git).push.never { raise Exception.new }
+          mock(@git).sleep.times(10).with_any_args
+
+          original_stdin, original_stderr, original_stdout = $stdin, $stderr, $stdout
+          $stdin, $stderr, $stdout = StringIO.new, StringIO.new, StringIO.new
+
+          begin
+            @git.create_and_push_snapshot_branch(p)
+          rescue SystemExit
+          ensure
+            $stdin, $stderr, $stdout = original_stdin, original_stderr, original_stdout
+          end
+        end
+      end
     end
     
 =begin

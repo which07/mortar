@@ -197,7 +197,12 @@ module Mortar
 
         git_ref = Helpers.action("Sending code snapshot to Mortar") do
           # push the code
-          push(project.remote, snapshot_branch)
+          begin
+            push(project.remote, snapshot_branch)
+          rescue
+            retry if retry_snapshot_push?
+            Helpers.error("Could not connect to github remote. Tried #{@snapshot_push_attempts.to_s} times.")
+          end
 
           # grab the commit hash
           ref = git_ref(snapshot_branch)
@@ -208,6 +213,19 @@ module Mortar
         Dir.chdir(curdir)
         return git_ref
       end
+
+      def retry_snapshot_push?
+        @last_snapshot_retry_sleep_time ||= 0
+        @snapshot_retry_sleep_time ||= 1
+
+        sleep(@snapshot_retry_sleep_time)
+        @last_snapshot_retry_sleep_time, @snapshot_retry_sleep_time = 
+          @snapshot_retry_sleep_time, @last_snapshot_retry_sleep_time + @snapshot_retry_sleep_time
+
+        @snapshot_push_attempts ||= 0
+        @snapshot_push_attempts += 1
+        @snapshot_push_attempts < 10
+      end 
 
       #    
       # add
