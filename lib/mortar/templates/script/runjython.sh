@@ -10,6 +10,6 @@ export CLASSPATH=<%= @classpath %>
 source <%= @local_install_dir %>/pythonenv/bin/activate
 
 # Run Pig
-<%= @local_install_dir %>/jython/bin/jython \ <% @java_props.each do |k,v| %>
-    -D<%= k %>=<%= v %> \
+<%= @local_install_dir %>/jython/bin/jython \
+<% @java_props.each do |k,v| %> -D<%= k %>=<%= v %> \
 <% end %> <% @jython_cmd_parts.each do |v| %> "<%= v %>" <% end %>
