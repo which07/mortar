@@ -87,7 +87,7 @@ module Mortar
           raise GitError, "No commits found in repository.  You must do an initial commit to initialize the repository."
         end
 
-        safe_copy do
+        safe_copy(mortar_snapshot_pathlist) do
           did_stash_changes = stash_working_dir("Stash for push to master")
           git('push mortar master')
         end
@@ -95,14 +95,14 @@ module Mortar
       end
 
       #
-      # Create a safe copy of the git directory
+      # Create a safe temporary directory with a given list of filesystem paths (files or dirs) copied into it
       #
 
-      def safe_copy(&block)
+      def safe_copy(pathlist, &block)
         # Copy code into a temp directory so we don't confuse editors while snapshotting
         curdir = Dir.pwd
         tmpdir = Dir.mktmpdir
-        FileUtils.cp_r(Dir.glob('*', File::FNM_DOTMATCH) - ['.', '..'], tmpdir)
+        FileUtils.cp_r(pathlist, tmpdir)
         Dir.chdir(tmpdir)
 
         if block
@@ -113,51 +113,72 @@ module Mortar
           return tmpdir
         end
       end
+
+      #
+      # Only snapshot filesystem paths that are in a whitelist
+      #
+
+      def mortar_snapshot_pathlist()
+        ensure_mortar_project_manifest_exists()
+
+        snapshot_pathlist = File.read('.mortar-project-manifest').split("\n")
+        snapshot_pathlist << ".git"
+
+        snapshot_pathlist.each do |path|
+          unless File.exists? path
+            Helpers.error(".mortar-project-manifest includes file/dir \"#{path}\" that is not in the mortar project directory.")
+          end
+        end
+        
+        snapshot_pathlist
+      end
+
+      #
+      # Create a snapshot whitelist file if it doesn't already exist
+      #
+      def ensure_mortar_project_manifest_exists()
+        unless File.exists? '.mortar-project-manifest'
+          create_mortar_project_manifest('.')
+        end
+      end
+
+      #
+      # Create a project manifest file
+      #
+      def create_mortar_project_manifest(path)
+        File.open("#{path}/.mortar-project-manifest", 'w') do |manifest|
+            manifest.puts "controlscripts"
+            manifest.puts "pigscripts"
+            manifest.puts "macros"
+            manifest.puts "udfs"
+        end
+      end
     
       #    
       # snapshot
       #
 
       def create_snapshot_branch
-
         # TODO: handle Ctrl-C in the middle
-        # TODO: can we do the equivalent of stash without changing the working directory
         unless has_commits?
           raise GitError, "No commits found in repository.  You must do an initial commit to initialize the repository."
         end
 
         # Copy code into a temp directory so we don't confuse editors while snapshotting
         curdir = Dir.pwd
-        tmpdir = safe_copy
+        tmpdir = safe_copy(mortar_snapshot_pathlist)
       
         starting_branch = current_branch
         snapshot_branch = "mortar-snapshot-#{Mortar::UUID.create_random.to_s}"
-        did_stash_changes = stash_working_dir(snapshot_branch)
-        begin
-          # checkout a new branch
-          git("checkout -b #{snapshot_branch}")
-        
-          if did_stash_changes
-            # apply the topmost stash that we just created
-            git("stash apply stash@{0}")
-          end
-        
-          add_untracked_files()
 
-          # commit the changes if there are any
-          if ! is_clean_working_directory?
-            git("commit -a -m \"mortar development snapshot commit\"")
-          end
-        
-        ensure
-        
-          # return to the starting branch
-          git("checkout #{starting_branch}")
+        # checkout a new branch
+        git("checkout -b #{snapshot_branch}")
+      
+        add_untracked_files()
 
-          # rebuild the original state of the working set
-          if did_stash_changes
-            git("stash pop stash@{0}")
-          end
+        # commit the changes if there are any
+        if ! is_clean_working_directory?
+          git("commit -a -m \"mortar development snapshot commit\"")
         end
       
         Dir.chdir(curdir)
@@ -178,9 +199,8 @@ module Mortar
           # push the code
           push(project.remote, snapshot_branch)
 
-          # grab the commit hash and clean out the branch from the local branches
+          # grab the commit hash
           ref = git_ref(snapshot_branch)
-          branch_delete(snapshot_branch)
           ref
         end
 
