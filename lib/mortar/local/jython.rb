@@ -60,4 +60,71 @@ class Mortar::Local::Jython
     FileUtils.rm_r(jython_directory)
     install
   end
+
+  # ##################################################################
+  # Almost all of below is copied/pasted/tweaked from pig.rb so please
+  # don't actually use it beyond the prototype it was indended for.
+  # ##################################################################
+
+  def run(cmd_args)
+    # Generate the script for running the command, then
+    # write it to a temp script which will be exectued
+    script_text = render_script_text(cmd_args)
+    # puts script_text
+    script = Tempfile.new("mortar-jython")
+    script.write(script_text)
+    script.close(false)
+    FileUtils.chmod(0755, script.path)
+    system(script.path)
+    script.unlink
+    return (0 == $?.to_i)
+  end
+
+  def render_script_text(cmd_args)
+    params = jython_template_params(cmd_args)
+    erb = ERB.new(File.read(jython_command_script_template_path), 0, "%<>")
+    erb.result(BindingClazz.new(params).get_binding)
+  end
+
+  def jython_template_params(cmd_args)
+    pig = Mortar::Local::Pig.new
+    pig_directory = pig.pig_directory
+    template_params = {}
+    template_params['pig_home'] = pig_directory
+    template_params['pig_classpath'] = "#{pig_directory}/lib-pig/*:#{jython_directory}/jython.jar"
+    template_params['classpath'] = "#{pig_directory}/lib/*:#{jython_directory}/jython.jar:#{pig_directory}/conf/jets3t.properties"
+    template_params['local_install_dir'] = local_install_directory
+    template_params['jython_cmd_parts'] = cmd_args
+    template_params['java_props'] = java_properties
+    return template_params
+  end
+
+  def java_properties
+    opts = {}
+    opts['python.verbose'] = 'error'
+    opts['jython.output'] = true
+    opts['python.home'] = jython_directory
+    opts['python.path'] = local_install_directory + "/../controlscripts"
+    opts['python.cachedir'] = jython_cache_directory
+    return opts
+  end
+
+  # Path to the template which generates the bash script for running pig
+  def jython_command_script_template_path
+    File.expand_path("../../templates/script/runjython.sh", __FILE__)
+  end
+
+  # Allows us to use a hash for template variables
+  class BindingClazz
+    def initialize(attrs)
+      attrs.each{ |k, v|
+        # set an instance variable with the key name so the binding will find it in scope
+        self.instance_variable_set("@#{k}".to_sym, v)
+      }
+    end
+    def get_binding()
+      binding
+    end
+  end
+
 end

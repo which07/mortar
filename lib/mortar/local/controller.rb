@@ -128,4 +128,10 @@ EOF
     pig.validate_script(pig_script, pig_parameters)
   end
 
+  def run_jython_command(cmd_args)
+    install_and_configure
+    jython = Mortar::Local::Jython.new()
+    jython.run(cmd_args)
+  end
+
 end

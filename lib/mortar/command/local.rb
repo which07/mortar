@@ -108,4 +108,19 @@ class Mortar::Command::Local < Mortar::Command::Base
     ctrl.validate(script, pig_parameters)
   end
 
+  # local:jython jython_script and/or args
+  #
+  # Run jython with depencencies properyly configured
+  #
+  #
+  #Examples:
+  #
+  #    Print jython version
+  #        $ mortar local:jython -c "import sys; print sys.version"
+  def jython
+    ctrl = Mortar::Local::Controller.new
+    ctrl.run_jython_command(args)
+  end
+
+
 end
