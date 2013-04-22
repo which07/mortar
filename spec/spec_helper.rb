@@ -30,6 +30,7 @@ Excon.defaults[:mock] = true
 require "mortar-api-ruby"
 
 require "mortar/cli"
+require "mortar/git"
 require "rspec"
 require "rr"
 require "fakefs/safe"
@@ -163,6 +164,9 @@ def with_blank_project(&block)
   FileUtils.mkdir_p(File.join(project_path, "controlscripts"))
   FileUtils.mkdir_p(File.join(project_path, "pigscripts"))
   FileUtils.mkdir_p(File.join(project_path, "macros"))
+  FileUtils.mkdir_p(File.join(project_path, "udfs"))
+  FileUtils.mkdir_p(File.join(project_path, "udfs/python"))
+  FileUtils.mkdir_p(File.join(project_path, "udfs/jython"))
 
   Dir.chdir(project_path)
   
@@ -188,9 +192,11 @@ end
 def with_git_initialized_project(&block)
   # wrap block in a proc that does a commit
   commit_proc = Proc.new do |project|
-    write_file(File.join(project.root_path, "README.txt"), "Some README text")
+    git = Mortar::Git::Git.new
+    git.create_mortar_project_manifest(project.root_path)
+
     remote = "mortar"
-    `git add README.txt`
+    `git add .mortar-project-manifest`
     `git commit -a -m "First commit"`
     `git remote add #{remote} git@github.com:mortarcode-dev/4dbbd83cae8d5bf8a4000000_#{project.name}.git`
     project.remote = remote
@@ -269,10 +275,15 @@ def create_and_validate_git_snapshot(git)
   # ensure the snapshot branch exists
   git.git("branch").include?(snapshot_branch).should be_true
 
+  snapshotted_paths = Dir.glob("**/*")
+  snapshotted_paths.should include("controlscripts")
+  snapshotted_paths.should include("pigscripts")
+  snapshotted_paths.should include("macros")
+  snapshotted_paths.should include("udfs/python")
+  snapshotted_paths.should include("udfs/jython")
+
   Dir.chdir(curdir)
   FileUtils.remove_entry_secure(snapshot_dir)
-
-  git.branches.should == initial_git_branches
 end
 
 require "mortar/helpers"

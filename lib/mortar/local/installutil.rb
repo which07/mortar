@@ -42,8 +42,12 @@ module Mortar
         File.join(project_root, local_install_directory_name)
       end
 
-      def local_pig_logfile
-        project_root + "/local-pig.log"
+      def local_log_dir
+        project_root + "/logs"
+      end
+
+      def local_udf_log_dir
+        local_log_dir + "/udf"
       end
 
       def local_project_gitignore
