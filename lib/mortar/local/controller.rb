@@ -92,15 +92,29 @@ EOF
     jy = Mortar::Local::Jython.new()
     jy.install_or_update()
 
-    ensure_local_install_dir_in_gitignore
+    ensure_local_install_dirs_in_gitignore
   end
 
-  def ensure_local_install_dir_in_gitignore()
+  def ensure_local_install_dirs_in_gitignore()
     if File.exists? local_project_gitignore
-      open(local_project_gitignore, 'r+') do |gitignore|
-        unless gitignore.read().include? local_install_directory_name
-          gitignore.seek(0, IO::SEEK_END)
+      File.open(local_project_gitignore, 'r+') do |gitignore|
+        contents = gitignore.read()
+        gitignore.seek(0, IO::SEEK_END)
+
+        unless contents[-1] == "\n"
+          gitignore.puts "" # write a newline
+        end
+
+        unless contents.include? local_install_directory_name
           gitignore.puts local_install_directory_name
+        end
+
+        unless contents.include? "logs"
+          gitignore.puts "logs"
+        end
+
+        unless contents.include? "illustrate-output"
+          gitignore.puts "illustrate-output"
         end
       end
     end
