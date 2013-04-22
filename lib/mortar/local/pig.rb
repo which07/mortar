@@ -18,6 +18,7 @@ require "erb"
 require 'tempfile'
 require "mortar/helpers"
 require "mortar/local/installutil"
+require 'open3'
 
 class Mortar::Local::Pig
   include Mortar::Local::InstallUtil
@@ -201,7 +202,33 @@ class Mortar::Local::Pig
     return params
   end
 
-  def illustrate_alias(pig_script, pig_alias, skip_pruning, pig_parameters)
+  def startup_grunt(&block)
+    unset_hadoop_env_vars
+    delete_local_log_file
+    # Generate the script for running the command, then
+    # write it to a temp script which will be exectued
+    script_text = script_for_command("", [])
+    script = Tempfile.new("mortar-")
+    script.write(script_text)
+    # puts script_text
+    script.close(false)
+    FileUtils.chmod(0755, script.path)
+    Open3.popen3(script.path, &block)
+
+    # if block_given?
+    #   yield(stdin, stdout, stderr)
+    # end
+
+    # stdin.close
+    # stdout.close
+    # stderr.close
+
+    script.unlink
+    return (0 == $?.to_i)
+
+  end
+
+  def illustrate_alias(pig_script, pig_alias, skip_pruning, pig_parameters, illustrate_outpath=nil, display_output=true)
     cmd = "-e 'illustrate "
 
     # Parameters have to be entered with the illustrate command (as
@@ -211,7 +238,10 @@ class Mortar::Local::Pig
     cmd += "-param_file #{param_file} "
 
     # Now point us at the script/alias to illustrate
-    illustrate_outpath = create_illustrate_output_path()
+    unless illustrate_outpath
+      illustrate_outpath = create_illustrate_output_path()
+    end
+
     cmd += "-script #{pig_script.path} -out #{illustrate_outpath} "
     
     if skip_pruning
@@ -226,17 +256,9 @@ class Mortar::Local::Pig
 
     result = run_pig_command(cmd, [], false)
 
-    if block_given?
-      # Pull in the dumped json file
-      illustrate_data = decode_illustrate_input_file(illustrate_outpath)
-
-      # Render a template using it's values
-      template_params = create_illustrate_template_parameters(illustrate_data)
-      yield(template_params)
-    else
-      if result
-        show_illustrate_output(illustrate_outpath)
-      end
+  
+    if result and display_output
+      show_illustrate_output(illustrate_outpath)
     end
 
   end

@@ -1,0 +1,132 @@
+
+<html>
+  <head>
+    <title>Illustrate Report</title>
+    <link rel="stylesheet" href="/css/illustrate.css" type="text/css" />
+  </head>
+  
+  <body>
+  <div id="illustrate-container">
+    
+  </div>
+  
+  <script src="/js/jquery-1.7.1.min.js"></script>
+  <script src="/js/jquery.transit.js"></script>
+  <script src="/js/jquery.stylestack.js"></script>
+  <script src="/js/zero_clipboard.js"></script>
+  <script src="/js/mortar-table.js"></script>
+  <script src="/js/underscore.js"></script>
+  <script>
+    //$('.illustrate_table td').mortarTableExpandableCell();
+    // TODO: get this working
+    /*
+    $('.illustrate_table td .clipboard').each(function() {
+       $(this).data('clippy',  new ZeroClipboard( $(this), {
+            moviePath: "resources/flash/zeroclipboard.swf"
+        })); 
+    });
+    */
+
+    var truncate_center = function(text, max_num_chars, token) {
+      var token = typeof token !== 'undefined' ? token : " ... ";
+      
+      var text_length = text.length;
+      if (text_length <= max_num_chars) {
+          return text;
+      }
+
+      var num_chars_to_remove = text_length + token.length - max_num_chars;
+      var mid_point = (text_length > 1) ? Math.floor(text_length / 2) : 1;
+      var left_chars_to_remove = Math.floor(num_chars_to_remove / 2);
+      var right_chars_to_remove = num_chars_to_remove - left_chars_to_remove;
+      return text.slice(0, mid_point - left_chars_to_remove) +
+          token +
+          text.slice(mid_point + right_chars_to_remove);
+    };
+
+    $(document).ready(function() {
+      (function poll(){
+          $.ajax({ 
+            url: "/illustrate-results.json",
+            success: function(data){
+              if(data && data['tables']) {
+                var illustrate_html = _.template($("#template_illustrate").html())({
+                  result: data
+                });
+                $("#illustrate-container").html(illustrate_html);
+              }
+            },
+            dataType: "json",
+            complete: poll,
+            timeout: 30000 
+          });
+      })();
+    });
+  </script>
+
+  <script type="text/template" id="template_illustrate">
+
+    <% _.each(result.tables, function(example_table, table_index) { %>
+        <h3 class="illustrate_alias">
+            <% if (example_table["op"] == "LOStore") { %>
+              Store : 
+            <% } %>
+            <%- example_table["alias"] %>
+            <% if (example_table["notices"] && (! _.isEmpty(example_table["notices"]))) {  %>
+            &nbsp;*
+            <% } %>
+        </h3>
+        <table class="table table-bordered illustrate_table expandable">
+          <tbody>
+            <tr>
+              <% _.each(example_table["fields"], function(field) { %>
+                <th><%- field %></th>
+              <% }); %>
+            </tr>
+            <% _.each(example_table["data"], function(row, row_index) { %>
+            <% if (row_index > 2) { return; } %>
+            <% var count = 0; %>
+              <tr>
+                <% _.each(row, function(value, item_index) { %>
+                    <% if (value) { %>
+                        <td>
+                          <div class="mortar-table-expandable-cell-wrapper">
+                            <div class="mortar-table-expandable-cell-container">
+                              <div class="mortar-table-expandable-cell-preview">
+                                <%- truncate_center(value, 30) %>
+                              </div>
+                              <div class="mortar-table-expandable-cell-content">
+                                <div data-clipboard-target="copy-<%- table_index %>-<%- row_index %>-<%- item_index %>" class="clipboard" data->Copy to Clipboard</div>
+                                <div id="copy-<%- table_index %>-<%- row_index %>-<%- item_index %>" class="illustrate_content_wrapper"><%- value %></div>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                    <% } else { %>
+                        <td><div>&nbsp;</div></td>
+                    <% } %>
+                    <% count++; %>
+                <% }); %>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <% if (example_table["notices"] && (! _.isEmpty(example_table["notices"]))) {  %>
+            <% _.each(example_table["notices"], function(notice) { %>
+                <div class="alert">
+                    <a class="close" data-dismiss="alert">&times;</a>
+                    * <%- notice %>
+                </div>
+            <% }); %>
+        <% } %>
+    <% }); %>
+    <% if (result["udf_output"] && (result["udf_output"].length > 0)) {  %>
+      <h3 class="illustrate_alias">UDF Output: </h3>
+      </br>
+      <pre id="illustrate_udf_output"><%- result["udf_output"] %></pre>
+    <% } %>
+  </script>
+
+  </body>
+
+</html>
