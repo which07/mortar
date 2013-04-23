@@ -201,5 +201,22 @@ module Mortar::Local
 
     end
 
+    context "reset_local_logs" do
+
+      it "removes the directory if it exists" do
+        pig = Mortar::Local::Pig.new
+        marker_file = pig.local_log_dir + "/marker-file"
+        FakeFS do
+          FileUtils.mkdir_p(pig.local_log_dir)
+          FileUtils.touch(marker_file)
+          expect(File.exists?(marker_file)).to be_true
+          pig.reset_local_logs
+          expect(File.exists?(marker_file)).to be_false
+        end
+
+      end
+    end
+
+
   end
 end

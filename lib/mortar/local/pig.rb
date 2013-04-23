@@ -256,7 +256,7 @@ class Mortar::Local::Pig
   end
 
   def reset_local_logs
-    if Dir.exists? local_log_dir
+    if File.directory? local_log_dir
       FileUtils.rm_rf local_log_dir
     end
     Dir.mkdir local_log_dir
