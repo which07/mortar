@@ -147,10 +147,12 @@ module Mortar
       #
       def create_mortar_project_manifest(path)
         File.open("#{path}/.mortar-project-manifest", 'w') do |manifest|
+          if File.directory? "#{path}/controlscripts"
             manifest.puts "controlscripts"
-            manifest.puts "pigscripts"
-            manifest.puts "macros"
-            manifest.puts "udfs"
+          end
+          manifest.puts "pigscripts"
+          manifest.puts "macros"
+          manifest.puts "udfs"
         end
       end
     
