@@ -150,6 +150,9 @@ module Mortar
           if File.directory? "#{path}/controlscripts"
             manifest.puts "controlscripts"
           end
+          if File.directory? "#{path}/fixtures"
+            manifest.puts "fixtures"
+          end
           manifest.puts "pigscripts"
           manifest.puts "macros"
           manifest.puts "udfs"
