@@ -33,6 +33,7 @@ require "mortar/cli"
 require "mortar/git"
 require "rspec"
 require "rr"
+require "fakefs/dir"
 require "fakefs/safe"
 require 'tmpdir'
 
@@ -296,6 +297,17 @@ module Mortar::Helpers
 end
 
 require "support/display_message_matcher"
+
+# Dir.exists? wasn't added until ruby 1.9.x, but FakeFS includes this
+# method regardless of ruby version. Monkey patching it away for now to
+# prevent false positive test passes.
+if RUBY_VERSION == "1.8.7"
+  module FakeFS
+    class <<Dir
+      remove_method :exists?
+    end
+  end
+end
 
 RSpec.configure do |config|
   config.mock_with :rr
