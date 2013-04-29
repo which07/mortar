@@ -36,10 +36,6 @@ class Mortar::Local::Watcher
   end
 
 	def watch 
-    # lines = @pig_script.code.gsub(/--.*\n?/, "").gsub(/^\s*\n+/, "").gsub(/\s*(rmf|store).*;/mi, "")
-    # line_array = lines.split(";").map { |e| "#{e};\n" }
-    # line_array.map { |line| line.scan(/\s*(\S*)\s*=/) }
-
 
     pig = Mortar::Local::Pig.new()
     pig.startup_grunt do |stdin, stdout, stderr|
@@ -60,7 +56,6 @@ class Mortar::Local::Watcher
               end
             rescue IO::WaitReadable
               if !!line.match(/grunt>\s?$/)
-                # puts "Line not ended, returning false"
                 last_line = line
                 return false
               end
