@@ -146,7 +146,7 @@ module Mortar
               manifest.puts "" # ensure file ends with a newline
             end
 
-            if File.exists?('controlscripts') and not contents.include?('controlscripts')
+            if File.directory?('controlscripts') and not contents.include?('controlscripts')
               manifest.puts "controlscripts"
             end
           end
