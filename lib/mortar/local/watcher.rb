@@ -114,7 +114,7 @@ class Mortar::Local::Watcher
             current_lines = executable_lines
             
             last_alias = lines.scan(/\s*(\S*)\s*=/)[-1][0]
-            executable_lines << "illustrate #{last_alias} -skipPruning;\n"
+            executable_lines << "illustrate -skipPruning #{last_alias};\n"
 
             puts line_array
 
