@@ -10,4 +10,6 @@ gem 'rb-fchange', :require => false
 gem 'async_sinatra'
 gem 'thin'
 
+gem 'json'
+
 gemspec
