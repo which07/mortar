@@ -142,7 +142,10 @@ module Mortar
             contents = manifest.read()
             manifest.seek(0, IO::SEEK_END)
 
-            unless contents[-1] == "\n"
+            # `contents` in ruby 1.8.7 is array with entries of the
+            # type Fixnum which isn't semantically comparable with
+            # the \n char, but the ascii code 10 is
+            unless (contents[-1] == "\n" or contents[-1] == 10)
               manifest.puts "" # ensure file ends with a newline
             end
 
