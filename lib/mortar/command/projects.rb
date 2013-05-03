@@ -58,6 +58,8 @@ class Mortar::Command::Projects < Mortar::Command::Base
   
   # projects:create PROJECTNAME
   #
+  # --withoutgit    # create a Mortar project that's not its own git repo. Instead, Mortar will sync using git in a tmp dir.
+  #
   # Used when you want to start a new Mortar project using Mortar generated code.
   def create
     name = shift_argument
@@ -66,11 +68,21 @@ class Mortar::Command::Projects < Mortar::Command::Base
     end
     
     Mortar::Command::run("generate:project", [name])
+
     FileUtils.cd(name)
-    git.git_init
-    git.git("add .")
-    git.git("commit -m \"Mortar project scaffolding\"")
-    Mortar::Command::run("projects:register", [name])
+    if options[:withoutgit]
+      validate_project_name(name)
+      register_project(name) do |project_result|
+        File.open(".mortar-project-remote", "w") do |f|
+          f.puts project_result["git_url"]
+        end
+      end
+    else
+      git.git_init
+      git.git("add .")
+      git.git("commit -m \"Mortar project scaffolding\"")
+      Mortar::Command::run("projects:register", [name])
+    end
   end
   alias_command "new", "projects:create"
   
@@ -93,11 +105,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
       end
     end
     
-    # ensure the project name does not already exist
-    project_names = api.get_projects().body["projects"].collect{|p| p['name']}
-    if project_names.include? name
-      error("Your account already contains a project named #{name}.\nPlease choose a different name for your new project, or clone the existing #{name} code using:\n\nmortar projects:clone #{name}")
-    end
+    validate_project_name(name)
     
     unless git.remotes(git_organization).empty?
       begin
@@ -107,39 +115,10 @@ class Mortar::Command::Projects < Mortar::Command::Base
       end
     end
     
-    project_id = nil
-    action("Sending request to register project: #{name}") do
-      project_id = api.post_project(name).body["project_id"]
-    end
-    
-    project_result = nil
-    project_status = nil
-    display
-    ticking(polling_interval) do |ticks|
-      project_result = api.get_project(project_id).body
-      project_status = project_result.fetch("status_code", project_result["status"])
-      project_description = project_result.fetch("status_description", project_status)
-      is_finished = Mortar::API::Projects::STATUSES_COMPLETE.include?(project_status)
-
-      redisplay("Status: %s %s" % [
-        project_description + (is_finished ? "" : "..."),
-        is_finished ? " " : spinner(ticks)],
-        is_finished) # only display newline on last message
-      if is_finished
-        display
-        break
-      end
-    end
-    
-    case project_status
-    when Mortar::API::Projects::STATUS_FAILED
-      error("Project registration failed.\nError message: #{project_result['error_message']}")
-    when Mortar::API::Projects::STATUS_ACTIVE
+    register_project(name) do |project_result|
       git.remote_add("mortar", project_result['git_url'])
       git.push_master
       display "Your project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n\n"
-    else
-      raise RuntimeError, "Unknown project status: #{project_status} for project_id: #{project_id}"
     end
     
   end

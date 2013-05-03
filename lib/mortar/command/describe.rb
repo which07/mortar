@@ -47,8 +47,12 @@ class Mortar::Command::Describe < Mortar::Command::Base
       error "Currently Mortar does not support describing control scripts"
     end
     
-    validate_git_based_project!
-    git_ref = git.create_and_push_snapshot_branch(project)
+    if project.gitless_project?
+      git_ref = git.sync_gitless_project(project)
+    else
+      validate_git_based_project!
+      git_ref = git.create_and_push_snapshot_branch(project)
+    end
     
     describe_id = nil
     action("Starting describe") do

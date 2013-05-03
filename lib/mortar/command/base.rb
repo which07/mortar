@@ -107,6 +107,48 @@ class Mortar::Command::Base
     end
     return ""
   end
+
+  def validate_project_name(name)
+    project_names = api.get_projects().body["projects"].collect{|p| p['name']}
+    if project_names.include? name
+      error("Your account already contains a project named #{name}.\nPlease choose a different name for your new project, or clone the existing #{name} code using:\n\nmortar projects:clone #{name}")
+    end
+  end
+
+  def register_project(name)
+    project_id = nil
+    action("Sending request to register project: #{name}") do
+      project_id = api.post_project(name).body["project_id"]
+    end
+    
+    project_result = nil
+    project_status = nil
+    display
+    ticking(polling_interval) do |ticks|
+      project_result = api.get_project(project_id).body
+      project_status = project_result.fetch("status_code", project_result["status"])
+      project_description = project_result.fetch("status_description", project_status)
+      is_finished = Mortar::API::Projects::STATUSES_COMPLETE.include?(project_status)
+
+      redisplay("Status: %s %s" % [
+        project_description + (is_finished ? "" : "..."),
+        is_finished ? " " : spinner(ticks)],
+        is_finished) # only display newline on last message
+      if is_finished
+        display
+        break
+      end
+    end
+    
+    case project_status
+    when Mortar::API::Projects::STATUS_FAILED
+      error("Project registration failed.\nError message: #{project_result['error_message']}")
+    when Mortar::API::Projects::STATUS_ACTIVE
+      yield project_result
+    else
+      raise RuntimeError, "Unknown project status: #{project_status} for project_id: #{project_id}"
+    end
+  end
   
 protected
 
