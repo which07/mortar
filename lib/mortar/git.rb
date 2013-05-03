@@ -119,7 +119,7 @@ module Mortar
       #
 
       def mortar_snapshot_pathlist()
-        ensure_mortar_project_manifest_exists()
+        ensure_valid_mortar_project_manifest()
 
         snapshot_pathlist = File.read('.mortar-project-manifest').split("\n")
         snapshot_pathlist << ".git"
@@ -136,8 +136,24 @@ module Mortar
       #
       # Create a snapshot whitelist file if it doesn't already exist
       #
-      def ensure_mortar_project_manifest_exists()
-        unless File.exists? '.mortar-project-manifest'
+      def ensure_valid_mortar_project_manifest()
+        if File.exists? '.mortar-project-manifest'
+          File.open('.mortar-project-manifest', 'r+') do |manifest|
+            contents = manifest.read()
+            manifest.seek(0, IO::SEEK_END)
+
+            # `contents` in ruby 1.8.7 is array with entries of the
+            # type Fixnum which isn't semantically comparable with
+            # the \n char, but the ascii code 10 is
+            unless (contents[-1] == "\n" or contents[-1] == 10)
+              manifest.puts "" # ensure file ends with a newline
+            end
+
+            if File.directory?('controlscripts') and not contents.include?('controlscripts')
+              manifest.puts "controlscripts"
+            end
+          end
+        else
           create_mortar_project_manifest('.')
         end
       end
