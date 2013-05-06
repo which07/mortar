@@ -266,7 +266,7 @@ module Mortar
           git("remote add mortar #{remote_path}")
           push_with_retry("mortar", "master", "Setting up gitless Mortar project")
         end
-        
+
         # pull from master and overwrite everything
         Dir.chdir(mirror_dir)
         git("fetch --all")
