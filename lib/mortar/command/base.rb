@@ -115,6 +115,16 @@ class Mortar::Command::Base
     end
   end
 
+  def validate_project_structure()
+    present_dirs = Dir.glob("*").select { |path| File.directory? path }
+    required_dirs = ["pigscripts", "macros", "udfs", "fixtures"]
+    missing_dirs = required_dirs - present_dirs
+
+    if missing_dirs.length > 0
+      error("Project missing required directories: #{missing_dirs.to_s}")
+    end
+  end
+
   def register_project(name)
     project_id = nil
     action("Sending request to register project: #{name}") do
@@ -148,6 +158,13 @@ class Mortar::Command::Base
     else
       raise RuntimeError, "Unknown project status: #{project_status} for project_id: #{project_id}"
     end
+  end
+
+  def initialize_gitless_project(api_registration_result)
+    File.open(".mortar-project-remote", "w") do |f|
+      f.puts api_registration_result["git_url"]
+    end
+    git.sync_gitless_project(project)
   end
   
 protected

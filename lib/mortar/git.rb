@@ -87,7 +87,7 @@ module Mortar
           raise GitError, "No commits found in repository.  You must do an initial commit to initialize the repository."
         end
 
-        safe_copy(mortar_manifest_pathlist) do
+        safe_copy(mortar_manifest_pathlist(Dir.pwd)) do
           did_stash_changes = stash_working_dir("Stash for push to master")
           git('push mortar master')
         end
@@ -118,29 +118,29 @@ module Mortar
       # Only snapshot filesystem paths that are in a whitelist
       #
 
-      def mortar_manifest_pathlist(include_dot_git = true)
-        ensure_valid_mortar_project_manifest()
+      def mortar_manifest_pathlist(root_path, include_dot_git = true)
+        ensure_valid_mortar_project_manifest(root_path)
 
-        manifest_pathlist = File.read('.mortar-project-manifest').split("\n")
+        manifest_pathlist = File.read("#{root_path}/.mortar-project-manifest").split("\n")
         if include_dot_git
           manifest_pathlist << ".git"
         end
 
-        manifest_pathlist.each do |path|
-          unless File.exists? path
-            Helpers.error(".mortar-project-manifest includes file/dir \"#{path}\" that is not in the mortar project directory.")
+        manifest_pathlist.each do |file_path|
+          unless File.exists? "#{root_path}/#{file_path}"
+            Helpers.error(".mortar-project-manifest includes file/dir \"#{file_path}\" that is not in the mortar project directory.")
           end
         end
         
-        manifest_pathlist
+        manifest_pathlist.map { |file_path| "#{root_path}/#{file_path}" }
       end
 
       #
       # Create a snapshot whitelist file if it doesn't already exist
       #
-      def ensure_valid_mortar_project_manifest()
-        if File.exists? '.mortar-project-manifest'
-          File.open('.mortar-project-manifest', 'r+') do |manifest|
+      def ensure_valid_mortar_project_manifest(root_path)
+        if File.exists? "#{root_path}/.mortar-project-manifest"
+          File.open("#{root_path}/.mortar-project-manifest", "r+") do |manifest|
             contents = manifest.read()
             manifest.seek(0, IO::SEEK_END)
 
@@ -156,7 +156,7 @@ module Mortar
             end
           end
         else
-          create_mortar_project_manifest('.')
+          create_mortar_project_manifest(root_path)
         end
       end
 
@@ -189,7 +189,7 @@ module Mortar
 
         # Copy code into a temp directory so we don't confuse editors while snapshotting
         curdir = Dir.pwd
-        tmpdir = safe_copy(mortar_manifest_pathlist)
+        tmpdir = safe_copy(mortar_manifest_pathlist(curdir))
       
         starting_branch = current_branch
         snapshot_branch = "mortar-snapshot-#{Mortar::UUID.create_random.to_s}"
@@ -219,7 +219,7 @@ module Mortar
         end
 
         Dir.chdir(snapshot_dir)
-        git_ref = push_with_retry(project.remote, snapshot_branch)
+        git_ref = push_with_retry(project.remote, snapshot_branch, "Sending code snapshot to Mortar")
         FileUtils.remove_entry_secure(snapshot_dir)
         Dir.chdir(curdir)
         return git_ref
@@ -238,47 +238,64 @@ module Mortar
         @snapshot_push_attempts < 10
       end
 
-      MORTAR_MIRROR_DIR = "/tmp/mortar-git-mirrors"
+      def mortar_mirrors_dir()
+        "/tmp/mortar-git-mirrors"
+      end
+
       def sync_gitless_project(project)
         # the project is not a git repo, so we manage a mirror dir in /tmp/mortar_projects that is a git repo
 
-        # create mirror dir if it doesn't already exist
-        remote_path = File.open(".mortar-project-remote").read.strip
-        project_mirror_dir = "#{MORTAR_MIRROR_DIR}/#{project.name}"
+        project_dir = project.root_path
+        mirror_dir = "#{mortar_mirrors_dir}/#{project.name}"
 
-        unless File.directory? project_mirror_dir
-          unless File.directory? MORTAR_MIRROR_DIR
-            FileUtils.mkdir_p MORTAR_MIRROR_DIR
+        # create and initialize mirror git repo if it doesn't already exist
+        unless File.directory? mirror_dir
+          unless File.directory? mortar_mirrors_dir
+            FileUtils.mkdir_p mortar_mirrors_dir
           end
 
-          clone(remote_path, project_mirror_dir)
+          # clone mortar-code repo
+          remote_path = File.open(".mortar-project-remote").read.strip
+          clone(remote_path, mirror_dir)
 
-          curdir = Dir.pwd
-          Dir.chdir(project_mirror_dir)
+          # make an initial commit to master
+          Dir.chdir(mirror_dir)
           File.open(".gitkeep", "w").close()
           git("add .")
           git("commit -m \"mortar development initial commit\"")
           git("remote add mortar #{remote_path}")
-          push_with_retry("mortar", "master", "Initializing mirror git repo for gitless Mortar project")
-          Dir.chdir(curdir)
+          push_with_retry("mortar", "master", "Setting up gitless Mortar project")
+        end
+        
+        # pull from master and overwrite everything
+        Dir.chdir(mirror_dir)
+        git("fetch --all")
+        git("reset --hard mortar/master")
+
+        # wipe mirror dir and copy project files into it
+        # since we fetched mortar/master earlier, the git diff will now be b/tw master and the current state
+        # mortar_manifest_pathlist(false) means don't copy .git
+        FileUtils.rm_rf(Dir.glob("#{mirror_dir}/*"))
+        FileUtils.cp_r(mortar_manifest_pathlist(project_dir, false), mirror_dir)
+
+        # update master
+        Dir.chdir(mirror_dir)
+        unless is_clean_working_directory?
+          git("add .")
+          git("add -u .") # this gets deletes
+          git("commit -m \"mortar development snapshot commit\"")
         end
 
-        # copy mortar project files into mirror dir
-        # mortar_manifest_pathlist(false) means don't copy .git
-        FileUtils.cp_r(mortar_manifest_pathlist(false), project_mirror_dir)
-
-        # push snapshot branch
-        Dir.chdir(project_mirror_dir)
+        # checkout snapshot branch.
+        # it will permenantly keep the code in this state (as opposed to master, which will be updated)
         snapshot_branch = "mortar-snapshot-#{Mortar::UUID.create_random.to_s}"
         git("checkout -b #{snapshot_branch}")
-        git("add .")
-        git("add -u .")
-        git("commit -m \"mortar development snapshot commit\"")
-        git_ref = push_with_retry("mortar", snapshot_branch)
 
-        # reset to master (empty project)
+        # push everything (master updates and snapshot branch)
+        git_ref = push_with_retry("mortar", snapshot_branch, "Sending code snapshot to Mortar", true)
+
         git("checkout master")
-
+        Dir.chdir(project_dir)
         return git_ref
       end
 
@@ -323,11 +340,19 @@ module Mortar
         git("push #{remote_name} #{ref}")
       end
 
-      def push_with_retry(remote_name, branch_name, action_msg = "Sending code snapshot to Mortar")
+      def push_all(remote_name)
+        git("push #{remote_name} --all")
+      end
+
+      def push_with_retry(remote_name, branch_name, action_msg, push_all_branches = false)
         git_ref = Helpers.action(action_msg) do
           # push the code
           begin
-              push(remote_name, branch_name)
+              if push_all_branches
+                push_all(remote_name)
+              else
+                push(remote_name, branch_name)
+              end
           rescue
             retry if retry_snapshot_push?
             Helpers.error("Could not connect to github remote. Tried #{@snapshot_push_attempts.to_s} times.")

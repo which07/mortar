@@ -58,7 +58,8 @@ class Mortar::Command::Projects < Mortar::Command::Base
   
   # projects:create PROJECTNAME
   #
-  # --withoutgit    # create a Mortar project that's not its own git repo. Instead, Mortar will sync using git in a tmp dir.
+  # --withoutgit    # Create a Mortar project that is not its own git repo.
+  #                 # Mortar will sync with the cloud using a mirror of your code in a tmp dir.
   #
   # Used when you want to start a new Mortar project using Mortar generated code.
   def create
@@ -73,9 +74,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
     if options[:withoutgit]
       validate_project_name(name)
       register_project(name) do |project_result|
-        File.open(".mortar-project-remote", "w") do |f|
-          f.puts project_result["git_url"]
-        end
+        initialize_gitless_project(project_result)
       end
     else
       git.git_init
@@ -88,6 +87,9 @@ class Mortar::Command::Projects < Mortar::Command::Base
   
   # projects:register PROJECTNAME
   #
+  # --withoutgit    # Register code that is not its own git repo as a Mortar project.
+  #                 # Mortar will sync with the cloud using a mirror of your code in a tmp dir.
+  #
   # Used when you want to start a new Mortar project using your existing code in the current directory.
   def register
     name = shift_argument
@@ -95,32 +97,40 @@ class Mortar::Command::Projects < Mortar::Command::Base
       error("Usage: mortar projects:register PROJECT\nMust specify PROJECT.")
     end
     validate_arguments!
-    
-    unless git.has_dot_git?
+
+    if options[:withoutgit]
+      validate_project_name(name)
+      validate_project_structure()
+
+      register_project(name) do |project_result|
+        initialize_gitless_project(project_result)
+      end
+    else
+      unless git.has_dot_git?
       # check if we're in the parent directory
-      if File.exists? name
-        error("mortar projects:register must be run from within the project directory.\nPlease \"cd #{name}\" and rerun this command.")
-      else
-        error("No git repository found in the current directory.\nPlease initialize a git repository for this project, and then rerun the register command.\nTo initialize your project in git, use:\n\ngit init\ngit add .\ngit commit -a -m \"first commit\"")
+        if File.exists? name
+          error("mortar projects:register must be run from within the project directory.\nPlease \"cd #{name}\" and rerun this command.")
+        else
+          error("No git repository found in the current directory.\nTo register a project that is not its own git repository, use the --withoutgit option.\nIf you do want this project to be its own git repository, please initialize git in this directory, and then rerun the register command.\nTo initialize your project in git, use:\n\ngit init\ngit add .\ngit commit -a -m \"first commit\"")
+        end
+      end
+
+      validate_project_name(name)
+
+      unless git.remotes(git_organization).empty?
+        begin
+          error("Currently in project: #{project.name}.  You can not register a new project inside of an existing mortar project.")
+        rescue Mortar::Command::CommandFailed => cf
+          error("Currently in an existing Mortar project.  You can not register a new project inside of an existing mortar project.")
+        end
+      end
+
+      register_project(name) do |project_result|
+        git.remote_add("mortar", project_result['git_url'])
+        git.push_master
+        display "Your project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n\n"
       end
     end
-    
-    validate_project_name(name)
-    
-    unless git.remotes(git_organization).empty?
-      begin
-        error("Currently in project: #{project.name}.  You can not register a new project inside of an existing mortar project.")
-      rescue Mortar::Command::CommandFailed => cf
-        error("Currently in an existing Mortar project.  You can not register a new project inside of an existing mortar project.")
-      end
-    end
-    
-    register_project(name) do |project_result|
-      git.remote_add("mortar", project_result['git_url'])
-      git.push_master
-      display "Your project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n\n"
-    end
-    
   end
   alias_command "register", "projects:register"
 
