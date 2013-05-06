@@ -168,6 +168,7 @@ def with_blank_project(&block)
   FileUtils.mkdir_p(File.join(project_path, "udfs"))
   FileUtils.mkdir_p(File.join(project_path, "udfs/python"))
   FileUtils.mkdir_p(File.join(project_path, "udfs/jython"))
+  FileUtils.mkdir_p(File.join(project_path, "fixtures"))
 
   Dir.chdir(project_path)
   

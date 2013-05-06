@@ -128,5 +128,24 @@ STDERR
         end
       end
     end
+
+    it "requests and reports a validate for a gitless project" do
+      with_gitless_project do |p|
+        # stub api requests
+        validate_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
+        parameters = ["name"=>"key", "value"=>"value" ]
+        
+        mock(Mortar::Auth.api).post_validate("myproject", "my_script", is_a(String), :parameters => parameters) {Excon::Response.new(:body => {"validate_id" => validate_id})}
+        mock(Mortar::Auth.api).get_validate(validate_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Validate::STATUS_QUEUED, "status_description" => "Pending"})).ordered
+        mock(Mortar::Auth.api).get_validate(validate_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Validate::STATUS_GATEWAY_STARTING, "status_description" => "GATEWAY_STARTING"})).ordered
+        mock(Mortar::Auth.api).get_validate(validate_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Validate::STATUS_PROGRESS, "status_description" => "Starting"})).ordered
+        mock(Mortar::Auth.api).get_validate(validate_id).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Validate::STATUS_SUCCESS, "status_description" => "Success"})).ordered
+        
+        mock(@git).sync_gitless_project.with_any_args.times(1) { "somewhere_over_the_rainbow" }
+
+        write_file(File.join(p.pigscripts_path, "my_script.pig"))
+        stderr, stdout = execute("validate my_script --polling_interval 0.05 -p key=value", p, @git)
+      end
+    end
   end
 end

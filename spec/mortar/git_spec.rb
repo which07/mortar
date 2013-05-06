@@ -15,7 +15,6 @@
 #
 
 require "spec_helper"
-require "fakefs/spec_helpers"
 require "mortar/git"
 require "mortar/helpers"
 
@@ -303,7 +302,10 @@ STASH
       end
     end
 
+    # we manually create and destroy "mirror_dir" instead of using FakeFS
+    # because FakeFS doesn't clean up properly when you use Dir.chdir inside of it
     context "snapshot with gitless project" do
+
       it "creates a mirror directory for the project when one does not already exist" do
         with_gitless_project do |p|
           mirror_dir = File.join(Dir.tmpdir, "mortar", "test-git-mirror")
