@@ -243,7 +243,7 @@ module Mortar
       end
 
       def sync_gitless_project(project)
-        # the project is not a git repo, so we manage a mirror dir in /tmp/mortar_projects that is a git repo
+        # the project is not a git repo, so we manage a mirror directory that is a git repo
 
         project_dir = project.root_path
         mirror_dir = "#{mortar_mirrors_dir}/#{project.name}"
