@@ -362,7 +362,7 @@ STASH
           @git.sync_gitless_project(p)
 
           File.exists?("#{project_mirror_dir}/pigscripts/calydonian_boar.pig").should be_false
-          FileUtils.rm_rf(project_mirror_dir)
+          FileUtils.rm_rf(mirror_dir)
         end
       end
     end

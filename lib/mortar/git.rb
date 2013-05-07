@@ -87,7 +87,7 @@ module Mortar
           raise GitError, "No commits found in repository.  You must do an initial commit to initialize the repository."
         end
 
-        safe_copy(mortar_manifest_pathlist(Dir.pwd)) do
+        safe_copy(mortar_manifest_pathlist) do
           did_stash_changes = stash_working_dir("Stash for push to master")
           git('push mortar master')
         end
@@ -118,29 +118,29 @@ module Mortar
       # Only snapshot filesystem paths that are in a whitelist
       #
 
-      def mortar_manifest_pathlist(root_path, include_dot_git = true)
-        ensure_valid_mortar_project_manifest(root_path)
+      def mortar_manifest_pathlist(include_dot_git = true)
+        ensure_valid_mortar_project_manifest()
 
-        manifest_pathlist = File.read("#{root_path}/.mortar-project-manifest").split("\n")
+        manifest_pathlist = File.read(".mortar-project-manifest").split("\n")
         if include_dot_git
           manifest_pathlist << ".git"
         end
 
-        manifest_pathlist.each do |file_path|
-          unless File.exists? "#{root_path}/#{file_path}"
-            Helpers.error(".mortar-project-manifest includes file/dir \"#{file_path}\" that is not in the mortar project directory.")
+        manifest_pathlist.each do |path|
+          unless File.exists? path
+            Helpers.error(".mortar-project-manifest includes file/dir \"#{path}\" that is not in the mortar project directory.")
           end
         end
         
-        manifest_pathlist.map { |file_path| "#{root_path}/#{file_path}" }
+        manifest_pathlist
       end
 
       #
       # Create a snapshot whitelist file if it doesn't already exist
       #
-      def ensure_valid_mortar_project_manifest(root_path)
-        if File.exists? "#{root_path}/.mortar-project-manifest"
-          File.open("#{root_path}/.mortar-project-manifest", "r+") do |manifest|
+      def ensure_valid_mortar_project_manifest()
+        if File.exists? ".mortar-project-manifest"
+          File.open(".mortar-project-manifest", "r+") do |manifest|
             contents = manifest.read()
             manifest.seek(0, IO::SEEK_END)
 
@@ -156,7 +156,7 @@ module Mortar
             end
           end
         else
-          create_mortar_project_manifest(root_path)
+          create_mortar_project_manifest('.')
         end
       end
 
@@ -189,7 +189,7 @@ module Mortar
 
         # Copy code into a temp directory so we don't confuse editors while snapshotting
         curdir = Dir.pwd
-        tmpdir = safe_copy(mortar_manifest_pathlist(curdir))
+        tmpdir = safe_copy(mortar_manifest_pathlist)
       
         starting_branch = current_branch
         snapshot_branch = "mortar-snapshot-#{Mortar::UUID.create_random.to_s}"
@@ -276,7 +276,8 @@ module Mortar
         # since we fetched mortar/master earlier, the git diff will now be b/tw master and the current state
         # mortar_manifest_pathlist(false) means don't copy .git
         FileUtils.rm_rf(Dir.glob("#{mirror_dir}/*"))
-        FileUtils.cp_r(mortar_manifest_pathlist(project_dir, false), mirror_dir)
+        Dir.chdir(project_dir)
+        FileUtils.cp_r(mortar_manifest_pathlist(false), mirror_dir)
 
         # update master
         Dir.chdir(mirror_dir)
