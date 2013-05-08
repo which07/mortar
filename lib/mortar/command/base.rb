@@ -117,7 +117,7 @@ class Mortar::Command::Base
 
   def validate_project_structure()
     present_dirs = Dir.glob("*").select { |path| File.directory? path }
-    required_dirs = ["pigscripts", "macros", "udfs", "fixtures"]
+    required_dirs = ["controlscripts", "pigscripts", "macros", "udfs", "fixtures"]
     missing_dirs = required_dirs - present_dirs
 
     if missing_dirs.length > 0
