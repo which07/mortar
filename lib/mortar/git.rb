@@ -248,6 +248,15 @@ module Mortar
         project_dir = project.root_path
         mirror_dir = "#{mortar_mirrors_dir}/#{project.name}"
 
+        ensure_gitless_project_mirror_exists(project_dir, mirror_dir)
+        sync_gitless_project_with_mirror(project_dir, mirror_dir)
+        git_ref = sync_gitless_project_mirror_with_cloud(project_dir, mirror_dir)
+
+        Dir.chdir(project_dir)
+        return git_ref
+      end
+
+      def ensure_gitless_project_mirror_exists(project_dir, mirror_dir)
         # create and initialize mirror git repo if it doesn't already exist
         unless File.directory? mirror_dir
           unless File.directory? mortar_mirrors_dir
@@ -266,7 +275,9 @@ module Mortar
           git("remote add mortar #{remote_path}")
           push_with_retry("mortar", "master", "Setting up gitless Mortar project")
         end
+      end
 
+      def sync_gitless_project_with_mirror(project_dir, mirror_dir)
         # pull from master and overwrite everything
         Dir.chdir(mirror_dir)
         git("fetch --all")
@@ -286,18 +297,19 @@ module Mortar
           git("add -u .") # this gets deletes
           git("commit -m \"mortar development snapshot commit\"")
         end
+      end
 
+      def sync_gitless_project_mirror_with_cloud(project_dir, mirror_dir)
         # checkout snapshot branch.
         # it will permenantly keep the code in this state (as opposed to master, which will be updated)
+        Dir.chdir(mirror_dir)
         snapshot_branch = "mortar-snapshot-#{Mortar::UUID.create_random.to_s}"
         git("checkout -b #{snapshot_branch}")
 
         # push everything (master updates and snapshot branch)
         git_ref = push_with_retry("mortar", snapshot_branch, "Sending code snapshot to Mortar", true)
-
+        
         git("checkout master")
-        Dir.chdir(project_dir)
-        return git_ref
       end
 
       #    

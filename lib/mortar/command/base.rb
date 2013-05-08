@@ -303,6 +303,12 @@ protected
     end
   end
 
+  def validate_gitless_project!
+    unless project.root_path
+      error("#{current_command[:command]} must be run from the project root directory")
+    end
+  end
+
   def validate_script!(script_name)
     pigscript = project.pigscripts[script_name]
     controlscript = project.controlscripts[script_name]
@@ -387,6 +393,16 @@ protected
 
   def no_browser?
     (options[:no_browser])
+  end
+
+  def sync_code_with_cloud
+    # returns git_ref
+    if project.gitless_project?
+      return git.sync_gitless_project(project)
+    else
+      validate_git_based_project!
+      return git.create_and_push_snapshot_branch(project)
+    end
   end
 
 end

@@ -114,12 +114,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
       end
     end
  
-    if project.gitless_project?
-      git_ref = git.sync_gitless_project(project)
-    else
-      validate_git_based_project!
-      git_ref = git.create_and_push_snapshot_branch(project)
-    end
+    git_ref = sync_code_with_cloud()
     
     notify_on_job_finish = ! options[:donotnotify]
     

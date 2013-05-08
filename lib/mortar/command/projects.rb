@@ -59,7 +59,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
   # projects:create PROJECTNAME
   #
   # --withoutgit    # Create a Mortar project that is not its own git repo.
-  #                 # Mortar will sync with the cloud using a mirror of your code in a tmp dir.
+  #                 # Your code will still be synced with a git repo in the cloud.
   #
   # Used when you want to start a new Mortar project using Mortar generated code.
   def create
@@ -72,10 +72,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
 
     FileUtils.cd(name)
     if options[:withoutgit]
-      validate_project_name(name)
-      register_project(name) do |project_result|
-        initialize_gitless_project(project_result)
-      end
+      Mortar::Command::run("projects:register", [name, "--withoutgit"])
     else
       git.git_init
       git.git("add .")
@@ -88,7 +85,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
   # projects:register PROJECTNAME
   #
   # --withoutgit    # Register code that is not its own git repo as a Mortar project.
-  #                 # Mortar will sync with the cloud using a mirror of your code in a tmp dir.
+  #                 # Your code will still be synced with a git repo in the cloud.
   #
   # Used when you want to start a new Mortar project using your existing code in the current directory.
   def register

@@ -42,12 +42,7 @@ class Mortar::Command::Validate < Mortar::Command::Base
       error "Currently Mortar does not support validating control scripts"
     end
     
-    if project.gitless_project?
-      git_ref = git.sync_gitless_project(project)
-    else
-      validate_git_based_project!
-      git_ref = git.create_and_push_snapshot_branch(project)
-    end
+    git_ref = sync_code_with_cloud()
     
     validate_id = nil
     action("Starting validate") do
