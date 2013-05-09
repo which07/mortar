@@ -123,7 +123,6 @@ class Mortar::Command::Projects < Mortar::Command::Base
       end
 
       register_project(name) do |project_result|
-        puts project_result
         git.remote_add("mortar", project_result['git_url'])
         git.push_master
         display "Your project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n\n"
