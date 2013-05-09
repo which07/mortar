@@ -65,8 +65,8 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
   # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
   # -d, --donotnotify           # Don't send an email on job completion.  (Default: false--an email will be sent to you once the job completes)
-  # -p, --project PROJECTNAME   # Run code from the master branch of the specified Mortar project in the cloud, without any snapshotting from your local machine. If you use this option, you must give the file extension of your script (.pig or .py).
-  # -b, --branch BRANCHNAME     # Used with -p/--project, run code from the specified branch instead of master.
+  # -P, --project PROJECTNAME   # Run code from the master branch of the specified Mortar project in the cloud, without any snapshotting from your local machine. If you use this option, you must give the file extension of your script (.pig or .py).
+  # -B, --branch BRANCHNAME     # Used with -p/--project, run code from the specified branch instead of master.
   #
   #Examples:
   #
@@ -93,8 +93,8 @@ class Mortar::Command::Jobs < Mortar::Command::Base
       end
     else
       project_name = project.name
-
       script = validate_script!(script_name)
+
       script_name = script.name
       case script
       when Mortar::Project::PigScript
