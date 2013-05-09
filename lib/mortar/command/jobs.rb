@@ -65,6 +65,8 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
   # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
   # -d, --donotnotify           # Don't send an email on job completion.  (Default: false--an email will be sent to you once the job completes)
+  # -p, --project PROJECTNAME   # Run code from the master branch of the specified Mortar project in the cloud, without any snapshotting from your local machine. If you use this option, you must give the file extension of your script (.pig or .py).
+  # -b, --branch BRANCHNAME     # Used with -p/--project, run code from the specified branch instead of master.
   #
   #Examples:
   #
@@ -77,18 +79,33 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     end
     
     validate_arguments!
-    script = validate_script!(script_name)
-    
-    case script
-    when Mortar::Project::PigScript
-      is_control_script = false
-    when Mortar::Project::ControlScript
-      is_control_script = true
+    if options[:project]
+      project_name = options[:project]
+
+      if script_name[-4,4] == ".pig"
+        is_control_script = false
+        script_name = script_name[0, script_name.length - 4]
+      elsif script_name[-3,3] == ".py"
+        is_control_script = true
+        script_name = script_name[0, script_name.length - 4]
+      else
+        error "Unknown Script Type"
+      end
     else
-      error "Unknown Script Type"
+      project_name = project.name
+
+      script = validate_script!(script_name)
+      script_name = script.name
+      case script
+      when Mortar::Project::PigScript
+        is_control_script = false
+      when Mortar::Project::ControlScript
+        is_control_script = true
+      else
+        error "Unknown Script Type"
+      end
     end
     
-
     unless options[:clusterid] || options[:clustersize]
       clusters = api.get_clusters().body['clusters']
 
@@ -114,7 +131,15 @@ class Mortar::Command::Jobs < Mortar::Command::Base
       end
     end
  
-    git_ref = sync_code_with_cloud()
+    if options[:project]
+      if options[:branch]
+        git_ref = options[:branch]
+      else
+        git_ref = "master"
+      end
+    else
+      git_ref = sync_code_with_cloud()
+    end
     
     notify_on_job_finish = ! options[:donotnotify]
     
@@ -131,14 +156,14 @@ class Mortar::Command::Jobs < Mortar::Command::Base
         elsif options[:permanentcluster]
           cluster_type = CLUSTER_TYPE__PERMANENT
         end
-        api.post_job_new_cluster(project.name, script.name, git_ref, cluster_size, 
+        api.post_job_new_cluster(project_name, script_name, git_ref, cluster_size, 
           :parameters => pig_parameters,
           :cluster_type => cluster_type,
           :notify_on_job_finish => notify_on_job_finish,
           :is_control_script => is_control_script).body
       else
         cluster_id = options[:clusterid]
-        api.post_job_existing_cluster(project.name, script.name, git_ref, cluster_id,
+        api.post_job_existing_cluster(project_name, script_name, git_ref, cluster_id,
           :parameters => pig_parameters,
           :notify_on_job_finish => notify_on_job_finish,
           :is_control_script => is_control_script).body
