@@ -168,6 +168,7 @@ def with_blank_project(&block)
   FileUtils.mkdir_p(File.join(project_path, "udfs"))
   FileUtils.mkdir_p(File.join(project_path, "udfs/python"))
   FileUtils.mkdir_p(File.join(project_path, "udfs/jython"))
+  FileUtils.mkdir_p(File.join(project_path, "fixtures"))
 
   Dir.chdir(project_path)
   
@@ -205,6 +206,15 @@ def with_git_initialized_project(&block)
   end
   
   with_blank_project(&commit_proc)
+end
+
+def with_gitless_project(&block)
+  with_blank_project do |project|
+    File.open(File.join(project.root_path, ".mortar-project-remote"), "w") do |f|
+      f.puts "git@github.com:mortarcode-dev/4dbbd83cae8d5bf8a4000000_#{project.name}.git"
+    end
+    block.call(project)
+  end
 end
 
 def write_file(path, contents="")

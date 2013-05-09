@@ -51,8 +51,7 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
       error "Currently Mortar does not support illustrating control scripts"
     end
     
-    validate_git_based_project!
-    git_ref = git.create_and_push_snapshot_branch(project)
+    git_ref = sync_code_with_cloud()
 
     illustrate_id = nil
     action("Starting illustrate") do

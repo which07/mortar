@@ -25,7 +25,7 @@ module Mortar
     before do
       @git = Mortar::Git::Git.new
     end
-    
+
     context "has_git?" do
       it "returns false with no git installed" do
         mock(@git).run_cmd("git --version").returns(["-bash: git: command not found",-1])
@@ -248,7 +248,7 @@ STASH
       end
     end
     
-    context "snapshot" do
+    context "snapshot with git project" do
       it "raises when no commits are found in the repo" do
         with_blank_project do |p|
           lambda { @git.create_snapshot_branch }.should raise_error(Mortar::Git::GitError)
@@ -298,6 +298,71 @@ STASH
           ensure
             $stdin, $stderr, $stdout = original_stdin, original_stderr, original_stdout
           end
+        end
+      end
+    end
+
+    # we manually create and destroy "mirror_dir" instead of using FakeFS
+    # because FakeFS doesn't clean up properly when you use Dir.chdir inside of it
+    context "snapshot with gitless project" do
+
+      it "creates a mirror directory for the project when one does not already exist" do
+        with_gitless_project do |p|
+          mirror_dir = File.join(Dir.tmpdir, "mortar", "test-git-mirror")
+          mock(@git).mortar_mirrors_dir.any_times { mirror_dir }
+
+          mock(@git).git.with_any_args.any_times { true }
+          mock(@git).clone.with_any_args.times(1) { FileUtils.mkdir("#{mirror_dir}/#{p.name}") }
+          mock(@git).push_with_retry.with_any_args.times(2) { true }
+          mock(@git).is_clean_working_directory? { false }
+
+          @git.sync_gitless_project(p)
+
+          File.directory?(mirror_dir).should be_true
+          FileUtils.rm_rf(mirror_dir)
+        end
+      end
+
+      it "syncs files to the project mirror" do
+        with_gitless_project do |p|
+          mirror_dir = File.join(Dir.tmpdir, "mortar", "test-git-mirror")
+          mock(@git).mortar_mirrors_dir.any_times { mirror_dir }
+
+          project_mirror_dir = File.join(mirror_dir, p.name)
+          FileUtils.mkdir_p(project_mirror_dir)
+          FileUtils.touch("#{p.root_path}/pigscripts/calydonian_boar.pig")
+
+          mock(@git).git.with_any_args.any_times { true }
+          mock(@git).clone.with_any_args.never
+          mock(@git).push_with_retry.with_any_args.times(1) { true }
+          mock(@git).is_clean_working_directory? { false }
+
+          @git.sync_gitless_project(p)
+
+          File.exists?("#{project_mirror_dir}/pigscripts/calydonian_boar.pig").should be_true
+          FileUtils.rm_rf(mirror_dir)
+        end
+      end
+
+      it "syncs deleted files to the project mirror" do
+        with_gitless_project do |p|
+          mirror_dir = File.join(Dir.tmpdir, "mortar", "test-git-mirror")
+          mock(@git).mortar_mirrors_dir.any_times { mirror_dir }
+
+          project_mirror_dir = File.join(mirror_dir, p.name)
+          FileUtils.mkdir_p(project_mirror_dir)
+          FileUtils.cp_r(Dir.glob("#{p.root_path}/*"), project_mirror_dir)
+          FileUtils.touch("#{project_mirror_dir}/pigscripts/calydonian_boar.pig")
+
+          mock(@git).git.with_any_args.any_times { true }
+          mock(@git).clone.with_any_args.never
+          mock(@git).push_with_retry.with_any_args.times(1) { true }
+          mock(@git).is_clean_working_directory? { false }
+
+          @git.sync_gitless_project(p)
+
+          File.exists?("#{project_mirror_dir}/pigscripts/calydonian_boar.pig").should be_false
+          FileUtils.rm_rf(mirror_dir)
         end
       end
     end

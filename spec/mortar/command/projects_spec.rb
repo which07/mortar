@@ -140,6 +140,35 @@ Sending request to register project: some_new_project... done\n\n\r\e[0KStatus: 
 STDOUT
       end
 
+      it "generates and registers a gitless project" do
+        mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [project1, project2]}))
+        project_id = "1234abcd1234abcd1234"
+        project_name = "some_new_project"
+        project_git_url = "git@github.com:mortarcode-dev/#{project_name}"
+        mock(Mortar::Auth.api).post_project("some_new_project") {Excon::Response.new(:body => {"project_id" => project_id})}
+        mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Projects::STATUS_ACTIVE,
+                                                                                             "git_url" => project_git_url})).ordered
+
+        # test that sync_gitless_project is called. the method itself is tested in git_spec.
+        mock(@git).sync_gitless_project.with_any_args.times(1) { true }
+
+        stderr, stdout = execute("projects:create #{project_name} --withoutgit", nil, @git)
+        Dir.pwd.end_with?("some_new_project").should be_true
+        File.exists?(".mortar-project-remote").should be_true
+        File.exists?("macros").should be_true
+        File.exists?("fixtures").should be_true
+        File.exists?("pigscripts").should be_true
+        File.exists?("udfs").should be_true
+        File.exists?("README.md").should be_true
+        File.exists?("Gemfile").should be_false
+        File.exists?("macros/.gitkeep").should be_true
+        File.exists?("fixtures/.gitkeep").should be_true
+        File.exists?("pigscripts/some_new_project.pig").should be_true
+        File.exists?("udfs/python/some_new_project.py").should be_true
+
+        File.read("pigscripts/some_new_project.pig").each_line { |line| line.match(/<%.*%>/).should be_nil }
+      end
+
     end
     
     context("register") do
@@ -170,7 +199,8 @@ STDERR
           stderr, stdout = execute("projects:register some_new_project")
           stderr.should == <<-STDERR
  !    No git repository found in the current directory.
- !    Please initialize a git repository for this project, and then rerun the register command.
+ !    To register a project that is not its own git repository, use the --withoutgit option.
+ !    If you do want this project to be its own git repository, please initialize git in this directory, and then rerun the register command.
  !    To initialize your project in git, use:
  !    
  !    git init
@@ -245,6 +275,28 @@ STDOUT
         stdout.should == <<-STDOUT
 Sending request to register project: some_new_project... done\n\n\r\e[0KStatus: Pending... /\r\e[0KStatus: Creating... -\r\e[0KStatus: Active  \n\nYour project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n
 STDOUT
+      end
+
+      it "registers a gitless project" do
+        mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [project1, project2]}))
+        project_id = "1234abcd1234abcd1234"
+        project_name = "some_new_project"
+        project_git_url = "git@github.com:mortarcode-dev/#{project_name}"
+        mock(Mortar::Auth.api).post_project("some_new_project") {Excon::Response.new(:body => {"project_id" => project_id})}
+        mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status_description" => "Pending", "status_code" => Mortar::API::Projects::STATUS_PENDING})).ordered
+        mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status_description" => "Creating", "status_code" => Mortar::API::Projects::STATUS_CREATING})).ordered
+        mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status_description" => "Active", "status_code" => Mortar::API::Projects::STATUS_ACTIVE,
+                                                                                             "git_url" => project_git_url})).ordered
+
+        any_instance_of(Mortar::Command::Projects) do |obj|
+          mock(obj).project.returns(nil)
+          mock(obj).validate_project_structure.returns(true)
+        end
+
+        # test that sync_gitless_project is called. the method itself is tested in git_spec.
+        mock(@git).sync_gitless_project.with_any_args.times(1) { true }
+
+        stderr, stdout = execute("projects:register some_new_project --withoutgit --polling_interval 0.05", nil, @git)
       end
       
     end

@@ -144,5 +144,28 @@ STDERR
         end
       end
     end
+
+    it "requests and reports a describe for a gitless project" do
+      with_gitless_project do |p|
+          # stub api requests
+          describe_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
+          describe_url = "https://api.mortardata.com/describe/#{describe_id}"
+          parameters = ["name"=>"key", "value"=>"value" ]
+          
+          mock(Mortar::Auth.api).post_describe("myproject", "my_script", "my_alias", is_a(String), :parameters => parameters) {Excon::Response.new(:body => {"describe_id" => describe_id})}
+          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Describe::STATUS_QUEUED, "status_description" => "Pending"})).ordered
+          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Describe::STATUS_GATEWAY_STARTING, "status_description" => "Gateway starting"})).ordered
+          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Describe::STATUS_PROGRESS, "status_description" => "Starting pig"})).ordered
+          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Describe::STATUS_SUCCESS, "status_description" => "Success", "web_result_url" => describe_url})).ordered
+          
+          mock(@git).sync_gitless_project.with_any_args.times(1) { "somewhere_over_the_rainbow" }
+
+          # stub launchy
+          mock(Launchy).open(describe_url) {Thread.new {}}
+                    
+          write_file(File.join(p.pigscripts_path, "my_script.pig"))
+          stderr, stdout = execute("describe my_script my_alias --polling_interval 0.05 -p key=value", p, @git)
+        end
+    end
   end
 end

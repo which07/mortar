@@ -114,8 +114,8 @@ class Mortar::Command::Jobs < Mortar::Command::Base
       end
     end
  
-    validate_git_based_project!
-    git_ref = git.create_and_push_snapshot_branch(project)
+    git_ref = sync_code_with_cloud()
+    
     notify_on_job_finish = ! options[:donotnotify]
     
     # post job to API    

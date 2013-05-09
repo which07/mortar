@@ -107,6 +107,65 @@ class Mortar::Command::Base
     end
     return ""
   end
+
+  def validate_project_name(name)
+    project_names = api.get_projects().body["projects"].collect{|p| p['name']}
+    if project_names.include? name
+      error("Your account already contains a project named #{name}.\nPlease choose a different name for your new project, or clone the existing #{name} code using:\n\nmortar projects:clone #{name}")
+    end
+  end
+
+  def validate_project_structure()
+    present_dirs = Dir.glob("*").select { |path| File.directory? path }
+    required_dirs = ["controlscripts", "pigscripts", "macros", "udfs", "fixtures"]
+    missing_dirs = required_dirs - present_dirs
+
+    if missing_dirs.length > 0
+      error("Project missing required directories: #{missing_dirs.to_s}")
+    end
+  end
+
+  def register_project(name)
+    project_id = nil
+    action("Sending request to register project: #{name}") do
+      project_id = api.post_project(name).body["project_id"]
+    end
+    
+    project_result = nil
+    project_status = nil
+    display
+    ticking(polling_interval) do |ticks|
+      project_result = api.get_project(project_id).body
+      project_status = project_result.fetch("status_code", project_result["status"])
+      project_description = project_result.fetch("status_description", project_status)
+      is_finished = Mortar::API::Projects::STATUSES_COMPLETE.include?(project_status)
+
+      redisplay("Status: %s %s" % [
+        project_description + (is_finished ? "" : "..."),
+        is_finished ? " " : spinner(ticks)],
+        is_finished) # only display newline on last message
+      if is_finished
+        display
+        break
+      end
+    end
+    
+    case project_status
+    when Mortar::API::Projects::STATUS_FAILED
+      error("Project registration failed.\nError message: #{project_result['error_message']}")
+    when Mortar::API::Projects::STATUS_ACTIVE
+      yield project_result
+    else
+      raise RuntimeError, "Unknown project status: #{project_status} for project_id: #{project_id}"
+    end
+  end
+
+  def initialize_gitless_project(api_registration_result)
+    File.open(".mortar-project-remote", "w") do |f|
+      f.puts api_registration_result["git_url"]
+    end
+    git.sync_gitless_project(project)
+  end
   
 protected
 
@@ -244,6 +303,12 @@ protected
     end
   end
 
+  def validate_gitless_project!
+    unless project.root_path
+      error("#{current_command[:command]} must be run from the project root directory")
+    end
+  end
+
   def validate_script!(script_name)
     pigscript = project.pigscripts[script_name]
     controlscript = project.controlscripts[script_name]
@@ -328,6 +393,16 @@ protected
 
   def no_browser?
     (options[:no_browser])
+  end
+
+  def sync_code_with_cloud
+    # returns git_ref
+    if project.gitless_project?
+      return git.sync_gitless_project(project)
+    else
+      validate_git_based_project!
+      return git.create_and_push_snapshot_branch(project)
+    end
   end
 
 end
