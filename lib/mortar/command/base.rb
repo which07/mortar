@@ -310,6 +310,7 @@ protected
   end
 
   def validate_script!(script_name)
+    script_name = File.basename(script_name, ".*")
     pigscript = project.pigscripts[script_name]
     controlscript = project.controlscripts[script_name]
     unless pigscript || controlscript
