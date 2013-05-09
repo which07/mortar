@@ -58,10 +58,10 @@ class Mortar::Command::Projects < Mortar::Command::Base
   
   # projects:create PROJECTNAME
   #
-  # --withoutgit    # Create a Mortar project that is not its own git repo.
-  #                 # Your code will still be synced with a git repo in the cloud.
-  #
   # Used when you want to start a new Mortar project using Mortar generated code.
+  #
+  # --withoutgit    # Create a Mortar project that is not its own git repo. Your code will still be synced with a git repo in the cloud.
+  #
   def create
     name = shift_argument
     unless name
@@ -84,10 +84,10 @@ class Mortar::Command::Projects < Mortar::Command::Base
   
   # projects:register PROJECTNAME
   #
-  # --withoutgit    # Register code that is not its own git repo as a Mortar project.
-  #                 # Your code will still be synced with a git repo in the cloud.
-  #
   # Used when you want to start a new Mortar project using your existing code in the current directory.
+  #
+  # --withoutgit    # Register code that is not its own git repo as a Mortar project. Your code will still be synced with a git repo in the cloud.
+  #
   def register
     name = shift_argument
     unless name
