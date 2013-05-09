@@ -65,7 +65,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
   # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
   # -d, --donotnotify           # Don't send an email on job completion.  (Default: false--an email will be sent to you once the job completes)
-  # -P, --project PROJECTNAME   # Run code from the master branch of the specified Mortar project in the cloud, without any snapshotting from your local machine. If you use this option, you must give the file extension of your script (.pig or .py).
+  # -P, --project PROJECTNAME   # Run code from the master branch of the specified Mortar project in the cloud, without sending up anything from your local machine. If you use this option, you must give the file extension of your script (.pig or .py).
   # -B, --branch BRANCHNAME     # Used with -p/--project, run code from the specified branch instead of master.
   #
   #Examples:
@@ -82,12 +82,12 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     if options[:project]
       project_name = options[:project]
 
-      if script_name[-4,4] == ".pig"
+      if File.extname(script_name) == ".pig"
         is_control_script = false
-        script_name = script_name[0, script_name.length - 4]
-      elsif script_name[-3,3] == ".py"
+        script_name = File.basename(script_name, ".*")
+      elsif File.extname(script_name) == ".py"
         is_control_script = true
-        script_name = script_name[0, script_name.length - 4]
+        script_name = File.basename(script_name, ".*")
       else
         error "Unknown Script Type"
       end
