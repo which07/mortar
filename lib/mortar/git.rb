@@ -308,8 +308,9 @@ module Mortar
 
         # push everything (master updates and snapshot branch)
         git_ref = push_with_retry("mortar", snapshot_branch, "Sending code snapshot to Mortar", true)
-        
+
         git("checkout master")
+        return git_ref
       end
 
       #    
