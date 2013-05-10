@@ -162,7 +162,7 @@ STDOUT
         end
       end
       
-      it "runs a control script" do
+      it "runs a control script using new full-path syntax" do
         with_git_initialized_project do |p|
           # stub api requests
           job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
@@ -175,7 +175,7 @@ STDOUT
               :is_control_script=>true) {Excon::Response.new(:body => {"job_id" => job_id, "web_job_url" => job_url})}
 
           write_file(File.join(p.controlscripts_path, "my_script.py"))
-          stderr, stdout = execute("jobs:run pigscripts/my_script.pig --clusterid e2790e7e8c7d48e39157238d58191346 -d", p, @git)
+          stderr, stdout = execute("jobs:run controlscripts/my_script.pig --clusterid e2790e7e8c7d48e39157238d58191346 -d", p, @git)
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
@@ -194,7 +194,74 @@ STDOUT
         end
       end
 
-      it "runs a job with no cluster defined" do
+      it "runs a control script using deprecated no-path controlscript syntax" do
+        with_git_initialized_project do |p|
+          # stub api requests
+          job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
+          job_url = "http://127.0.0.1:5000/jobs/job_detail?job_id=c571a8c7f76a4fd4a67c103d753e2dd5"
+          cluster_id = "e2790e7e8c7d48e39157238d58191346"
+
+          mock(Mortar::Auth.api).post_job_existing_cluster("myproject", "my_script", is_a(String), cluster_id,
+              :parameters => [],
+              :notify_on_job_finish => false,
+              :is_control_script=>true) {Excon::Response.new(:body => {"job_id" => job_id, "web_job_url" => job_url})}
+
+          write_file(File.join(p.controlscripts_path, "my_script.py"))
+          stderr, stdout = execute("jobs:run my_script --clusterid e2790e7e8c7d48e39157238d58191346 -d", p, @git)
+          stdout.should == <<-STDOUT
+Taking code snapshot... done
+Sending code snapshot to Mortar... done
+Requesting job execution... done
+job_id: c571a8c7f76a4fd4a67c103d753e2dd5
+
+Job status can be viewed on the web at:
+
+ http://127.0.0.1:5000/jobs/job_detail?job_id=c571a8c7f76a4fd4a67c103d753e2dd5
+
+Or by running:
+
+  mortar jobs:status c571a8c7f76a4fd4a67c103d753e2dd5 --poll
+
+STDOUT
+        end
+      end
+
+      it "runs a job with no cluster defined using deprecated no-path pigscript syntax" do
+        with_git_initialized_project do |p|
+          job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
+          job_url = "http://127.0.0.1:5000/jobs/job_detail?job_id=c571a8c7f76a4fd4a67c103d753e2dd5"
+          cluster_size = 2
+
+          mock(Mortar::Auth.api).get_clusters() {Excon::Response.new(:body => {'clusters' => []})}
+          mock(Mortar::Auth.api).post_job_new_cluster("myproject", "my_script", is_a(String), cluster_size, 
+            :parameters => [], 
+            :cluster_type => Jobs::CLUSTER_TYPE__PERSISTENT,
+            :notify_on_job_finish => true,
+            :is_control_script=>false) {Excon::Response.new(:body => {"job_id" => job_id, "web_job_url" => job_url})}
+
+          write_file(File.join(p.pigscripts_path, "my_script.pig"))
+          stderr, stdout = execute("jobs:run my_script", p, @git)
+          stdout.should == <<-STDOUT
+Defaulting to running job on new cluster of size 2
+Taking code snapshot... done
+Sending code snapshot to Mortar... done
+Requesting job execution... done
+job_id: c571a8c7f76a4fd4a67c103d753e2dd5
+
+Job status can be viewed on the web at:
+
+ http://127.0.0.1:5000/jobs/job_detail?job_id=c571a8c7f76a4fd4a67c103d753e2dd5
+
+Or by running:
+
+  mortar jobs:status c571a8c7f76a4fd4a67c103d753e2dd5 --poll
+
+STDOUT
+
+        end
+      end
+      
+      it "runs a job with no cluster defined using new full-path pigscript syntax" do
         with_git_initialized_project do |p|
           job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
           job_url = "http://127.0.0.1:5000/jobs/job_detail?job_id=c571a8c7f76a4fd4a67c103d753e2dd5"
