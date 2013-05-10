@@ -64,6 +64,7 @@ module Mortar
           write_file pigscript_path
           p.pigscripts.my_script.name.should == "my_script"
           p.pigscripts.my_script.path.should == pigscript_path
+          p.pigscripts.my_script.executable_path.should == "pigscripts/my_script.pig"
         end
       end
 

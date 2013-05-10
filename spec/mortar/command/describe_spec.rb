@@ -33,7 +33,7 @@ module Mortar::Command
       it "errors when an alias is not provided" do
         with_git_initialized_project do |p|
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("describe my_script", p)
+          stderr, stdout = execute("describe pigscripts/my_script.pig", p)
           stderr.should == <<-STDERR
  !    Usage: mortar describe PIGSCRIPT ALIAS
  !    Must specify PIGSCRIPT and ALIAS.
@@ -46,18 +46,31 @@ STDERR
           @git.git('remote rm mortar')
           p.remote = nil
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("describe my_script my_alias", p, @git)
+          stderr, stdout = execute("describe pigscripts/my_script.pig my_alias", p, @git)
           stderr.should == <<-STDERR
  !    Unable to find git remote for project myproject
 STDERR
         end
       end
 
-      it "errors when requested pigscript cannot be found" do
+      it "errors when requested pigscript cannot be found with old pigscript access style" do
         with_git_initialized_project do |p|
           stderr, stdout = execute("describe does_not_exist my_alias", p, @git)
           stderr.should == <<-STDERR
  !    Unable to find a pigscript or controlscript for does_not_exist
+ !    
+ !    No pigscripts found
+ !    
+ !    No controlscripts found
+ STDERR
+        end
+      end
+
+      it "errors when requested pigscript cannot be found with new full-path pigscript access style" do
+        with_git_initialized_project do |p|
+          stderr, stdout = execute("describe pigscripts/does_not_exist.pig my_alias", p, @git)
+          stderr.should == <<-STDERR
+ !    Unable to find a pigscript or controlscript for pigscripts/does_not_exist.pig
  !    
  !    No pigscripts found
  !    
@@ -76,7 +89,7 @@ STDERR
         end
       end
       
-      it "requests and reports on a successful describe" do
+      it "requests and reports on a successful describe using deprecated no-path pigscript syntax" do
         with_git_initialized_project do |p|
           # stub api requests
           describe_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
@@ -94,6 +107,37 @@ STDERR
                     
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
           stderr, stdout = execute("describe my_script my_alias --polling_interval 0.05 -p key=value", p, @git)
+          stdout.should == <<-STDOUT
+Taking code snapshot... done
+Sending code snapshot to Mortar... done
+Starting describe... done
+
+\r\e[0K[/] Calculating schema for my_alias and ancestors...\r\e[0K[-] Calculating schema for my_alias and ancestors...\r\e[0K[\\] Calculating schema for my_alias and ancestors...\r\e[0K[|] Calculating schema for my_alias and ancestors...
+
+Results available at https://api.mortardata.com/describe/c571a8c7f76a4fd4a67c103d753e2dd5
+Opening web browser to show results... done
+STDOUT
+        end
+      end
+      
+      it "requests and reports on a successful describe using new full path pigscript syntax" do
+        with_git_initialized_project do |p|
+          # stub api requests
+          describe_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
+          describe_url = "https://api.mortardata.com/describe/#{describe_id}"
+          parameters = ["name"=>"key", "value"=>"value" ]
+          
+          mock(Mortar::Auth.api).post_describe("myproject", "my_script", "my_alias", is_a(String), :parameters => parameters) {Excon::Response.new(:body => {"describe_id" => describe_id})}
+          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Describe::STATUS_QUEUED, "status_description" => "Pending"})).ordered
+          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Describe::STATUS_GATEWAY_STARTING, "status_description" => "Gateway starting"})).ordered
+          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Describe::STATUS_PROGRESS, "status_description" => "Starting pig"})).ordered
+          mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Describe::STATUS_SUCCESS, "status_description" => "Success", "web_result_url" => describe_url})).ordered
+          
+          # stub launchy
+          mock(Launchy).open(describe_url) {Thread.new {}}
+                    
+          write_file(File.join(p.pigscripts_path, "my_script.pig"))
+          stderr, stdout = execute("describe pigscripts/my_script.pig my_alias --polling_interval 0.05 -p key=value", p, @git)
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
@@ -126,7 +170,7 @@ STDOUT
             "error_type" => error_type})).ordered
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("describe my_script my_alias --polling_interval 0.05", p, @git)
+          stderr, stdout = execute("describe pigscripts/my_script.pig my_alias --polling_interval 0.05", p, @git)
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
@@ -164,7 +208,7 @@ STDERR
           mock(Launchy).open(describe_url) {Thread.new {}}
                     
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("describe my_script my_alias --polling_interval 0.05 -p key=value", p, @git)
+          stderr, stdout = execute("describe pigscripts/my_script.pig my_alias --polling_interval 0.05 -p key=value", p, @git)
         end
     end
   end

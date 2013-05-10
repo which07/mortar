@@ -46,7 +46,7 @@ STDOUT
           stderr, stdout = execute("pigscripts", p)
           stdout.should == <<-STDOUT
 === pigscripts
-my_script
+pigscripts/my_script.pig
 
 STDOUT
         end
@@ -59,8 +59,8 @@ STDOUT
           stderr, stdout = execute("pigscripts", p)
           stdout.should == <<-STDOUT
 === pigscripts
-a_script
-b_script
+pigscripts/a_script.pig
+pigscripts/b_script.pig
 
 STDOUT
         end

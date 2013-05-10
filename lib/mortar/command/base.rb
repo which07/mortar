@@ -310,12 +310,12 @@ protected
   end
 
   def validate_script!(script_name)
-    script_name = File.basename(script_name, ".*")
-    pigscript = project.pigscripts[script_name]
-    controlscript = project.controlscripts[script_name]
+    shortened_script_name = File.basename(script_name, ".*")
+    pigscript = project.pigscripts[shortened_script_name]
+    controlscript = project.controlscripts[shortened_script_name]
     unless pigscript || controlscript
-      available_pigscripts = project.pigscripts.none? ? "No pigscripts found" : "Available pigscripts:\n#{project.pigscripts.keys.sort.join("\n")}"
-      available_controlscripts = project.controlscripts.none? ? "No controlscripts found" : "Available controlscripts:\n#{project.controlscripts.keys.sort.join("\n")}"
+      available_pigscripts = project.pigscripts.none? ? "No pigscripts found" : "Available pigscripts:\n#{project.pigscripts.collect{|k,v| v.executable_path}.sort.join("\n")}"
+      available_controlscripts = project.controlscripts.none? ? "No controlscripts found" : "Available controlscripts:\n#{project.controlscripts.collect{|k,v| v.executable_path}.sort.join("\n")}"
       error("Unable to find a pigscript or controlscript for #{script_name}\n\n#{available_pigscripts}\n\n#{available_controlscripts}")
     end
 
@@ -327,8 +327,9 @@ protected
   end
   
   def validate_pigscript!(pigscript_name)
-    unless pigscript = project.pigscripts[pigscript_name]
-      available_scripts = project.pigscripts.none? ? "No pigscripts found" : "Available scripts:\n#{project.pigscripts.keys.sort.join("\n")}"
+    shortened_pigscript_name = File.basename(pigscript_name, ".*")
+    unless pigscript = project.pigscripts[shortened_pigscript_name]
+      available_scripts = project.pigscripts.none? ? "No pigscripts found" : "Available scripts:\n#{project.pigscripts.collect{|k,v| v.executable_path}.sort.join("\n")}"
       error("Unable to find pigscript #{pigscript_name}\n#{available_scripts}")
     end
     pigscript

@@ -33,8 +33,9 @@ class Mortar::Command::Illustrate < Mortar::Command::Base
   #
   # Examples:
   #  
-  #     Illustrate the songs_sample relation in the generate_regression_model_coefficients script.
-  #         $ mortar illustrate generate_regression_model_coefficients songs_sample
+  #     Illustrate all relations in the generate_regression_model_coefficients pigscript.
+  #         $ mortar illustrate pigscripts/generate_regression_model_coefficients.pig
+  #
   def index
     pigscript_name = shift_argument
     alias_name = shift_argument

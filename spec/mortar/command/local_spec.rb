@@ -26,11 +26,11 @@ module Mortar::Command
       it "errors when the script doesn't exist" do
         with_git_initialized_project do |p|
           write_file(File.join(p.pigscripts_path, "my_other_script.pig"))
-          stderr, stdout = execute("local:illustrate my_script some_alias", p)
+          stderr, stdout = execute("local:illustrate pigscripts/my_script.pig some_alias", p)
           stderr.should == <<-STDERR
- !    Unable to find pigscript my_script
+ !    Unable to find pigscript pigscripts/my_script.pig
  !    Available scripts:
- !    my_other_script
+ !    pigscripts/my_other_script.pig
 STDERR
         end
       end
@@ -74,15 +74,15 @@ STDERR
         with_git_initialized_project do |p|
           write_file(File.join(p.pigscripts_path, "my_other_script.pig"))
           write_file(File.join(p.controlscripts_path, "my_control_script.py"))
-          stderr, stdout = execute("local:run my_script", p)
+          stderr, stdout = execute("local:run pigscripts/my_script.pig", p)
           stderr.should == <<-STDERR
- !    Unable to find a pigscript or controlscript for my_script
+ !    Unable to find a pigscript or controlscript for pigscripts/my_script.pig
  !    
  !    Available pigscripts:
- !    my_other_script
+ !    pigscripts/my_other_script.pig
  !    
  !    Available controlscripts:
- !    my_control_script
+ !    controlscripts/my_control_script.pig
 STDERR
         end
       end
@@ -97,7 +97,7 @@ STDERR
           any_instance_of(Mortar::Local::Controller) do |u|
             mock(u).run(pigscript, []).returns(nil)
           end
-          stderr, stdout = execute("local:run #{script_name}", p)
+          stderr, stdout = execute("local:run pigscripts/#{script_name}.pig", p)
           stderr.should == ""
         end
       end
@@ -156,7 +156,7 @@ STDERR
 
     context "local:validate" do
 
-      it "Runs pig with the -check command option" do
+      it "Runs pig with the -check command option for deprecated no-path pigscript syntax" do
         with_git_initialized_project do |p|
           script_name = "some_script"
           script_path = File.join(p.pigscripts_path, "#{script_name}.pig")
@@ -170,6 +170,24 @@ STDERR
             mock(u).run_pig_command(" -check #{pigscript.path}", [])
           end
           stderr, stdout = execute("local:validate #{script_name}", p)
+          stderr.should == ""
+        end
+      end
+
+      it "Runs pig with the -check command option for new full-path pigscript syntax" do
+        with_git_initialized_project do |p|
+          script_name = "some_script"
+          script_path = File.join(p.pigscripts_path, "#{script_name}.pig")
+          write_file(script_path)
+          pigscript = Mortar::Project::PigScript.new(script_name, script_path)
+          mock(Mortar::Project::PigScript).new(script_name, script_path).returns(pigscript)
+          any_instance_of(Mortar::Local::Controller) do |u|
+            mock(u).install_and_configure
+          end
+          any_instance_of(Mortar::Local::Pig) do |u|
+            mock(u).run_pig_command(" -check #{pigscript.path}", [])
+          end
+          stderr, stdout = execute("local:validate pigscripts/#{script_name}.pig", p)
           stderr.should == ""
         end
       end
