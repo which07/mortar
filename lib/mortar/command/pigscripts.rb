@@ -28,7 +28,7 @@ class Mortar::Command::PigScripts < Mortar::Command::Base
     validate_arguments!
     if project.pigscripts.any?
       styled_header("pigscripts")
-      styled_array(project.pigscripts.keys)
+      styled_array(project.pigscripts.collect{|k,v| v.executable_path}.sort)
     else
       display("You have no pigscripts.")
     end
