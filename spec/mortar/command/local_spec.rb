@@ -26,11 +26,11 @@ module Mortar::Command
       it "errors when the script doesn't exist" do
         with_git_initialized_project do |p|
           write_file(File.join(p.pigscripts_path, "my_other_script.pig"))
-          stderr, stdout = execute("local:illustrate my_script some_alias", p)
+          stderr, stdout = execute("local:illustrate pigscripts/my_script.pig some_alias", p)
           stderr.should == <<-STDERR
- !    Unable to find pigscript my_script
+ !    Unable to find pigscript pigscripts/my_script.pig
  !    Available scripts:
- !    my_other_script
+ !    pigscripts/my_other_script.pig
 STDERR
         end
       end
@@ -74,15 +74,15 @@ STDERR
         with_git_initialized_project do |p|
           write_file(File.join(p.pigscripts_path, "my_other_script.pig"))
           write_file(File.join(p.controlscripts_path, "my_control_script.py"))
-          stderr, stdout = execute("local:run my_script", p)
+          stderr, stdout = execute("local:run pigscripts/my_script.pig", p)
           stderr.should == <<-STDERR
- !    Unable to find a pigscript or controlscript for my_script
+ !    Unable to find a pigscript or controlscript for pigscripts/my_script.pig
  !    
  !    Available pigscripts:
- !    my_other_script
+ !    pigscripts/my_other_script.pig
  !    
  !    Available controlscripts:
- !    my_control_script
+ !    controlscripts/my_control_script.pig
 STDERR
         end
       end
@@ -97,7 +97,7 @@ STDERR
           any_instance_of(Mortar::Local::Controller) do |u|
             mock(u).run(pigscript, []).returns(nil)
           end
-          stderr, stdout = execute("local:run #{script_name}", p)
+          stderr, stdout = execute("local:run pigscripts/#{script_name}.pig", p)
           stderr.should == ""
         end
       end

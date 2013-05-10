@@ -33,7 +33,7 @@ module Mortar::Command
       it "errors when an alias is not provided" do
         with_git_initialized_project do |p|
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("describe my_script", p)
+          stderr, stdout = execute("describe pigscripts/my_script.pig", p)
           stderr.should == <<-STDERR
  !    Usage: mortar describe PIGSCRIPT ALIAS
  !    Must specify PIGSCRIPT and ALIAS.
@@ -46,18 +46,31 @@ STDERR
           @git.git('remote rm mortar')
           p.remote = nil
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("describe my_script my_alias", p, @git)
+          stderr, stdout = execute("describe pigscripts/my_script.pig my_alias", p, @git)
           stderr.should == <<-STDERR
  !    Unable to find git remote for project myproject
 STDERR
         end
       end
 
-      it "errors when requested pigscript cannot be found" do
+      it "errors when requested pigscript cannot be found with old pigscript access style" do
         with_git_initialized_project do |p|
           stderr, stdout = execute("describe does_not_exist my_alias", p, @git)
           stderr.should == <<-STDERR
  !    Unable to find a pigscript or controlscript for does_not_exist
+ !    
+ !    No pigscripts found
+ !    
+ !    No controlscripts found
+ STDERR
+        end
+      end
+
+      it "errors when requested pigscript cannot be found with new full-path pigscript access style" do
+        with_git_initialized_project do |p|
+          stderr, stdout = execute("describe pigscripts/does_not_exist.pig my_alias", p, @git)
+          stderr.should == <<-STDERR
+ !    Unable to find a pigscript or controlscript for pigscripts/does_not_exist.pig
  !    
  !    No pigscripts found
  !    
@@ -93,7 +106,7 @@ STDERR
           mock(Launchy).open(describe_url) {Thread.new {}}
                     
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("describe my_script my_alias --polling_interval 0.05 -p key=value", p, @git)
+          stderr, stdout = execute("describe pigscripts/my_script.pig my_alias --polling_interval 0.05 -p key=value", p, @git)
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
@@ -126,7 +139,7 @@ STDOUT
             "error_type" => error_type})).ordered
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("describe my_script my_alias --polling_interval 0.05", p, @git)
+          stderr, stdout = execute("describe pigscripts/my_script.pig my_alias --polling_interval 0.05", p, @git)
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
@@ -164,7 +177,7 @@ STDERR
           mock(Launchy).open(describe_url) {Thread.new {}}
                     
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("describe my_script my_alias --polling_interval 0.05 -p key=value", p, @git)
+          stderr, stdout = execute("describe pigscripts/my_script.pig my_alias --polling_interval 0.05 -p key=value", p, @git)
         end
     end
   end

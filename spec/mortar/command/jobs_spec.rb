@@ -53,7 +53,7 @@ module Mortar::Command
             :is_control_script=> false) {Excon::Response.new(:body => {"job_id" => job_id, "web_job_url" => job_url})}
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("jobs:run my_script -1 --clustersize 5 -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
+          stderr, stdout = execute("jobs:run pigscripts/my_script.pig -1 --clustersize 5 -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
@@ -86,7 +86,7 @@ STDOUT
                                                       :is_control_script=> false) {Excon::Response.new(:body => {"job_id" => job_id, "web_job_url" => job_url})}
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("jobs:run my_script -2 --clustersize 5 -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
+          stderr, stdout = execute("jobs:run pigscripts/my_script.pig -2 --clustersize 5 -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
@@ -110,7 +110,7 @@ Or by running:
         with_git_initialized_project do |p|
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("jobs:run my_script -2 -1 --clustersize 5 -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
+          stderr, stdout = execute("jobs:run pigscripts/my_script.pig -2 -1 --clustersize 5 -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
           stderr.should == <<-STDERR
  !    Cannot declare cluster as both --singlejobcluster and --permanentcluster
 STDERR
@@ -122,7 +122,7 @@ STDERR
           cluster_id = "e2790e7e8c7d48e39157238d58191346"
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("jobs:run my_script -2 --clusterid e2790e7e8c7d48e39157238d58191346 -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
+          stderr, stdout = execute("jobs:run pigscripts/my_script.pig -2 --clusterid e2790e7e8c7d48e39157238d58191346 -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
           stderr.should == <<-STDERR
  !    Option permanentcluster cannot be set when running a job on an existing cluster (with --clusterid option)
           STDERR
@@ -143,7 +143,7 @@ STDERR
             :is_control_script=>false) {Excon::Response.new(:body => {"job_id" => job_id, "web_job_url" => job_url})}
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("jobs:run my_script --clustersize 5 -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
+          stderr, stdout = execute("jobs:run pigscripts/my_script.pig --clustersize 5 -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
@@ -175,7 +175,7 @@ STDOUT
               :is_control_script=>true) {Excon::Response.new(:body => {"job_id" => job_id, "web_job_url" => job_url})}
 
           write_file(File.join(p.controlscripts_path, "my_script.py"))
-          stderr, stdout = execute("jobs:run my_script --clusterid e2790e7e8c7d48e39157238d58191346 -d", p, @git)
+          stderr, stdout = execute("jobs:run pigscripts/my_script.pig --clusterid e2790e7e8c7d48e39157238d58191346 -d", p, @git)
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
@@ -208,7 +208,7 @@ STDOUT
             :is_control_script=>false) {Excon::Response.new(:body => {"job_id" => job_id, "web_job_url" => job_url})}
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("jobs:run my_script ", p, @git)
+          stderr, stdout = execute("jobs:run pigscripts/my_script.pig ", p, @git)
           stdout.should == <<-STDOUT
 Defaulting to running job on new cluster of size 2
 Taking code snapshot... done
@@ -239,7 +239,7 @@ STDOUT
           mock(Mortar::Auth.api).post_job_existing_cluster("myproject", "my_script", is_a(String), cluster_id, :parameters => [], :notify_on_job_finish => false, :is_control_script=>false) {Excon::Response.new(:body => {"job_id" => job_id, "web_job_url" => job_url})}
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("jobs:run my_script --clusterid e2790e7e8c7d48e39157238d58191346 -d", p, @git)
+          stderr, stdout = execute("jobs:run pigscripts/my_script.pig --clusterid e2790e7e8c7d48e39157238d58191346 -d", p, @git)
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
@@ -294,7 +294,7 @@ STDOUT
             :is_control_script=>false) {Excon::Response.new(:body => {"job_id" => job_id, "web_job_url" => job_url})}
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("jobs:run my_script ", p, @git)
+          stderr, stdout = execute("jobs:run pigscripts/my_script.pig ", p, @git)
           stdout.should == <<-STDOUT
 Defaulting to running job on largest existing free cluster, id = 510bf0db3004860820ab6590, size = 5
 Taking code snapshot... done
@@ -336,7 +336,7 @@ THIRD=BEAR
 PARAMS
 
           write_file(File.join(p.root_path, "params.ini"), parameters)
-          stderr, stdout = execute("jobs:run my_script --clustersize 5 -p FIRST=FOO -p SECOND=BAR --param-file params.ini", p, @git)
+          stderr, stdout = execute("jobs:run pigscripts/my_script.pig --clustersize 5 -p FIRST=FOO -p SECOND=BAR --param-file params.ini", p, @git)
         end
       end
 
@@ -362,7 +362,7 @@ THIRD=BEAR
 PARAMS
 
           write_file(File.join(p.root_path, "params.ini"), parameters)
-          stderr, stdout = execute("jobs:run my_script --clustersize 5 -p FIRST=FOO -p SECOND=BAR --param-file params.ini", p, @git)
+          stderr, stdout = execute("jobs:run pigscripts/my_script.pig --clustersize 5 -p FIRST=FOO -p SECOND=BAR --param-file params.ini", p, @git)
         end
       end
 
@@ -382,7 +382,7 @@ THIRD=BEAR
 PARAMS
 
           write_file(File.join(p.root_path, "params.ini"), parameters)
-          stderr, stdout = execute("jobs:run my_script --clustersize 5 -p FIRST=FOO -p SECOND=BAR --param-file params.ini", p, @git)
+          stderr, stdout = execute("jobs:run pigscripts/my_script.pig --clustersize 5 -p FIRST=FOO -p SECOND=BAR --param-file params.ini", p, @git)
           stderr.should == <<-STDERR
  !    Parameter file is malformed
 STDERR
@@ -405,7 +405,7 @@ STDERR
             :is_control_script=>false) {Excon::Response.new(:body => {"job_id" => job_id, "web_job_url" => job_url})}
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("jobs:run my_script --clustersize 5 -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
+          stderr, stdout = execute("jobs:run pigscripts/my_script.pig --clustersize 5 -p FIRST_PARAM=FOO -p SECOND_PARAM=BAR", p, @git)
         end
       end
     end

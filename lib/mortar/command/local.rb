@@ -42,7 +42,7 @@ class Mortar::Command::Local < Mortar::Command::Base
   #Examples:
   #
   #    Run the generate_regression_model_coefficients script locally.
-  #        $ mortar local:run generate_regression_model_coefficients
+  #        $ mortar local:run pigscripts/generate_regression_model_coefficients.pig
   def run
     script_name = shift_argument
     unless script_name
@@ -67,8 +67,8 @@ class Mortar::Command::Local < Mortar::Command::Base
   #
   # Examples:
   #
-  #     Illustrate the songs_sample relation in the generate_regression_model_coefficients script.
-  #         $ mortar illustrate generate_regression_model_coefficients songs_sample
+  #     Illustrate all relations in the generate_regression_model_coefficients pigscript:
+  #         $ mortar illustrate pigscripts/generate_regression_model_coefficients.pig
   def illustrate
     pigscript_name = shift_argument
     alias_name = shift_argument
@@ -95,8 +95,8 @@ class Mortar::Command::Local < Mortar::Command::Base
   #
   #Examples:
   #
-  #    Check the pig syntax of the generate_regression_model_coefficients script locally.
-  #        $ mortar local:validate generate_regression_model_coefficients
+  #    Check the pig syntax of the generate_regression_model_coefficients pigscript locally.
+  #        $ mortar local:validate pigscripts/generate_regression_model_coefficients.pig
   def validate
     script_name = shift_argument
     unless script_name

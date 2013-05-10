@@ -65,13 +65,16 @@ class Mortar::Command::Jobs < Mortar::Command::Base
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
   # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
   # -d, --donotnotify           # Don't send an email on job completion.  (Default: false--an email will be sent to you once the job completes)
-  # -P, --project PROJECTNAME   # Run code from the master branch of the specified Mortar project in the cloud, without sending up anything from your local machine. If you use this option, you must give the file extension of your script (.pig or .py).
-  # -B, --branch BRANCHNAME     # Used with -p/--project, run code from the specified branch instead of master.
+  # -P, --project PROJECTNAME   # Use a project that is not checked out in the current directory.  Runs code from project's master branch in github rather than snapshotting local code.
+  # -B, --branch BRANCHNAME     # Used with --project to specify a non-master branch
   #
   #Examples:
   #
-  #    Run the generate_regression_model_coefficients script on a 3 node cluster.
-  #        $ mortar jobs:run generate_regression_model_coefficients --clustersize 3
+  #    Run the generate_regression_model_coefficients pigscript on a 3 node cluster.
+  #        $ mortar jobs:run pigscripts/generate_regression_model_coefficients.pig --clustersize 3
+  #
+  #    Run the regression_controller control script on a 3 node cluster.
+  #        $ mortar jobs:run controlscripts/regression_controller.py --clustersize 3
   def run
     script_name = shift_argument
     unless script_name
@@ -89,7 +92,9 @@ class Mortar::Command::Jobs < Mortar::Command::Base
         is_control_script = true
         script_name = File.basename(script_name, ".*")
       else
-        error "Unknown Script Type"
+        error "Unable to guess script type (controlscript vs pigscript).\n" + 
+          "When running a script with the --project option, please provide the full path and filename, e.g.\n" +
+          " mortar run pigscripts/#{script_name}.pig --project #{project_name}"
       end
     else
       project_name = project.name

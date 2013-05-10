@@ -34,7 +34,7 @@ module Mortar::Command
           @git.git('remote rm mortar')
           p.remote = nil
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("illustrate my_script my_alias", p, @git)
+          stderr, stdout = execute("illustrate pigscripts/my_script.pig my_alias", p, @git)
           stderr.should == <<-STDERR
  !    Unable to find git remote for project myproject
 STDERR
@@ -43,9 +43,9 @@ STDERR
 
       it "errors when requested pigscript cannot be found" do
         with_git_initialized_project do |p|
-          stderr, stdout = execute("illustrate does_not_exist my_alias", p, @git)
+          stderr, stdout = execute("illustrate pigscripts/does_not_exist.pig my_alias", p, @git)
           stderr.should == <<-STDERR
- !    Unable to find a pigscript or controlscript for does_not_exist
+ !    Unable to find a pigscript or controlscript for pigscripts/does_not_exist.pig
  !    
  !    No pigscripts found
  !    
@@ -57,7 +57,7 @@ STDERR
       it "errors when requested with controlscript" do
         with_git_initialized_project do |p|
           write_file(File.join(p.controlscripts_path, "my_script.py"))
-          stderr, stdout = execute("illustrate my_script my_alias", p, @git)
+          stderr, stdout = execute("illustrate pigscripts/my_script.pig my_alias", p, @git)
           stderr.should == <<-STDERR
  !    Currently Mortar does not support illustrating control scripts
  STDERR
@@ -84,7 +84,7 @@ STDERR
           mock(Launchy).open(illustrate_url) {Thread.new {}}
                     
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("illustrate my_script my_alias --polling_interval 0.05 -p key=value", p, @git)
+          stderr, stdout = execute("illustrate pigscripts/my_script.pig my_alias --polling_interval 0.05 -p key=value", p, @git)
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
@@ -111,7 +111,7 @@ STDOUT
           mock(Mortar::Auth.api).get_illustrate(illustrate_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Illustrate::STATUS_SUCCESS,          "status_description" => "Succeeded", "web_result_url" => illustrate_url})).ordered
                     
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("illustrate my_script my_alias --polling_interval 0.05 -p key=value --no_browser", p, @git)
+          stderr, stdout = execute("illustrate pigscripts/my_script.pig my_alias --polling_interval 0.05 -p key=value --no_browser", p, @git)
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
@@ -138,7 +138,7 @@ STDOUT
           mock(Mortar::Auth.api).get_illustrate(illustrate_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Illustrate::STATUS_SUCCESS,          "status_description" => "Succeeded", "web_result_url" => illustrate_url})).ordered
                     
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("illustrate my_script my_alias --polling_interval 0.05 -p key=value -s --no_browser", p, @git)
+          stderr, stdout = execute("illustrate pigscripts/my_script.pig my_alias --polling_interval 0.05 -p key=value -s --no_browser", p, @git)
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
@@ -171,7 +171,7 @@ STDOUT
           mock(Launchy).open(illustrate_url) {Thread.new {}}
                     
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("illustrate my_script --polling_interval 0.05 -p key=value", p, @git)
+          stderr, stdout = execute("illustrate pigscripts/my_script.pig --polling_interval 0.05 -p key=value", p, @git)
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
@@ -206,7 +206,7 @@ STDOUT
             "status_description" => "Failed"})).ordered
 
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("illustrate my_script my_alias --polling_interval 0.05", p, @git)
+          stderr, stdout = execute("illustrate pigscripts/my_script.pig my_alias --polling_interval 0.05", p, @git)
           stdout.should == <<-STDOUT
 Taking code snapshot... done
 Sending code snapshot to Mortar... done
@@ -246,7 +246,7 @@ STDERR
           mock(Launchy).open(illustrate_url) {Thread.new {}}
                     
           write_file(File.join(p.pigscripts_path, "my_script.pig"))
-          stderr, stdout = execute("illustrate my_script --polling_interval 0.05 -p key=value", p, @git)
+          stderr, stdout = execute("illustrate pigscripts/my_script.pig --polling_interval 0.05 -p key=value", p, @git)
         end
       end
     end

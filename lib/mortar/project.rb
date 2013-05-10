@@ -182,8 +182,19 @@ module Mortar
     end
     
     class ControlScript < Script
+      
+      def executable_path
+        "controlscripts/#{self.name}.pig"
+      end
+      
     end
+    
     class PigScript < Script
+      
+      def executable_path
+        "pigscripts/#{self.name}.pig"
+      end
+    
     end
     
   end

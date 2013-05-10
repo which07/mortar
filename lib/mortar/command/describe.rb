@@ -31,8 +31,8 @@ class Mortar::Command::Describe < Mortar::Command::Base
   #
   # Examples:
   #     
-  #     Describe the songs_sample relation in the generate_regression_model_coefficients script.
-  #          $ mortar describe generate_regression_model_coefficients songs_sample
+  #     Describe the songs_sample relation in the generate_regression_model_coefficients.pig pigscript.
+  #          $ mortar describe pigscripts/generate_regression_model_coefficients.pig songs_sample
   def index
     pigscript_name = shift_argument
     alias_name = shift_argument
