@@ -314,11 +314,19 @@ class Mortar::Local::Pig
   # running on the server side.  We duplicate these here.
   def automatic_pig_parameters
     params = {}
+
     if ENV['MORTAR_EMAIL_S3_ESCAPED']
       params['MORTAR_EMAIL_S3_ESCAPED'] = ENV['MORTAR_EMAIL_S3_ESCAPED']
     else
       params['MORTAR_EMAIL_S3_ESCAPED'] = Mortar::Auth.user_s3_safe
     end
+    
+    if ENV['MORTAR_SOFTWARE_MIRROR']
+      params['BACON_BITS'] = "s3n://" + ENV['MORTAR_SOFTWARE_MIRROR'] + "/bacon-bits"
+    else
+      params['BACON_BITS'] = "s3n://mhc-software-mirror/bacon-bits"
+    end
+
     # Coerce into the same format as pig parameters that were
     # passed in via the command line or a parameter file
     param_list = []
