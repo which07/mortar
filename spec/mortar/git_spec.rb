@@ -89,7 +89,7 @@ module Mortar
           lambda { @git.git("--version") }.should_not raise_error
         end
       end
-      
+
       it "raises error on no .git file" do
         with_no_git_directory do
           lambda {@git.git("--version") }.should raise_error(Mortar::Git::GitError)

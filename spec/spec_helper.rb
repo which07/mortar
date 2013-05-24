@@ -297,6 +297,12 @@ def create_and_validate_git_snapshot(git)
   FileUtils.remove_entry_secure(snapshot_dir)
 end
 
+module SandboxHelper
+  def bash(cmd)
+    `#{cmd}`
+  end
+end
+
 require "mortar/helpers"
 module Mortar::Helpers
   @home_directory = Dir.mktmpdir

@@ -510,6 +510,60 @@ module Mortar
       end
     end
 
+    def get_parameters(params, param_file)
+      paramfile_params = get_parameters_from_file(param_file)
+      paramoption_params = get_parameters_from_string(params)
+
+      parameters = []
+      paramfile_params.merge(paramoption_params).each do |name, value|
+        parameters << {"name" => name, "value" => value}
+      end
+
+      return parameters
+    end
+
+    def get_parameters_from_file(param_file)
+      parameters = {}
+
+      if param_file
+        File.open(param_file, "r").each do |line|
+          # If the line isn't empty
+          if not line.chomp.empty? and not line.chomp.match(/^;/)
+            name, value = line.split('=', 2)
+            if not name or not value
+              error("Parameter file is malformed")
+            end
+            parameters[name] = value
+          end
+        end
+      end
+
+      return parameters
+    end
+
+    def get_parameters_from_string(params)
+      parameters = {}
+      input_parameters = params ? Array(params) : []
+      input_parameters.each do |name_equals_value|
+        name, value = name_equals_value.split('=', 2)
+        parameters[name] = value
+      end
+      return parameters
+    end
+    
+    # Allows us to use a hash for template variables
+    class BindingClazz
+      def initialize(attrs)
+        attrs.each{ |k, v|
+          # set an instance variable with the key name so the binding will find it in scope
+          self.instance_variable_set("@#{k}".to_sym, v)
+        }
+      end
+      def get_binding()
+        binding
+      end
+    end
+
     private
 
       def create_display_method(name, colour_code, new_line=true)
@@ -530,3 +584,6 @@ module Mortar
       create_display_method("conflict", "1;31")
   end
 end
+
+
+

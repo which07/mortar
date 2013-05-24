@@ -28,4 +28,9 @@ RSpec::Core::RakeTask.new(:spec) do |t|
   t.verbose = true
 end
 
+desc "Generate ctags"
+task :ctags do
+  system("ctags -R --exclude=css --exclude=flash --exclude=.git *")
+  puts "Done"
+end
 task :default => :spec
