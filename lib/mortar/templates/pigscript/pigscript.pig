@@ -7,7 +7,7 @@
  */
  
 <%= '%default'%> INPUT_PATH 's3n://mortar-example-data/tutorial/excite.log.bz2'
-<%= '%default'%> OUTPUT_PATH 's3n://my-output-bucket/$MORTAR_EMAIL_S3_ESCAPED/<%= script_name %>'
+<%= '%default'%> OUTPUT_PATH 's3n://my-output-bucket/$MORTAR_EMAIL_S3_ESCAPED/<%= script_name_alias %>'
 
 <% if not options[:skip_udf] %>
 /**
@@ -29,7 +29,7 @@ filtered = FILTER my_input_data
 -- This is an example call to a python user-defined function
 with_udf_output = FOREACH filtered 
                  GENERATE field0..field2, 
-                          <%= script_name %>.example_udf(field0) AS example_udf_field;
+                          <%= script_name_alias %>.example_udf(field0) AS example_udf_field;
 
 -- remove any existing data
 rmf $OUTPUT_PATH;

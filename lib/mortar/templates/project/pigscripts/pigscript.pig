@@ -12,7 +12,8 @@
 /**
  * User-Defined Functions (UDFs)
  */
-REGISTER '../udfs/python/<%= project_name %>.py' USING streaming_python AS <%= project_name %>;
+
+REGISTER '../udfs/python/<%= project_name %>.py' USING streaming_python AS <%= project_name_alias %>;
 
 -- This is an example of loading up input data
 my_input_data = LOAD '$INPUT_PATH' 
@@ -26,7 +27,7 @@ filtered = FILTER my_input_data
 -- This is an example call to a python user-defined function
 with_udf_output = FOREACH filtered 
                  GENERATE field0..field2, 
-                          <%= project_name %>.example_udf(field0) AS example_udf_field;
+                          <%= project_name_alias %>.example_udf(field0) AS example_udf_field;
 
 -- remove any existing data
 rmf $OUTPUT_PATH;
