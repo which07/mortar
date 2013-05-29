@@ -137,6 +137,9 @@ STDOUT
 \e[1;32m      create\e[0m  udfs/python
 \e[1;32m      create\e[0m  udfs/python/some_new_project.py
 Sending request to register project: some_new_project... done\n\n\r\e[0KStatus: ACTIVE  \n\nYour project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n
+NOTE: You'll need to change to the new directory to use your project:
+    cd some_new_project
+
 STDOUT
       end
 
