@@ -400,11 +400,15 @@ protected
   def sync_code_with_cloud
     # returns git_ref
     if project.gitless_project?
-      return git.sync_gitless_project(project, Mortar::Auth.user + "-base")
+      return git.sync_gitless_project(project, embedded_project_user_branch)
     else
       validate_git_based_project!
       return git.create_and_push_snapshot_branch(project)
     end
+  end
+
+  def embedded_project_user_branch
+    return Mortar::Auth.user_s3_safe + "-base"
   end
 
 end

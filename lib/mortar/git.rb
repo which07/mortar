@@ -252,7 +252,7 @@ module Mortar
 
         ensure_gitless_project_mirror_exists(mirror_dir)
         sync_gitless_project_with_mirror(mirror_dir, project_dir, branch)
-        git_ref = sync_gitless_project_mirror_with_cloud(mirror_dir)
+        git_ref = sync_gitless_project_mirror_with_cloud(mirror_dir, branch)
 
         Dir.chdir(project_dir)
         return git_ref
@@ -315,7 +315,7 @@ module Mortar
         end
       end
 
-      def sync_gitless_project_mirror_with_cloud(mirror_dir)
+      def sync_gitless_project_mirror_with_cloud(mirror_dir, branch)
         # checkout snapshot branch.
         # it will permenantly keep the code in this state (as opposed to the user's base branch, which will be updated)
         Dir.chdir(mirror_dir)
@@ -325,7 +325,7 @@ module Mortar
         # push everything (master updates and snapshot branch)
         git_ref = push_with_retry("mortar", snapshot_branch, "Sending code snapshot to Mortar", true)
 
-        git("checkout master")
+        git("checkout #{branch}")
         return git_ref
       end
 
