@@ -24,8 +24,7 @@ class Mortar::Command::Local < Mortar::Command::Base
 
   # local:configure
   #
-  # Install dependencies for running this pig project locally, other
-  # commands will also perform this step automatically.
+  # Install dependencies for running this mortar project locally - other mortar:local commands will also perform this step automatically.
   #
   def configure
     ctrl = Mortar::Local::Controller.new
@@ -34,7 +33,7 @@ class Mortar::Command::Local < Mortar::Command::Base
 
   # local:run SCRIPT
   #
-  # Run a job on your local machine
+  # Run a job on your local machine.
   #
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
   # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
@@ -88,7 +87,7 @@ class Mortar::Command::Local < Mortar::Command::Base
 
   # local:validate SCRIPT
   #
-  # Run a job on your local machine
+  # Locally validate the syntax of a script.
   #
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
   # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
