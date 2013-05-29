@@ -78,6 +78,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
       git.git("add .")
       git.git("commit -m \"Mortar project scaffolding\"")
       Mortar::Command::run("projects:register", [name])
+      display "NOTE: You'll need to change to the new directory to use your project:\n    cd #{name}\n\n"
     end
   end
   alias_command "new", "projects:create"
