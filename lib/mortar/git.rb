@@ -286,10 +286,10 @@ module Mortar
         # pull from remote branch and overwrite everything, if it exists.
         # if it doesn't exist, create it.
         Dir.chdir(mirror_dir)
+        git("reset --hard HEAD")
         git("fetch --all")
         begin
           git("checkout #{branch}")
-          git("reset --hard HEAD")
         rescue Exception => e
           err_msg = e.to_s
           if err_msg.include?("error: pathspec") and err_msg.include?("did not match any file(s) known to git")
@@ -322,7 +322,7 @@ module Mortar
         snapshot_branch = "mortar-snapshot-#{Mortar::UUID.create_random.to_s}"
         git("checkout -b #{snapshot_branch}")
 
-        # push everything (master updates and snapshot branch)
+        # push everything (use base branch updates and snapshot branch)
         git_ref = push_with_retry("mortar", snapshot_branch, "Sending code snapshot to Mortar", true)
 
         git("checkout #{branch}")
