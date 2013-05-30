@@ -280,7 +280,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
         # If the job is not complete, but not in the running state, just display its status
         else
           job_display_status = job_status['status_description']
-          if job_status.has_key?('status_details')
+          if !job_status['status_details'].nil?
             job_display_status += " - #{job_status['status_details']}"
           end
           redisplay("[#{spinner(ticks)}] Status: #{job_display_status}")
