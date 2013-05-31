@@ -316,7 +316,7 @@ STASH
           mock(@git).push_with_retry.with_any_args.times(2) { true }
           mock(@git).is_clean_working_directory? { false }
 
-          @git.sync_gitless_project(p)
+          @git.sync_gitless_project(p, "master")
 
           File.directory?(mirror_dir).should be_true
           FileUtils.rm_rf(mirror_dir)
@@ -337,7 +337,7 @@ STASH
           mock(@git).push_with_retry.with_any_args.times(1) { true }
           mock(@git).is_clean_working_directory? { false }
 
-          @git.sync_gitless_project(p)
+          @git.sync_gitless_project(p, "bob-the-builder-base")
 
           File.exists?("#{project_mirror_dir}/pigscripts/calydonian_boar.pig").should be_true
           FileUtils.rm_rf(mirror_dir)
@@ -359,7 +359,7 @@ STASH
           mock(@git).push_with_retry.with_any_args.times(1) { true }
           mock(@git).is_clean_working_directory? { false }
 
-          @git.sync_gitless_project(p)
+          @git.sync_gitless_project(p, "bob-the-builder-base")
 
           File.exists?("#{project_mirror_dir}/pigscripts/calydonian_boar.pig").should be_false
           FileUtils.rm_rf(mirror_dir)

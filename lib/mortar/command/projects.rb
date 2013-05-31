@@ -138,6 +138,9 @@ class Mortar::Command::Projects < Mortar::Command::Base
   # Adds a remote to your local git repository to the Mortar git repository.  For example if a 
   # co-worker creates a Mortar project from an internal repository you would clone the internal
   # repository and then after cloning call mortar projects:set_remote.
+  #
+  # --withoutgit    # make this a gitless project tied to the specified remote
+  #
   def set_remote
     project_name = shift_argument
 
@@ -145,13 +148,15 @@ class Mortar::Command::Projects < Mortar::Command::Base
       error("Usage: mortar projects:set_remote PROJECT\nMust specify PROJECT.")
     end
 
-    unless git.has_dot_git?
-      error("Can only set the remote for an existing git project.  Please run:\n\ngit init\ngit add .\ngit commit -a -m \"first commit\"\n\nto initialize your project in git.")
-    end
+    unless options[:withoutgit]
+      unless git.has_dot_git?
+        error("Can only set the remote for an existing git project.  Please run:\n\ngit init\ngit add .\ngit commit -a -m \"first commit\"\n\nto initialize your project in git.")
+      end
 
-    if git.remotes(git_organization).include?("mortar")
-      display("The remote has already been set for project: #{project_name}")
-      return
+      if git.remotes(git_organization).include?("mortar")
+        display("The remote has already been set for project: #{project_name}")
+        return
+      end
     end
 
     projects = api.get_projects().body["projects"]
@@ -160,7 +165,15 @@ class Mortar::Command::Projects < Mortar::Command::Base
       error("No project named: #{project_name} exists. You can create this project using:\n\n mortar projects:create")
     end
 
-    git.remote_add("mortar", project['git_url'])
+    if options[:withoutgit]
+      File.open(".mortar-project-remote", "w") do |f|
+        f.puts project["git_url"]
+      end
+      git.sync_gitless_project(project, embedded_project_user_branch)
+    else
+      git.remote_add("mortar", project["git_url"])
+    end
+
     display("Successfully added the mortar remote to the #{project_name} project")
 
   end
