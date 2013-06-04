@@ -242,7 +242,7 @@ module Mortar
         "/tmp/mortar-git-mirrors"
       end
 
-      def sync_gitless_project(project, branch)
+      def sync_embedded_project(project, branch)
         # the project is not a git repo, so we manage a mirror directory that is a git repo
         # branch is which branch to sync to. this will be master if the cloud repo
         # is being initialized, or a branch based on the user's name in any other circumstance
@@ -250,15 +250,15 @@ module Mortar
         project_dir = project.root_path
         mirror_dir = "#{mortar_mirrors_dir}/#{project.name}"
 
-        ensure_gitless_project_mirror_exists(mirror_dir)
-        sync_gitless_project_with_mirror(mirror_dir, project_dir, branch)
-        git_ref = sync_gitless_project_mirror_with_cloud(mirror_dir, branch)
+        ensure_embedded_project_mirror_exists(mirror_dir)
+        sync_embedded_project_with_mirror(mirror_dir, project_dir, branch)
+        git_ref = sync_embedded_project_mirror_with_cloud(mirror_dir, branch)
 
         Dir.chdir(project_dir)
         return git_ref
       end
 
-      def ensure_gitless_project_mirror_exists(mirror_dir)
+      def ensure_embedded_project_mirror_exists(mirror_dir)
         # create and initialize mirror git repo if it doesn't already exist
         unless File.directory? mirror_dir
           unless File.directory? mortar_mirrors_dir
@@ -275,14 +275,14 @@ module Mortar
                                          # initialization is not necessary if this is not the first user to use it 
             File.open(".gitkeep", "w").close()
             git("add .")
-            git("commit -m \"Setting up gitless Mortar project\"")
+            git("commit -m \"Setting up embedded Mortar project\"")
             git("remote add mortar #{remote_path}")
-            push_with_retry("mortar", "master", "Setting up gitless Mortar project")
+            push_with_retry("mortar", "master", "Setting up embedded Mortar project")
           end
         end
       end
 
-      def sync_gitless_project_with_mirror(mirror_dir, project_dir, branch)
+      def sync_embedded_project_with_mirror(mirror_dir, project_dir, branch)
         # pull from remote branch and overwrite everything, if it exists.
         # if it doesn't exist, create it.
         Dir.chdir(mirror_dir)
@@ -315,7 +315,7 @@ module Mortar
         end
       end
 
-      def sync_gitless_project_mirror_with_cloud(mirror_dir, branch)
+      def sync_embedded_project_mirror_with_cloud(mirror_dir, branch)
         # checkout snapshot branch.
         # it will permenantly keep the code in this state (as opposed to the user's base branch, which will be updated)
         Dir.chdir(mirror_dir)

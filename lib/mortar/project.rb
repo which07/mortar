@@ -83,7 +83,7 @@ module Mortar
         path = File.join(@root_path, "fixtures")
       end
 
-      def gitless_project?()
+      def embedded_project?()
         File.exists?(File.join(@root_path, ".mortar-project-remote"))
       end
     end
