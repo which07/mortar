@@ -258,8 +258,8 @@ STDERR
         end
       end
 
-      it "requests and reports an illustrate for a gitless project" do
-        with_gitless_project do |p|
+      it "requests and reports an illustrate for an embedded project" do
+        with_embedded_project do |p|
           # stub api requests
           illustrate_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
           illustrate_url = "https://api.mortardata.com/illustrates/#{illustrate_id}"
@@ -274,7 +274,7 @@ STDERR
           mock(Mortar::Auth.api).get_illustrate(illustrate_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Illustrate::STATUS_PRUNING_DATA,     "status_description" => "Pruning data"})).ordered
           mock(Mortar::Auth.api).get_illustrate(illustrate_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Illustrate::STATUS_SUCCESS,          "status_description" => "Succeeded", "web_result_url" => illustrate_url})).ordered
           
-          mock(@git).sync_gitless_project.with_any_args.times(1) { "somewhere_over_the_rainbow" }
+          mock(@git).sync_embedded_project.with_any_args.times(1) { "somewhere_over_the_rainbow" }
 
           # stub launchy
           mock(Launchy).open(illustrate_url) {Thread.new {}}

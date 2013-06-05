@@ -143,7 +143,7 @@ NOTE: You'll need to change to the new directory to use your project:
 STDOUT
       end
 
-      it "generates and registers a gitless project" do
+      it "generates and registers an embedded project" do
         mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [project1, project2]}))
         project_id = "1234abcd1234abcd1234"
         project_name = "some_new_project"
@@ -152,10 +152,10 @@ STDOUT
         mock(Mortar::Auth.api).get_project(project_id).returns(Excon::Response.new(:body => {"status" => Mortar::API::Projects::STATUS_ACTIVE,
                                                                                              "git_url" => project_git_url})).ordered
 
-        # test that sync_gitless_project is called. the method itself is tested in git_spec.
-        mock(@git).sync_gitless_project.with_any_args.times(1) { true }
+        # test that sync_embedded_project is called. the method itself is tested in git_spec.
+        mock(@git).sync_embedded_project.with_any_args.times(1) { true }
 
-        stderr, stdout = execute("projects:create #{project_name} --withoutgit", nil, @git)
+        stderr, stdout = execute("projects:create #{project_name} --embedded", nil, @git)
         Dir.pwd.end_with?("some_new_project").should be_true
         File.exists?(".mortar-project-remote").should be_true
         File.exists?("macros").should be_true
@@ -202,7 +202,7 @@ STDERR
           stderr, stdout = execute("projects:register some_new_project")
           stderr.should == <<-STDERR
  !    No git repository found in the current directory.
- !    To register a project that is not its own git repository, use the --withoutgit option.
+ !    To register a project that is not its own git repository, use the --embedded option.
  !    If you do want this project to be its own git repository, please initialize git in this directory, and then rerun the register command.
  !    To initialize your project in git, use:
  !    
@@ -280,7 +280,7 @@ Sending request to register project: some_new_project... done\n\n\r\e[0KStatus: 
 STDOUT
       end
 
-      it "registers a gitless project" do
+      it "registers an embedded project" do
         mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [project1, project2]}))
         project_id = "1234abcd1234abcd1234"
         project_name = "some_new_project"
@@ -296,10 +296,10 @@ STDOUT
           mock(obj).validate_project_structure.returns(true)
         end
 
-        # test that sync_gitless_project is called. the method itself is tested in git_spec.
-        mock(@git).sync_gitless_project.with_any_args.times(1) { true }
+        # test that sync_embedded_project is called. the method itself is tested in git_spec.
+        mock(@git).sync_embedded_project.with_any_args.times(1) { true }
 
-        stderr, stdout = execute("projects:register some_new_project --withoutgit --polling_interval 0.05", nil, @git)
+        stderr, stdout = execute("projects:register some_new_project --embedded --polling_interval 0.05", nil, @git)
       end
       
     end
