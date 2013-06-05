@@ -170,5 +170,18 @@ module Mortar
       expect(@cli.has_credentials).to be_false
     end
 
+    it "uses path from env when specified" do
+      netrc_path = '/foo/bar/baz'
+      ENV['MORTAR_LOGIN_FILE'] = netrc_path
+      expect(@cli.netrc_path).to eq(netrc_path)
+      ENV.delete('MORTAR_LOGIN_FILE')
+    end
+
+    it "uses the default path when no environment setting" do
+      FakeFS do
+        expect(@cli.netrc_path).to eq(Netrc.default_path)
+      end
+    end
+
   end
 end
