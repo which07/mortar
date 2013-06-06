@@ -117,7 +117,10 @@ class Mortar::Auth
     def netrc_path
       default = Netrc.default_path
       encrypted = default + ".gpg"
-      if File.exists?(encrypted)
+      from_env = ENV['MORTAR_LOGIN_FILE']
+      if from_env
+        from_env
+      elsif File.exists?(encrypted)
         encrypted
       else
         default
