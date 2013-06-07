@@ -32,7 +32,7 @@ class Mortar::Command::Local < Mortar::Command::Base
 
     # cd into the project root
     project_root = options[:project_root] ||= Dir.getwd
-    unless Dir.exists?(project_root)
+    unless File.directory?(project_root)
       error("No such directory #{project_root}")
     end
     Dir.chdir(project_root)
@@ -62,7 +62,7 @@ class Mortar::Command::Local < Mortar::Command::Base
 
     # cd into the project root
     project_root = options[:project_root] ||= Dir.getwd
-    unless Dir.exists?(project_root)
+    unless File.directory?(project_root)
       error("No such directory #{project_root}")
     end
     Dir.chdir(project_root)
@@ -99,7 +99,7 @@ class Mortar::Command::Local < Mortar::Command::Base
 
     # cd into the project root
     project_root = options[:project_root] ||= Dir.getwd
-    unless Dir.exists?(project_root)
+    unless File.directory?(project_root)
       error("No such directory #{project_root}")
     end
     Dir.chdir(project_root)
@@ -133,7 +133,7 @@ class Mortar::Command::Local < Mortar::Command::Base
 
     # cd into the project root
     project_root = options[:project_root] ||= Dir.getwd
-    unless Dir.exists?(project_root)
+    unless File.directory?(project_root)
       error("No such directory #{project_root}")
     end
     Dir.chdir(project_root)
