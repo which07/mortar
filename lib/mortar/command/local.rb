@@ -26,7 +26,17 @@ class Mortar::Command::Local < Mortar::Command::Base
   #
   # Install dependencies for running this mortar project locally - other mortar:local commands will also perform this step automatically.
   #
+  # --project-root PROJECTDIR  # The root directory of the project if not the CWD
+  #
   def configure
+
+    # cd into the project root
+    project_root = options[:project_root] ||= Dir.getwd
+    unless Dir.exists?(project_root)
+      error("No such directory #{project_root}")
+    end
+    Dir.chdir(project_root)
+
     ctrl = Mortar::Local::Controller.new
     ctrl.install_and_configure
   end
@@ -37,6 +47,7 @@ class Mortar::Command::Local < Mortar::Command::Base
   #
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
   # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
+  # --project-root PROJECTDIR   # The root directory of the project if not the CWD
   #
   #Examples:
   #
@@ -48,6 +59,14 @@ class Mortar::Command::Local < Mortar::Command::Base
       error("Usage: mortar local:run SCRIPT\nMust specify SCRIPT.")
     end
     validate_arguments!
+
+    # cd into the project root
+    project_root = options[:project_root] ||= Dir.getwd
+    unless Dir.exists?(project_root)
+      error("No such directory #{project_root}")
+    end
+    Dir.chdir(project_root)
+
     script = validate_script!(script_name)
     ctrl = Mortar::Local::Controller.new
     ctrl.run(script, pig_parameters)
@@ -63,6 +82,7 @@ class Mortar::Command::Local < Mortar::Command::Base
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
   # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
   # --no_browser                # Don't open the illustrate results automatically in the browser.
+  # --project-root PROJECTDIR   # The root directory of the project if not the CWD
   #
   # Examples:
   #
@@ -76,6 +96,13 @@ class Mortar::Command::Local < Mortar::Command::Base
     unless pigscript_name
       error("Usage: mortar local:illustrate PIGSCRIPT [ALIAS]\nMust specify PIGSCRIPT.")
     end
+
+    # cd into the project root
+    project_root = options[:project_root] ||= Dir.getwd
+    unless Dir.exists?(project_root)
+      error("No such directory #{project_root}")
+    end
+    Dir.chdir(project_root)
 
     validate_arguments!
     pigscript = validate_pigscript!(pigscript_name)
@@ -91,6 +118,7 @@ class Mortar::Command::Local < Mortar::Command::Base
   #
   # -p, --parameter NAME=VALUE  # Set a pig parameter value in your script.
   # -f, --param-file PARAMFILE  # Load pig parameter values from a file.
+  # --project-root PROJECTDIR   # The root directory of the project if not the CWD
   #
   #Examples:
   #
@@ -102,6 +130,14 @@ class Mortar::Command::Local < Mortar::Command::Base
       error("Usage: mortar local:validate SCRIPT\nMust specify SCRIPT.")
     end
     validate_arguments!
+
+    # cd into the project root
+    project_root = options[:project_root] ||= Dir.getwd
+    unless Dir.exists?(project_root)
+      error("No such directory #{project_root}")
+    end
+    Dir.chdir(project_root)
+
     script = validate_script!(script_name)
     ctrl = Mortar::Local::Controller.new
     ctrl.validate(script, pig_parameters)
