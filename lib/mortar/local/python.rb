@@ -47,11 +47,11 @@ class Mortar::Local::Python
   def install_or_update_osx
     @command = "#{local_install_directory}/python/bin/python"
     if should_do_python_install?
-      action "Installing python" do
+      action "Installing python to #{local_install_directory_name}" do
         install_osx
       end
     elsif should_do_update?
-      action "Updating to latest python" do
+      action "Updating to latest python in #{local_install_directory_name}" do
         install_osx
       end
     end

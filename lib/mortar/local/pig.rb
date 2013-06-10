@@ -98,11 +98,11 @@ class Mortar::Local::Pig
   def install_or_update()
     call_install = false
     if should_do_pig_install?
-      action "Installing pig" do
+      action "Installing pig to #{local_install_directory_name}" do
         install()
       end
     elsif should_do_pig_update?
-      action "Updating to latest pig" do
+      action "Updating to latest pig in #{local_install_directory_name}" do
         install()
       end
     end

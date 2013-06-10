@@ -25,11 +25,11 @@ class Mortar::Local::Jython
 
   def install_or_update
     if should_install
-      action("Installing jython") do
+      action("Installing jython to #{local_install_directory_name}") do
         install
       end
     elsif should_update
-      action("Updating jython") do
+      action("Updating jython in #{local_install_directory_name}") do
         update
       end
     end
