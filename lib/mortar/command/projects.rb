@@ -49,7 +49,10 @@ class Mortar::Command::Projects < Mortar::Command::Base
     validate_arguments!
     
     # delete embedded project mirror if one exists
-    FileUtils.rm_r("#{git.mortar_mirrors_dir()}/#{name}")
+    mirror_dir = "#{git.mortar_mirrors_dir()}/#{name}"
+    if Dir.exists? mirror_dir
+      FileUtils.rm_r mirror_dir
+    end
 
     # delete Mortar remote
     project_id = nil
