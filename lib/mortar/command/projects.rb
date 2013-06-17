@@ -50,7 +50,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
     
     # delete embedded project mirror if one exists
     mirror_dir = "#{git.mortar_mirrors_dir()}/#{name}"
-    if Dir.exists? mirror_dir
+    if File.directory? mirror_dir
       FileUtils.rm_r mirror_dir
     end
 
