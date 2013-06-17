@@ -48,6 +48,13 @@ class Mortar::Command::Projects < Mortar::Command::Base
     end
     validate_arguments!
     
+    # delete embedded project mirror if one exists
+    mirror_dir = "#{git.mortar_mirrors_dir()}/#{name}"
+    if File.directory? mirror_dir
+      FileUtils.rm_r mirror_dir
+    end
+
+    # delete Mortar remote
     project_id = nil
     action("Sending request to delete project: #{name}") do
       api.delete_project(name).body["project_id"]
