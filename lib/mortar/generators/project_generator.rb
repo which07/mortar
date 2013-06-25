@@ -42,7 +42,7 @@ module Mortar
           mkdir "controlscripts" 
 
           inside "controlscripts" do
-            generate_file "controlscript.py", "#{project_name}.py"
+            copy_file "gitkeep", ".gitkeep"
           end
           
           mkdir "macros"
