@@ -388,7 +388,7 @@ STDOUT
           cluster_size = 5
 
           mock(Mortar::Auth.api).post_job_new_cluster("myproject", "my_script", is_a(String), cluster_size, 
-            :parameters => match_array([{"name" => "FIRST", "value" => "FOO"}, {"name" => "SECOND", "value" => "BAR"}, {"name" => "THIRD", "value" => "BEAR\n"}]), 
+            :parameters => match_array([{"name" => "FIRST", "value" => "FOO"}, {"name" => "SECOND", "value" => "BAR"}, {"name" => "THIRD", "value" => "BEAR"}]), 
             :cluster_type => Jobs::CLUSTER_TYPE__PERSISTENT,
             :notify_on_job_finish => true,
             :is_control_script=>false) {Excon::Response.new(:body => {"job_id" => job_id})}
@@ -413,7 +413,7 @@ PARAMS
           cluster_size = 5
 
           mock(Mortar::Auth.api).post_job_new_cluster("myproject", "my_script", is_a(String), cluster_size, 
-            :parameters => match_array([{"name" => "FIRST", "value" => "FOO"}, {"name" => "SECOND", "value" => "BAR"}, {"name" => "THIRD", "value" => "BEAR\n"}]), 
+            :parameters => match_array([{"name" => "FIRST", "value" => "FOO"}, {"name" => "SECOND", "value" => "BAR"}, {"name" => "THIRD", "value" => "BEAR"}]), 
             :cluster_type => Jobs::CLUSTER_TYPE__PERSISTENT,
             :notify_on_job_finish => true,
             :is_control_script=>false) {Excon::Response.new(:body => {"job_id" => job_id})}
