@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 
+require "fileutils"
 require "mortar/generators/generator_base"
 module Mortar
   module Generators
@@ -63,6 +64,43 @@ module Mortar
             mkdir "python"
             inside "python" do
               copy_file "python_udf.py", "#{project_name}.py"
+            end
+
+            mkdir "jython"
+            inside "jython" do
+              copy_file "gitkeep", ".gitkeep"
+            end
+
+            mkdir "java"
+            inside "java" do
+              copy_file "gitkeep", ".gitkeep"
+            end
+          end
+
+          mkdir "vendor"
+
+          inside "vendor" do
+            mkdir "macros"
+            inside "macros" do
+              copy_file "gitkeep", ".gitkeep"
+            end
+
+            mkdir "udfs"
+            inside "udfs" do
+              mkdir "python"
+              inside "python" do
+                copy_file "gitkeep", ".gitkeep"
+              end
+
+              mkdir "jython"
+              inside "jython" do
+                copy_file "gitkeep", ".gitkeep"
+              end
+
+              mkdir "java"
+              inside "java" do
+                copy_file "gitkeep", ".gitkeep"
+              end
             end
           end
           

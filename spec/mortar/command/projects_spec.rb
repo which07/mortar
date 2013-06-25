@@ -136,6 +136,20 @@ STDOUT
 \e[1;32m      create\e[0m  udfs
 \e[1;32m      create\e[0m  udfs/python
 \e[1;32m      create\e[0m  udfs/python/some_new_project.py
+\e[1;32m      create\e[0m  udfs/jython
+\e[1;32m      create\e[0m  udfs/jython/.gitkeep
+\e[1;32m      create\e[0m  udfs/java
+\e[1;32m      create\e[0m  udfs/java/.gitkeep
+\e[1;32m      create\e[0m  vendor
+\e[1;32m      create\e[0m  vendor/macros
+\e[1;32m      create\e[0m  vendor/macros/.gitkeep
+\e[1;32m      create\e[0m  vendor/udfs
+\e[1;32m      create\e[0m  vendor/udfs/python
+\e[1;32m      create\e[0m  vendor/udfs/python/.gitkeep
+\e[1;32m      create\e[0m  vendor/udfs/jython
+\e[1;32m      create\e[0m  vendor/udfs/jython/.gitkeep
+\e[1;32m      create\e[0m  vendor/udfs/java
+\e[1;32m      create\e[0m  vendor/udfs/java/.gitkeep
 Sending request to register project: some_new_project... done\n\n\r\e[0KStatus: ACTIVE  \n\nYour project is ready for use.  Type 'mortar help' to see the commands you can perform on the project.\n
 NOTE: You'll need to change to the new directory to use your project:
     cd some_new_project
