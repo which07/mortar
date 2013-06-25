@@ -88,8 +88,9 @@ class Mortar::Auth
       get_credentials[1]
     end
 
-    def user_s3_safe
-      return user.gsub(/[^0-9a-zA-Z]/i, '-')
+    def user_s3_safe(local = false)
+      user_email = (local && !has_credentials) ? "notloggedin@user.org" : user
+      return user_email.gsub(/[^0-9a-zA-Z]/i, '-')
     end
 
     def api_key(user = get_credentials[0], password = get_credentials[1])

@@ -17,13 +17,12 @@
 require 'spec_helper'
 require 'fakefs/spec_helpers'
 require 'mortar/local/pig'
+require 'mortar/auth'
 require 'launchy'
-
 
 class Mortar::Local::Pig
   attr_reader :command
 end
-
 
 module Mortar::Local
   describe Pig do
@@ -196,6 +195,16 @@ module Mortar::Local
         mock(pig).run_pig_command.with_any_args.returns(false)
         mock(pig).show_illustrate_output.with_any_args.never
         stub(pig).make_pig_param_file.returns('param.file')
+        pig.illustrate_alias(script, 'my_alias', false, [])
+      end
+
+      it "does not require login credentials for illustration" do
+        any_instance_of(Mortar::Project::PigScripts, :elements => nil, :path => "/foo/bar/baz.pig")
+        script = Mortar::Project::PigScripts.new('/foo/bar/baz.pig', 'baz', 'pig')
+        pig = Mortar::Local::Pig.new
+        mock(Mortar::Auth).user_s3_safe(true).returns('notloggedin-user-org')
+        mock(pig).run_pig_command.with_any_args.returns(true)
+        mock(pig).show_illustrate_output.with_any_args
         pig.illustrate_alias(script, 'my_alias', false, [])
       end
 
