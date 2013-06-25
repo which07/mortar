@@ -154,6 +154,10 @@ module Mortar
             if File.directory?('controlscripts') and not contents.include?('controlscripts')
               manifest.puts "controlscripts"
             end
+
+            if File.directory?("vendor") and not contents.include?("vendor")
+              manifest.puts "vendor"
+            end
           end
         else
           create_mortar_project_manifest('.')
@@ -174,6 +178,9 @@ module Mortar
           manifest.puts "pigscripts"
           manifest.puts "macros"
           manifest.puts "udfs"
+          if File.directory? "#{path}/vendor"
+            manifest.puts "vendor"
+          end
         end
       end
     
