@@ -76,7 +76,7 @@ class Mortar::Command::Base
       File.open(options[:param_file], "r").each do |line|
         line = line.chomp
         # If the line isn't empty
-        if not line.empty? and not line.match(/^;/)
+        if not line.empty? and not line.match(/^;/) and not line.start_with?("#")
           name, value = line.split('=', 2)
           if not name or not value
             error("Parameter file is malformed")
