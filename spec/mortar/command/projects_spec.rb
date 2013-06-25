@@ -128,7 +128,7 @@ STDOUT
 \e[1;32m      create\e[0m  pigscripts
 \e[1;32m      create\e[0m  pigscripts/some_new_project.pig
 \e[1;32m      create\e[0m  controlscripts
-\e[1;32m      create\e[0m  controlscripts/.gitkeep
+\e[1;32m      create\e[0m  controlscripts/some_new_project.py
 \e[1;32m      create\e[0m  macros
 \e[1;32m      create\e[0m  macros/.gitkeep
 \e[1;32m      create\e[0m  fixtures
@@ -167,6 +167,7 @@ STDOUT
         File.exists?("macros/.gitkeep").should be_true
         File.exists?("fixtures/.gitkeep").should be_true
         File.exists?("pigscripts/some_new_project.pig").should be_true
+        File.exists?("controlscripts/some_new_project.py").should be_true
         File.exists?("udfs/python/some_new_project.py").should be_true
 
         File.read("pigscripts/some_new_project.pig").each_line { |line| line.match(/<%.*%>/).should be_nil }
