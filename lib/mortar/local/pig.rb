@@ -305,7 +305,7 @@ class Mortar::Local::Pig
     opts['python.verbose'] = 'error'
     opts['jython.output'] = true
     opts['python.home'] = jython_directory
-    opts['python.path'] = local_install_directory + "/../controlscripts"
+    opts['python.path'] = "#{local_install_directory}/../controlscripts/lib:#{local_install_directory}/../vendor/controlscripts/lib"
     opts['python.cachedir'] = jython_cache_directory
     return opts
   end
@@ -319,12 +319,6 @@ class Mortar::Local::Pig
       params['MORTAR_EMAIL_S3_ESCAPED'] = ENV['MORTAR_EMAIL_S3_ESCAPED']
     else
       params['MORTAR_EMAIL_S3_ESCAPED'] = Mortar::Auth.user_s3_safe(true)
-    end
-    
-    if ENV['MORTAR_SOFTWARE_MIRROR']
-      params['BACON_BITS'] = "s3n://" + ENV['MORTAR_SOFTWARE_MIRROR'] + "/bacon-bits"
-    else
-      params['BACON_BITS'] = "s3n://mhc-software-mirror/bacon-bits"
     end
 
     # Coerce into the same format as pig parameters that were
