@@ -129,6 +129,8 @@ STDOUT
 \e[1;32m      create\e[0m  pigscripts/some_new_project.pig
 \e[1;32m      create\e[0m  controlscripts
 \e[1;32m      create\e[0m  controlscripts/.gitkeep
+\e[1;32m      create\e[0m  controlscripts/lib
+\e[1;32m      create\e[0m  controlscripts/lib/__init__.py
 \e[1;32m      create\e[0m  macros
 \e[1;32m      create\e[0m  macros/.gitkeep
 \e[1;32m      create\e[0m  fixtures
@@ -141,6 +143,12 @@ STDOUT
 \e[1;32m      create\e[0m  udfs/java
 \e[1;32m      create\e[0m  udfs/java/.gitkeep
 \e[1;32m      create\e[0m  vendor
+\e[1;32m      create\e[0m  vendor/controlscripts
+\e[1;32m      create\e[0m  vendor/controlscripts/.gitkeep
+\e[1;32m      create\e[0m  vendor/controlscripts/lib
+\e[1;32m      create\e[0m  vendor/controlscripts/lib/__init__.py
+\e[1;32m      create\e[0m  vendor/pigscripts
+\e[1;32m      create\e[0m  vendor/pigscripts/.gitkeep
 \e[1;32m      create\e[0m  vendor/macros
 \e[1;32m      create\e[0m  vendor/macros/.gitkeep
 \e[1;32m      create\e[0m  vendor/udfs
