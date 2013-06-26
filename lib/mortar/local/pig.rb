@@ -318,7 +318,7 @@ class Mortar::Local::Pig
     if ENV['MORTAR_EMAIL_S3_ESCAPED']
       params['MORTAR_EMAIL_S3_ESCAPED'] = ENV['MORTAR_EMAIL_S3_ESCAPED']
     else
-      params['MORTAR_EMAIL_S3_ESCAPED'] = Mortar::Auth.user_s3_safe
+      params['MORTAR_EMAIL_S3_ESCAPED'] = Mortar::Auth.user_s3_safe(true)
     end
     
     if ENV['MORTAR_SOFTWARE_MIRROR']
