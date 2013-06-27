@@ -43,7 +43,10 @@ module Mortar
           mkdir "controlscripts" 
 
           inside "controlscripts" do
-            copy_file "gitkeep", ".gitkeep"
+            mkdir "lib"
+            inside "lib" do
+              copy_file "__init__.py", "__init__.py"
+            end
           end
           
           mkdir "macros"
@@ -80,6 +83,19 @@ module Mortar
           mkdir "vendor"
 
           inside "vendor" do
+            mkdir "controlscripts"
+            inside "controlscripts" do
+              mkdir "lib"
+              inside "lib" do
+                copy_file "__init__.py", "__init__.py"
+              end
+            end
+
+            mkdir "pigscripts"
+            inside "pigscripts" do
+              copy_file "gitkeep", ".gitkeep"
+            end
+
             mkdir "macros"
             inside "macros" do
               copy_file "gitkeep", ".gitkeep"
