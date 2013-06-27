@@ -43,7 +43,6 @@ module Mortar
           mkdir "controlscripts" 
 
           inside "controlscripts" do
-            copy_file "gitkeep", ".gitkeep"
             mkdir "lib"
             inside "lib" do
               copy_file "__init__.py", "__init__.py"
@@ -86,7 +85,6 @@ module Mortar
           inside "vendor" do
             mkdir "controlscripts"
             inside "controlscripts" do
-              copy_file "gitkeep", ".gitkeep"
               mkdir "lib"
               inside "lib" do
                 copy_file "__init__.py", "__init__.py"
