@@ -304,10 +304,10 @@ STASH
 
     # we manually create and destroy "mirror_dir" instead of using FakeFS
     # because FakeFS doesn't clean up properly when you use Dir.chdir inside of it
-    context "snapshot with gitless project" do
+    context "snapshot with embedded project" do
 
       it "creates a mirror directory for the project when one does not already exist" do
-        with_gitless_project do |p|
+        with_embedded_project do |p|
           mirror_dir = File.join(Dir.tmpdir, "mortar", "test-git-mirror")
           mock(@git).mortar_mirrors_dir.any_times { mirror_dir }
 
@@ -316,7 +316,7 @@ STASH
           mock(@git).push_with_retry.with_any_args.times(2) { true }
           mock(@git).is_clean_working_directory? { false }
 
-          @git.sync_gitless_project(p)
+          @git.sync_embedded_project(p, "master")
 
           File.directory?(mirror_dir).should be_true
           FileUtils.rm_rf(mirror_dir)
@@ -324,7 +324,7 @@ STASH
       end
 
       it "syncs files to the project mirror" do
-        with_gitless_project do |p|
+        with_embedded_project do |p|
           mirror_dir = File.join(Dir.tmpdir, "mortar", "test-git-mirror")
           mock(@git).mortar_mirrors_dir.any_times { mirror_dir }
 
@@ -337,7 +337,7 @@ STASH
           mock(@git).push_with_retry.with_any_args.times(1) { true }
           mock(@git).is_clean_working_directory? { false }
 
-          @git.sync_gitless_project(p)
+          @git.sync_embedded_project(p, "bob-the-builder-base")
 
           File.exists?("#{project_mirror_dir}/pigscripts/calydonian_boar.pig").should be_true
           FileUtils.rm_rf(mirror_dir)
@@ -345,7 +345,7 @@ STASH
       end
 
       it "syncs deleted files to the project mirror" do
-        with_gitless_project do |p|
+        with_embedded_project do |p|
           mirror_dir = File.join(Dir.tmpdir, "mortar", "test-git-mirror")
           mock(@git).mortar_mirrors_dir.any_times { mirror_dir }
 
@@ -359,7 +359,7 @@ STASH
           mock(@git).push_with_retry.with_any_args.times(1) { true }
           mock(@git).is_clean_working_directory? { false }
 
-          @git.sync_gitless_project(p)
+          @git.sync_embedded_project(p, "bob-the-builder-base")
 
           File.exists?("#{project_mirror_dir}/pigscripts/calydonian_boar.pig").should be_false
           FileUtils.rm_rf(mirror_dir)

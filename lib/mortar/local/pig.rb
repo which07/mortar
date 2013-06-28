@@ -98,11 +98,11 @@ class Mortar::Local::Pig
   def install_or_update()
     call_install = false
     if should_do_pig_install?
-      action "Installing pig" do
+      action "Installing pig to #{local_install_directory_name}" do
         install()
       end
     elsif should_do_pig_update?
-      action "Updating to latest pig" do
+      action "Updating to latest pig in #{local_install_directory_name}" do
         install()
       end
     end
@@ -305,7 +305,7 @@ class Mortar::Local::Pig
     opts['python.verbose'] = 'error'
     opts['jython.output'] = true
     opts['python.home'] = jython_directory
-    opts['python.path'] = local_install_directory + "/../controlscripts"
+    opts['python.path'] = "#{local_install_directory}/../controlscripts/lib:#{local_install_directory}/../vendor/controlscripts/lib"
     opts['python.cachedir'] = jython_cache_directory
     return opts
   end
@@ -314,11 +314,13 @@ class Mortar::Local::Pig
   # running on the server side.  We duplicate these here.
   def automatic_pig_parameters
     params = {}
+
     if ENV['MORTAR_EMAIL_S3_ESCAPED']
       params['MORTAR_EMAIL_S3_ESCAPED'] = ENV['MORTAR_EMAIL_S3_ESCAPED']
     else
-      params['MORTAR_EMAIL_S3_ESCAPED'] = Mortar::Auth.user_s3_safe
+      params['MORTAR_EMAIL_S3_ESCAPED'] = Mortar::Auth.user_s3_safe(true)
     end
+
     # Coerce into the same format as pig parameters that were
     # passed in via the command line or a parameter file
     param_list = []

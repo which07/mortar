@@ -32,6 +32,7 @@ module Mortar
         def set_script_binding(script_name, options)
           options = options
           script_name = script_name
+          script_name_alias = script_name.gsub /[^0-9a-z]/i, ''
           @script_binding = binding
         end 
       

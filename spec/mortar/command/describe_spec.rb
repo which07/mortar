@@ -189,8 +189,8 @@ STDERR
       end
     end
 
-    it "requests and reports a describe for a gitless project" do
-      with_gitless_project do |p|
+    it "requests and reports a describe for an embedded project" do
+      with_embedded_project do |p|
           # stub api requests
           describe_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
           describe_url = "https://api.mortardata.com/describe/#{describe_id}"
@@ -202,7 +202,7 @@ STDERR
           mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Describe::STATUS_PROGRESS, "status_description" => "Starting pig"})).ordered
           mock(Mortar::Auth.api).get_describe(describe_id, :exclude_result => true).returns(Excon::Response.new(:body => {"status_code" => Mortar::API::Describe::STATUS_SUCCESS, "status_description" => "Success", "web_result_url" => describe_url})).ordered
           
-          mock(@git).sync_gitless_project.with_any_args.times(1) { "somewhere_over_the_rainbow" }
+          mock(@git).sync_embedded_project.with_any_args.times(1) { "somewhere_over_the_rainbow" }
 
           # stub launchy
           mock(Launchy).open(describe_url) {Thread.new {}}

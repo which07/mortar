@@ -388,7 +388,7 @@ STDOUT
           cluster_size = 5
 
           mock(Mortar::Auth.api).post_job_new_cluster("myproject", "my_script", is_a(String), cluster_size, 
-            :parameters => match_array([{"name" => "FIRST", "value" => "FOO"}, {"name" => "SECOND", "value" => "BAR"}, {"name" => "THIRD", "value" => "BEAR\n"}]), 
+            :parameters => match_array([{"name" => "FIRST", "value" => "FOO"}, {"name" => "SECOND", "value" => "BAR"}, {"name" => "THIRD", "value" => "BEAR"}]), 
             :cluster_type => Jobs::CLUSTER_TYPE__PERSISTENT,
             :notify_on_job_finish => true,
             :is_control_script=>false) {Excon::Response.new(:body => {"job_id" => job_id})}
@@ -413,7 +413,7 @@ PARAMS
           cluster_size = 5
 
           mock(Mortar::Auth.api).post_job_new_cluster("myproject", "my_script", is_a(String), cluster_size, 
-            :parameters => match_array([{"name" => "FIRST", "value" => "FOO"}, {"name" => "SECOND", "value" => "BAR"}, {"name" => "THIRD", "value" => "BEAR\n"}]), 
+            :parameters => match_array([{"name" => "FIRST", "value" => "FOO"}, {"name" => "SECOND", "value" => "BAR"}, {"name" => "THIRD", "value" => "BEAR"}]), 
             :cluster_type => Jobs::CLUSTER_TYPE__PERSISTENT,
             :notify_on_job_finish => true,
             :is_control_script=>false) {Excon::Response.new(:body => {"job_id" => job_id})}
@@ -456,14 +456,14 @@ STDERR
         end
       end
 
-      it "runs a job for a gitless project" do
-        with_gitless_project do |p|
+      it "runs a job for an embedded project" do
+        with_embedded_project do |p|
           # stub api requests
           job_id = "c571a8c7f76a4fd4a67c103d753e2dd5"
           job_url = "http://127.0.0.1:5000/jobs/job_detail?job_id=c571a8c7f76a4fd4a67c103d753e2dd5"
           cluster_size = 5
 
-          mock(@git).sync_gitless_project.with_any_args.times(1) { "somewhere_over_the_rainbow" }
+          mock(@git).sync_embedded_project.with_any_args.times(1) { "somewhere_over_the_rainbow" }
 
           mock(Mortar::Auth.api).post_job_new_cluster("myproject", "my_script", is_a(String), cluster_size, 
             :parameters => match_array([{"name" => "FIRST_PARAM", "value" => "FOO"}, {"name" => "SECOND_PARAM", "value" => "BAR"}]), 

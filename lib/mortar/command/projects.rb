@@ -48,6 +48,13 @@ class Mortar::Command::Projects < Mortar::Command::Base
     end
     validate_arguments!
     
+    # delete embedded project mirror if one exists
+    mirror_dir = "#{git.mortar_mirrors_dir()}/#{name}"
+    if File.directory? mirror_dir
+      FileUtils.rm_r mirror_dir
+    end
+
+    # delete Mortar remote
     project_id = nil
     action("Sending request to delete project: #{name}") do
       api.delete_project(name).body["project_id"]
@@ -60,7 +67,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
   #
   # Used when you want to start a new Mortar project using Mortar generated code.
   #
-  # --withoutgit    # Create a Mortar project that is not its own git repo. Your code will still be synced with a git repo in the cloud.
+  # --embedded    # Create a Mortar project that is not its own git repo. Your code will still be synced with a git repo in the cloud.
   #
   def create
     name = shift_argument
@@ -71,13 +78,14 @@ class Mortar::Command::Projects < Mortar::Command::Base
     Mortar::Command::run("generate:project", [name])
 
     FileUtils.cd(name)
-    if options[:withoutgit]
-      Mortar::Command::run("projects:register", [name, "--withoutgit"])
+    if options[:embedded]
+      Mortar::Command::run("projects:register", [name, "--embedded"])
     else
       git.git_init
       git.git("add .")
       git.git("commit -m \"Mortar project scaffolding\"")
       Mortar::Command::run("projects:register", [name])
+      display "NOTE: You'll need to change to the new directory to use your project:\n    cd #{name}\n\n"
     end
   end
   alias_command "new", "projects:create"
@@ -86,7 +94,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
   #
   # Used when you want to start a new Mortar project using your existing code in the current directory.
   #
-  # --withoutgit    # Register code that is not its own git repo as a Mortar project. Your code will still be synced with a git repo in the cloud.
+  # --embedded    # Register code that is not its own git repo as a Mortar project. Your code will still be synced with a git repo in the cloud.
   #
   def register
     name = shift_argument
@@ -95,12 +103,12 @@ class Mortar::Command::Projects < Mortar::Command::Base
     end
     validate_arguments!
 
-    if options[:withoutgit]
+    if options[:embedded]
       validate_project_name(name)
       validate_project_structure()
 
       register_project(name) do |project_result|
-        initialize_gitless_project(project_result)
+        initialize_embedded_project(project_result)
       end
     else
       unless git.has_dot_git?
@@ -108,7 +116,7 @@ class Mortar::Command::Projects < Mortar::Command::Base
         if File.exists? name
           error("mortar projects:register must be run from within the project directory.\nPlease \"cd #{name}\" and rerun this command.")
         else
-          error("No git repository found in the current directory.\nTo register a project that is not its own git repository, use the --withoutgit option.\nIf you do want this project to be its own git repository, please initialize git in this directory, and then rerun the register command.\nTo initialize your project in git, use:\n\ngit init\ngit add .\ngit commit -a -m \"first commit\"")
+          error("No git repository found in the current directory.\nTo register a project that is not its own git repository, use the --embedded option.\nIf you do want this project to be its own git repository, please initialize git in this directory, and then rerun the register command.\nTo initialize your project in git, use:\n\ngit init\ngit add .\ngit commit -a -m \"first commit\"")
         end
       end
 
@@ -137,6 +145,9 @@ class Mortar::Command::Projects < Mortar::Command::Base
   # Adds a remote to your local git repository to the Mortar git repository.  For example if a 
   # co-worker creates a Mortar project from an internal repository you would clone the internal
   # repository and then after cloning call mortar projects:set_remote.
+  #
+  # --embedded    # make this a embedded project tied to the specified remote
+  #
   def set_remote
     project_name = shift_argument
 
@@ -144,13 +155,15 @@ class Mortar::Command::Projects < Mortar::Command::Base
       error("Usage: mortar projects:set_remote PROJECT\nMust specify PROJECT.")
     end
 
-    unless git.has_dot_git?
-      error("Can only set the remote for an existing git project.  Please run:\n\ngit init\ngit add .\ngit commit -a -m \"first commit\"\n\nto initialize your project in git.")
-    end
+    unless options[:embedded]
+      unless git.has_dot_git?
+        error("Can only set the remote for an existing git project.  Please run:\n\ngit init\ngit add .\ngit commit -a -m \"first commit\"\n\nto initialize your project in git.")
+      end
 
-    if git.remotes(git_organization).include?("mortar")
-      display("The remote has already been set for project: #{project_name}")
-      return
+      if git.remotes(git_organization).include?("mortar")
+        display("The remote has already been set for project: #{project_name}")
+        return
+      end
     end
 
     projects = api.get_projects().body["projects"]
@@ -159,7 +172,15 @@ class Mortar::Command::Projects < Mortar::Command::Base
       error("No project named: #{project_name} exists. You can create this project using:\n\n mortar projects:create")
     end
 
-    git.remote_add("mortar", project['git_url'])
+    if options[:embedded]
+      File.open(".mortar-project-remote", "w") do |f|
+        f.puts project["git_url"]
+      end
+      git.sync_embedded_project(project, embedded_project_user_branch)
+    else
+      git.remote_add("mortar", project["git_url"])
+    end
+
     display("Successfully added the mortar remote to the #{project_name} project")
 
   end

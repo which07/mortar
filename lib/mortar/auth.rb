@@ -88,8 +88,9 @@ class Mortar::Auth
       get_credentials[1]
     end
 
-    def user_s3_safe
-      return user.gsub(/[^0-9a-zA-Z]/i, '-')
+    def user_s3_safe(local = false)
+      user_email = (local && !has_credentials) ? "notloggedin@user.org" : user
+      return user_email.gsub(/[^0-9a-zA-Z]/i, '-')
     end
 
     def api_key(user = get_credentials[0], password = get_credentials[1])
@@ -117,7 +118,10 @@ class Mortar::Auth
     def netrc_path
       default = Netrc.default_path
       encrypted = default + ".gpg"
-      if File.exists?(encrypted)
+      from_env = ENV['MORTAR_LOGIN_FILE']
+      if from_env
+        from_env
+      elsif File.exists?(encrypted)
         encrypted
       else
         default

@@ -106,6 +106,11 @@ STDERR
 
     context("configure") do
 
+      it "errors if the project root doesn't exist or we can't cd there" do
+        stderr, stdout = execute("local:configure --project-root /foo/baz")
+        stderr.should == " !    No such directory /foo/baz\n"
+      end
+
       it "errors if java can't be found" do
         any_instance_of(Mortar::Local::Java) do |j|
           stub(j).check_install.returns(false)
