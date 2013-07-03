@@ -350,4 +350,17 @@ class Mortar::Local::Pig
     param_file.path
   end
 
+  # Allows us to use a hash for template variables
+  class BindingClazz
+    def initialize(attrs)
+      attrs.each{ |k, v|
+        # set an instance variable with the key name so the binding will find it in scope
+        self.instance_variable_set("@#{k}".to_sym, v)
+      }
+    end
+    def get_binding()
+      binding
+    end
+  end
+
 end

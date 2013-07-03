@@ -4,7 +4,6 @@ require "mortar/plugin"
 
 module Mortar
   describe Plugin do
-    include SandboxHelper
     
     it "lives in ~/.mortar/plugins" do
       stub(Mortar::Plugin).home_directory.returns '/home/user' 
