@@ -19,6 +19,7 @@
 
 require 'rexml/document'
 require 'mortar/helpers'
+require 'mortar/plugin'
 require 'mortar/project'
 require 'mortar/version'
 require 'mortar/api'
@@ -35,6 +36,7 @@ module Mortar
       Dir[File.join(File.dirname(__FILE__), "command", "*.rb")].each do |file|
         require file
       end
+      Mortar::Plugin.load!
     end
 
     def self.commands
