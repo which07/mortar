@@ -182,7 +182,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     display("Or by running:\n\n  mortar jobs:status #{response['job_id']} --poll")
     display
 
-    response
+    response['job_id']
   end
   
   alias_command "run", "jobs:run"
