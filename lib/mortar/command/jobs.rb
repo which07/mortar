@@ -181,6 +181,8 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     display
     display("Or by running:\n\n  mortar jobs:status #{response['job_id']} --poll")
     display
+
+    response
   end
   
   alias_command "run", "jobs:run"
@@ -253,6 +255,7 @@ class Mortar::Command::Jobs < Mortar::Command::Base
     
     # If polling the status
     if options[:poll]
+      job_status = nil
       ticking(polling_interval) do |ticks|
         job_status = api.get_job(job_id).body
         # If the job is complete exit and display the table normally 
@@ -286,10 +289,12 @@ class Mortar::Command::Jobs < Mortar::Command::Base
           redisplay("[#{spinner(ticks)}] Status: #{job_display_status}")
         end
       end
+      job_status
     # If not polling, get the job status and display the results
     else
       job_status = api.get_job(job_id).body
       display_job_status(job_status)
+      job_status
     end
   end
 
