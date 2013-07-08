@@ -146,6 +146,7 @@ ERROR
             end
           end
         end
+        install_dependencies
       end
     end
 
