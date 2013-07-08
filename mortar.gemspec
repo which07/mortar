@@ -19,7 +19,6 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency  "mortar-api-ruby", "~> 0.6.3"
   gem.add_runtime_dependency  "netrc",           "~> 0.7"
   gem.add_runtime_dependency  "launchy",         "~> 2.1"
-  gem.add_runtime_dependency  "bundler",         "~> 1.2"
 
   gem.add_development_dependency "excon", '~> 0.15'
   gem.add_development_dependency "fakefs", '~> 0.4.2'
