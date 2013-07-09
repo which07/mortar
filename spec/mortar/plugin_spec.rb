@@ -99,18 +99,6 @@ module Mortar
       end
 
       describe "installing plugins with dependencies" do
-        it "should install plugin dependencies" do
-          plugin_folder = "/tmp/mortar_plugin"
-          FileUtils.mkdir_p(plugin_folder)
-          File.open(plugin_folder + '/Gemfile', 'w') { |f| f.write "# dummy content" }
-          `cd #{plugin_folder} && git init && echo 'test' > README && git add . && git commit -m 'my plugin'`
-          Plugin.new(plugin_folder).install
-          File.directory?("#{@sandbox}/mortar_plugin").should be_true
-          File.directory?("#{@sandbox}/mortar_plugin/bundle").should be_true
-          File.exist?("#{@sandbox}/mortar_plugin/Gemfile").should be_true
-          File.read("#{@sandbox}/mortar_plugin/README").should == "test\n"
-        end
-
         it "should fail to install plugin with bad dependencies" do
           mock(Plugin).install_bundle { system("exit 1") } 
           plugin_folder = "/tmp/mortar_plugin"
