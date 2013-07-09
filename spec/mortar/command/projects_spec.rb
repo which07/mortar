@@ -36,9 +36,11 @@ module Mortar::Command
     
     project1 = {'name' => "Project1",
                 'status' => Mortar::API::Projects::STATUS_ACTIVE,
+                'project_id' => 'abcd1234',
                 'git_url' => "git@github.com:mortarcode-dev/Project1"}
     project2 = {'name' => "Project2",
                 'status' => Mortar::API::Projects::STATUS_ACTIVE,
+                'project_id' => 'defg5678',
                 'git_url' => "git@github.com:mortarcode-dev/Project2"}
         
     context("index") do
@@ -75,12 +77,13 @@ STDERR
       end
       
       it "deletes project" do
-        project_name = "COMMANDO"
+        project_id = "abcd1234"
 
-        mock(Mortar::Auth.api).delete_project(project_name).returns(Excon::Response.new(:body => {}, :status => 200 )) 
-        stderr, stdout = execute("projects:delete COMMANDO")
+        mock(Mortar::Auth.api).get_projects().returns(Excon::Response.new(:body => {"projects" => [project1, project2]}))
+        mock(Mortar::Auth.api).delete_project(project_id).returns(Excon::Response.new(:body => {}, :status => 200 ))
+        stderr, stdout = execute("projects:delete Project1")
         stdout.should == <<-STDOUT
-Sending request to delete project: COMMANDO... done
+Sending request to delete project: Project1... done
 
 Your project has been deleted.
 STDOUT

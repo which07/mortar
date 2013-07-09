@@ -47,19 +47,31 @@ class Mortar::Command::Projects < Mortar::Command::Base
       error("Usage: mortar projects:delete PROJECTNAME\nMust specify PROJECTNAME.")
     end
     validate_arguments!
-    
-    # delete embedded project mirror if one exists
-    mirror_dir = "#{git.mortar_mirrors_dir()}/#{name}"
-    if File.directory? mirror_dir
-      FileUtils.rm_r mirror_dir
+    projects = api.get_projects().body['projects']
+    project_id = nil
+    if projects.any?
+      projects.each do |project|
+        if project['name'] == name
+          project_id = project['project_id']
+        end
+      end
     end
 
-    # delete Mortar remote
-    project_id = nil
-    action("Sending request to delete project: #{name}") do
-      api.delete_project(name).body["project_id"]
+    if project_id.nil?
+      display "\nNo project with name: #{name}"
+    else
+      # delete embedded project mirror if one exists
+      mirror_dir = "#{git.mortar_mirrors_dir()}/#{name}"
+      if File.directory? mirror_dir
+        FileUtils.rm_r mirror_dir
+      end
+
+      # delete Mortar remote
+      action("Sending request to delete project: #{name}") do
+        api.delete_project(project_id).body['project_id']
+      end
+      display "\nYour project has been deleted."
     end
-    display "\nYour project has been deleted."
     
   end
   
