@@ -99,6 +99,33 @@ module Mortar
       end
 
       describe "installing plugins with dependencies" do
+        it "should install plugin dependencies" do
+          ## Setup Fake Gem
+          mortar_fake_gem_folder = create_fake_gem("/tmp")
+          plugin_folder = "/tmp/mortar_plugin"
+          FileUtils.mkdir_p(plugin_folder)
+          File.open(plugin_folder + '/Gemfile', 'w') { |f|
+            f.write "gem 'mortar_fake_gem', :path => '#{mortar_fake_gem_folder}'" 
+          }
+          File.open(plugin_folder + '/init.rb', 'w') { |f|
+            f.write <<-EOS
+require File.join(File.dirname(__FILE__), "bundle/bundler/setup")
+require "mortar_fake_gem"
+
+PluginTest = MortarFakeGem::WhoIs.awesome?
+EOS
+          }
+          `cd #{plugin_folder} && git init && echo 'test' > README && git add . && git commit -m 'my plugin'`
+          Plugin.new(plugin_folder).install
+          File.directory?("#{@sandbox}/mortar_plugin").should be_true
+          File.directory?("#{@sandbox}/mortar_plugin/bundle").should be_true
+          File.exist?("#{@sandbox}/mortar_plugin/Gemfile").should be_true
+          File.read("#{@sandbox}/mortar_plugin/README").should == "test\n"
+
+          Plugin.load!
+          PluginTest.should be_true
+        end
+
         it "should fail to install plugin with bad dependencies" do
           mock(Plugin).install_bundle { system("exit 1") } 
           plugin_folder = "/tmp/mortar_plugin"

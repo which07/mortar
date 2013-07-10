@@ -43,8 +43,17 @@ module Mortar
     def self.install_bundle
       # TODO: Deal with the bundler as a runtime dependency issue
       # before moving these require statements to the top.
-      require 'bundler/cli'
-      require 'bundler/friendly_errors'
+      begin
+        require 'bundler/cli'
+        require 'bundler/friendly_errors'
+      rescue LoadError => e 
+        raise <<-ERROR
+Unable to install this plugin. Make sure you have bundler installed:
+
+$ gem install bundler
+
+ERROR
+      end
 
       out = StringIO.new
       $stdout = out
