@@ -41,7 +41,40 @@ module Mortar
     end
 
     def self.install_bundle
-      system("bundle install --standalone --without development >> ./../plugin_install.log")
+      # TODO: Deal with the bundler as a runtime dependency issue
+      # before moving these require statements to the top.
+      begin
+        require 'bundler/cli'
+        require 'bundler/friendly_errors'
+      rescue LoadError => e 
+        raise <<-ERROR
+Unable to install this plugin. Make sure you have bundler installed:
+
+$ gem install bundler
+
+ERROR
+      end
+
+      out = StringIO.new
+      $stdout = out
+      begin
+        bundle_def = Bundler.definition({})
+        Bundler.ui = Bundler::UI::Shell.new({})
+        Bundler.ui.level = "silent"
+        Bundler.settings[:path] = "bundle"
+        Bundler::Installer.install(Bundler.root, bundle_def, {
+          :standalone => [],
+        })
+        $stdout = STDOUT
+        result = true
+      rescue StandardError => e
+        result = false
+      end
+      open("#{Plugin.directory}/plugin_install.log", 'a') do |f|
+        f.puts out.to_s
+      end
+      $stdout = STDOUT
+      return result
     end
 
     def self.load!
@@ -111,8 +144,7 @@ ERROR
         Mortar::Plugin.without_bundler_env do
           ENV["BUNDLE_GEMFILE"] = File.expand_path("Gemfile", path)
           if File.exists? ENV["BUNDLE_GEMFILE"]
-            Mortar::Plugin.install_bundle 
-            unless $?.success?
+            unless Mortar::Plugin.install_bundle 
               FileUtils.rm_rf path
               raise Mortar::Plugin::ErrorInstallingDependencies, <<-ERROR
 Unable to install dependencies for #{name}.

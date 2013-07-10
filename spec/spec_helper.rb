@@ -249,6 +249,44 @@ def git_create_conflict(git, project)
   filename
 end
 
+def create_fake_gem(path)
+  mortar_fake_gem = <<-EOS
+Gem::Specification.new do |s|
+  s.name = "mortar_fake_gem"
+  s.version = "0.0.1"
+  s.summary = "mortar_fake_gem is the best"
+  s.files = [
+    "lib/mortar_fake_gem.rb"
+  ]
+  s.require_paths = ["lib"]
+end
+EOS
+  
+  mortar_fake_gem_rb = <<-EOS
+module MortarFakeGem
+  class WhoIs
+    def self.awesome?
+      return true
+    end
+  end
+end
+EOS
+
+  files = { 
+    "mortar_fake_gem.gemspec" => mortar_fake_gem,
+    "lib/mortar_fake_gem.rb" => mortar_fake_gem_rb,
+  }
+
+  FileUtils.mkdir_p(File.join(path, "mortar_fake_gem/lib"))
+  files.each { |file_name, contents|
+    File.open(File.join(path, "/mortar_fake_gem/#{file_name}"), 'w') do |f|
+      f.puts contents
+    end
+  }
+
+  return File.join(path, "mortar_fake_gem")
+
+end
 
 def git_add_file(git, project)
   # add a new file

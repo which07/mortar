@@ -46,7 +46,7 @@ module Mortar::Command
           plugin.install
           Mortar::Plugin.load_plugin(plugin.name)
         rescue StandardError => e
-          error e
+          error e.message
         end
       end
     end
@@ -68,7 +68,7 @@ module Mortar::Command
         begin
           plugin.uninstall
         rescue Mortar::Plugin::ErrorPluginNotFound => e
-          error e
+          error e.message
         end
       end
     end
@@ -101,7 +101,7 @@ module Mortar::Command
             status "skipped symlink"
           rescue StandardError => e
             status "error"
-            display e
+            display e.message
           end
         end
       end
