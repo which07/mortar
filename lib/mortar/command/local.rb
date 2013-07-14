@@ -66,8 +66,38 @@ class Mortar::Command::Local < Mortar::Command::Base
       error("No such directory #{project_root}")
     end
     Dir.chdir(project_root)
-
     script = validate_script!(script_name)
+    ctrl = Mortar::Local::Controller.new
+    ctrl.run(script, pig_parameters)
+  end
+
+  # local:characterize 
+  # 
+  # 
+  # -f, --param-file PARAMFILE # Load pig parameter values from a file
+  #
+  # Load some data and emit statistics.
+  # PARAMFILE:
+  #   Loader
+  #   Location of data
+  #   Output path
+  #   Schema (optional)
+  #   Infer Types? (default = true)
+  #
+  # Type inference is performed by default, but it may slow down
+  #   characterization.
+  def characterize
+    validate_arguments!
+
+    #cd into the project root
+    project_root = options[:project_root] ||= Dir.getwd
+    unless File.directory?(project_root)
+      error("No such directory #{project_root}")
+    end
+    Dir.chdir(project_root)
+
+    controlscript_name = "controlscripts/lib/characterize_control.py"
+    script = validate_script!(controlscript_name)
     ctrl = Mortar::Local::Controller.new
     ctrl.run(script, pig_parameters)
   end

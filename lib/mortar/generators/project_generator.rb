@@ -38,6 +38,7 @@ module Mortar
           
           inside "pigscripts" do
             generate_file "pigscript.pig", "#{project_name}.pig"
+            copy_file "characterize.pig", "characterize.pig"
           end
 
           mkdir "controlscripts" 
@@ -46,6 +47,7 @@ module Mortar
             mkdir "lib"
             inside "lib" do
               copy_file "__init__.py", "__init__.py"
+              copy_file "characterize_control.py", "characterize_control.py"
             end
           end
           
@@ -53,6 +55,7 @@ module Mortar
           
           inside "macros" do
             copy_file "gitkeep", ".gitkeep"
+            copy_file "characterize.pig", "characterize.pig"
           end
 
           mkdir "fixtures"
@@ -72,6 +75,7 @@ module Mortar
             mkdir "jython"
             inside "jython" do
               copy_file "gitkeep", ".gitkeep"
+              copy_file "top_5_tuple.py", "top_5_tuple.py"
             end
 
             mkdir "java"
