@@ -1,4 +1,7 @@
 # based on the Rails Plugin
+
+require "stringio"
+
 module Mortar
   class Plugin
     include Mortar::Helpers
@@ -65,13 +68,13 @@ ERROR
         Bundler::Installer.install(Bundler.root, bundle_def, {
           :standalone => [],
         })
-        $stdout = STDOUT
         result = true
       rescue StandardError => e
+        out.write e.message
         result = false
       end
       open("#{Plugin.directory}/plugin_install.log", 'a') do |f|
-        f.puts out.to_s
+        f.puts out.string
       end
       $stdout = STDOUT
       return result
