@@ -55,7 +55,7 @@ module Mortar
           
           inside "macros" do
             copy_file "gitkeep", ".gitkeep"
-            copy_file "characterize.pig", "characterize.pig"
+            copy_file "characterize_macro.pig", "characterize_macro.pig"
           end
 
           mkdir "fixtures"

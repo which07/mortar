@@ -72,7 +72,10 @@ class Mortar::Command::Local < Mortar::Command::Base
   end
 
   # local:characterize 
-  # 
+  #
+  # Characterize will inspect your input data, inferring a schema and 
+  #    generating keys, if needed. It will output CSV containing various
+  #    statistics about your data (most common values, percent null, etc.)
   # 
   # -f, --param-file PARAMFILE # Load pig parameter values from a file
   #

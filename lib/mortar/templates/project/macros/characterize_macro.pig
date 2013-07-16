@@ -72,11 +72,11 @@ unique_vals = FOREACH key_groups {
              MIN(unique_v.val) as min_val:double, MAX(unique_v.val) as max_val:double;
 }
 
--- calculate quartile tuples for each key (filtering out null values to make datafu happy)
+-- calculate decile tuples for each key (filtering out null values to make datafu happy)
 no_nulls = filter raw_fields by val is not null;
 no_null_groups = GROUP no_nulls BY keyname;
-key_quartiles = FOREACH no_null_groups {
-  GENERATE flatten(group) as keyname:chararray, Deciles(no_nulls.val) as quartiles:tuple();
+key_deciles = FOREACH no_null_groups {
+  GENERATE flatten(group) as keyname:chararray, Deciles(no_nulls.val) as deciles:tuple();
 }      
 
 -- Find the number of times each value occurs for each field
@@ -105,14 +105,14 @@ flat_vals = FOREACH cogroup_result {
 }
 
 join_result = JOIN flat_vals BY keyname,
-            key_quartiles  BY keyname;
+            key_deciles  BY keyname;
 
 -- Clean up columns (remove duplicate keyname field)
 result =  FOREACH join_result
          GENERATE flat_vals::keyname as Key,
                   num_distinct_vals_count as NDistinct,
                   num_vals as NVals,
-                  quartiles as Deciles,        
+                  deciles as Deciles,        
                   num_null as NNull,
                   percent_null as PctNull,
                   min_val as Min,
