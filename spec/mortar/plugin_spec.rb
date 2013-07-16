@@ -23,7 +23,7 @@ module Mortar
       end
 
       after(:each) do
-        FileUtils.rm_rf(@sandbox)
+        # FileUtils.rm_rf(@sandbox)
       end
 
       it "lists installed plugins" do
@@ -99,6 +99,7 @@ module Mortar
       end
 
       describe "installing plugins with dependencies" do
+
         it "should install plugin dependencies" do
           ## Setup Fake Gem
           mortar_fake_gem_folder = create_fake_gem("/tmp")
