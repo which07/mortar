@@ -84,9 +84,14 @@ class Mortar::Command::Local < Mortar::Command::Base
   #   LOADER=<full class path of loader function>
   #   INPUT_SRC=<Location of the input data>
   #   OUTPUT_PATH=<Relative path from project root for output>
+  #   INFER_TYPES=<when true, recursively infers types for input data>
   #
-  # Type inference is performed by default, but it may slow down
-  #   characterization.
+  # Example paramfile:
+  #   LOADER=org.apache.pig.piggybank.storage.JsonLoader()
+  #   INPUT_SRC=s3n://twitter-gardenhose-mortar/example
+  #   OUTPUT_PATH=twitter_char
+  #   INFER_TYPES=true
+  #
   def characterize
     validate_arguments!
 

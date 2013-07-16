@@ -6,11 +6,13 @@ if __name__ == "__main__":
     loader       = params["LOADER"]
     input_source = params["INPUT_SRC"]
     output_path  = params["OUTPUT_PATH"]
+    infer_types  = params["INFER_TYPES"]
 
     Pig.compileFromFile("../pigscripts/characterize.pig").bind({
         "LOADER"      : loader,
         "INPUT_SRC"   : input_source,
         "OUTPUT_PATH" : output_path,
+        "INFER_TYPES" : infer_types
     }).runSingle()
 
     for root, _, files in os.walk("../%s" % output_path):

@@ -14,7 +14,10 @@ def key_bag_to_tuple(input_bag):
     val_count_tup = tuple(val_counts)
     orig_val_tup = tuple(orig_vals)
     output.append(val_tup)
-    output.append(input_bag[0][1])
+    for t in input_bag:
+        if t[1] != "NULL":
+            output.append(t[1])
+            break
     output.append(orig_val_tup)
     output.append(val_count_tup)
     return tuple(output)

@@ -137,7 +137,7 @@ STDOUT
 \e[1;32m      create\e[0m  controlscripts/lib/characterize_control.py
 \e[1;32m      create\e[0m  macros
 \e[1;32m      create\e[0m  macros/.gitkeep
-\e[1;32m      create\e[0m  macros/characterize.pig
+\e[1;32m      create\e[0m  macros/characterize_macro.pig
 \e[1;32m      create\e[0m  fixtures
 \e[1;32m      create\e[0m  fixtures/.gitkeep
 \e[1;32m      create\e[0m  udfs
