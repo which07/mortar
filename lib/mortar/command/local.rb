@@ -66,8 +66,44 @@ class Mortar::Command::Local < Mortar::Command::Base
       error("No such directory #{project_root}")
     end
     Dir.chdir(project_root)
-
     script = validate_script!(script_name)
+    ctrl = Mortar::Local::Controller.new
+    ctrl.run(script, pig_parameters)
+  end
+
+  # local:characterize 
+  #
+  # Characterize will inspect your input data, inferring a schema and 
+  #    generating keys, if needed. It will output CSV containing various
+  #    statistics about your data (most common values, percent null, etc.)
+  # 
+  # -f, --param-file PARAMFILE # Load pig parameter values from a file
+  #
+  # Load some data and emit statistics.
+  # PARAMFILE:
+  #   LOADER=<full class path of loader function>
+  #   INPUT_SRC=<Location of the input data>
+  #   OUTPUT_PATH=<Relative path from project root for output>
+  #   INFER_TYPES=<when true, recursively infers types for input data>
+  #
+  # Example paramfile:
+  #   LOADER=org.apache.pig.piggybank.storage.JsonLoader()
+  #   INPUT_SRC=s3n://twitter-gardenhose-mortar/example
+  #   OUTPUT_PATH=twitter_char
+  #   INFER_TYPES=true
+  #
+  def characterize
+    validate_arguments!
+
+    #cd into the project root
+    project_root = options[:project_root] ||= Dir.getwd
+    unless File.directory?(project_root)
+      error("No such directory #{project_root}")
+    end
+    Dir.chdir(project_root)
+
+    controlscript_name = "controlscripts/lib/characterize_control.py"
+    script = validate_script!(controlscript_name)
     ctrl = Mortar::Local::Controller.new
     ctrl.run(script, pig_parameters)
   end
