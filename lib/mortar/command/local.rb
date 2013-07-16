@@ -78,11 +78,9 @@ class Mortar::Command::Local < Mortar::Command::Base
   #
   # Load some data and emit statistics.
   # PARAMFILE:
-  #   Loader
-  #   Location of data
-  #   Output path
-  #   Schema (optional)
-  #   Infer Types? (default = true)
+  #   LOADER=<full class path of loader function>
+  #   INPUT_SRC=<Location of the input data>
+  #   OUTPUT_PATH=<Relative path from project root for output>
   #
   # Type inference is performed by default, but it may slow down
   #   characterization.
