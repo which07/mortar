@@ -63,7 +63,12 @@ ERROR
       begin
         bundle_def = Bundler.definition({})
         Bundler.ui = Bundler::UI::Shell.new({})
-        Bundler.ui.level = "silent"
+
+        # Older versions of Thor and Bundler don't have this option
+        if Bundler.ui.respond_to?(:level=)
+          Bundler.ui.level = "silent"
+        end
+
         Bundler.settings[:path] = "bundle"
         Bundler::Installer.install(Bundler.root, bundle_def, {
           :standalone => [],
