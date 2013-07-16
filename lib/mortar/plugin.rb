@@ -62,10 +62,11 @@ ERROR
       $stdout = out
       begin
         bundle_def = Bundler.definition({})
-        Bundler.ui = Bundler::UI::Shell.new({})
 
-        # Older versions of Thor and Bundler don't have this option
-        if Bundler.ui.respond_to?(:level=)
+        if Gem::Version.new(Bundler::VERSION) < Gem::Version.new("1.3.0")
+          Bundler.ui = Bundler::UI::Shell.new(Thor::Base.shell.new)
+        else
+          Bundler.ui = Bundler::UI::Shell.new({})
           Bundler.ui.level = "silent"
         end
 
