@@ -43,7 +43,8 @@ module Mortar
       ENV.replace(original_env.to_hash)
     end
 
-    def self.install_bundle
+    # Internal: Ensures bundler is installed, if it isn't it'll raise an error
+    def self.ensure_bundler_installed
       # TODO: Deal with the bundler as a runtime dependency issue
       # before moving these require statements to the top.
       begin
@@ -57,6 +58,11 @@ $ gem install bundler
 
 ERROR
       end
+    end
+
+    def self.install_bundle
+      # Raises error on failure
+      Mortar::Plugin.ensure_bundler_installed
 
       out = StringIO.new
       $stdout = out
@@ -153,13 +159,18 @@ ERROR
         Mortar::Plugin.without_bundler_env do
           ENV["BUNDLE_GEMFILE"] = File.expand_path("Gemfile", path)
           if File.exists? ENV["BUNDLE_GEMFILE"]
-            unless Mortar::Plugin.install_bundle 
+            begin
+              unless Mortar::Plugin.install_bundle 
+                FileUtils.rm_rf path
+                raise Mortar::Plugin::ErrorInstallingDependencies, <<-ERROR
+  Unable to install dependencies for #{name}.
+  Error logs stored to #{Plugin.directory}/plugin_install.log
+  Refer to the documentation for this plugin for help.
+  ERROR
+              end
+            rescue StandardError => e
               FileUtils.rm_rf path
-              raise Mortar::Plugin::ErrorInstallingDependencies, <<-ERROR
-Unable to install dependencies for #{name}.
-Error logs stored to #{Plugin.directory}/plugin_install.log
-Refer to the documentation for this plugin for help.
-ERROR
+              raise e
             end
           end
         end
