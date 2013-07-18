@@ -61,6 +61,8 @@ ERROR
       out = StringIO.new
       $stdout = out
       begin
+        Bundler.settings[:path] = "bundle"
+        Bundler.settings[:disable_shared_gems] = '1'
         bundle_def = Bundler.definition({})
 
         if Gem::Version.new(Bundler::VERSION) < Gem::Version.new("1.3.0")
@@ -70,9 +72,9 @@ ERROR
           Bundler.ui.level = "silent"
         end
 
-        Bundler.settings[:path] = "bundle"
         Bundler::Installer.install(Bundler.root, bundle_def, {
           :standalone => [],
+          :disabled_shared_gems => '1'
         })
         result = true
       rescue StandardError => e
