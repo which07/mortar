@@ -174,11 +174,11 @@ ERROR
     end
 
     def install_dependencies
-      Dir.chdir(path) do
-        Mortar::Plugin.without_bundler_env do
-          ENV["BUNDLE_GEMFILE"] = File.expand_path("Gemfile", path)
-          if File.exists? ENV["BUNDLE_GEMFILE"]
-            begin
+      begin
+        Dir.chdir(path) do
+          Mortar::Plugin.without_bundler_env do
+            ENV["BUNDLE_GEMFILE"] = File.expand_path("Gemfile", path)
+            if File.exists? ENV["BUNDLE_GEMFILE"]
               unless Mortar::Plugin.install_bundle 
                 FileUtils.rm_rf path
                 raise Mortar::Plugin::ErrorInstallingDependencies, <<-ERROR
@@ -187,12 +187,12 @@ ERROR
   Refer to the documentation for this plugin for help.
   ERROR
               end
-            rescue StandardError => e
-              FileUtils.rm_rf path
-              raise e
             end
           end
         end
+      rescue StandardError => e
+        FileUtils.rm_rf path
+        raise e
       end
     end
 
