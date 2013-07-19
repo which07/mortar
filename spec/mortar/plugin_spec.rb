@@ -143,6 +143,16 @@ EOS
           lambda { Plugin.new(plugin_folder).install }.should raise_error Mortar::Plugin::ErrorInstallingDependencies 
           File.exists?("#{Plugin.directory}/plugin_install.log").should be_true
         end
+
+        it "should clean plugin if bundler isn't installed" do
+          mock(Plugin).ensure_bundler_installed { raise "Bundler not installed! Whoops!" }
+          plugin_folder = "/tmp/mortar_plugin"
+          FileUtils.mkdir_p(plugin_folder)
+          File.open(plugin_folder + '/Gemfile', 'w') { |f| f.write "# dummy content" }
+          `cd #{plugin_folder} && git init && echo 'test' > README && git add . && git commit -m 'my plugin'`
+          lambda { Plugin.new(plugin_folder).install }.should raise_error StandardError 
+          File.exist?("#{@sandbox}/mortar_plugin").should be_false
+        end
       end
 
       describe "when there are plugin load errors" do
