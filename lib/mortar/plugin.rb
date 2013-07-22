@@ -42,7 +42,7 @@ module Mortar
       ENV.delete("BUNDLE_BIN_PATH")
       ENV.delete("RUBYOPT")
 
-      # GAHH MONKEY PATCH
+      # Use monkey patched method to remove existing bundler configuration.
       Bundler.nuke_configuration
 
       yield
@@ -73,16 +73,11 @@ ERROR
       out = StringIO.new
       $stdout = out
       begin
-        # This PSA is brought to you be Thomas Millar.
-        # 
-        # WARNING! THIS IS A MONKEY PATCH!
-        #
+        # WARNING! These 4 lines are a monkey patch.
         Bundler.settings[:path] = "bundle"
         Bundler.settings[:disable_shared_gems] = '1'
         Bundler.bundle_path = nil
         Bundler.send(:configure_gem_home_and_path)
-        #
-        # that is all.
 
         bundle_def = Bundler.definition({})
 
