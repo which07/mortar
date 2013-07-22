@@ -33,11 +33,18 @@ module Mortar
     end
     
     def self.without_bundler_env 
+      # Raises error on failure
+      Mortar::Plugin.ensure_bundler_installed
+
       original_env = ENV.to_hash
       ENV.delete("BUNDLE_GEMFILE")
       ENV.delete("BUNDLE_PATH")
       ENV.delete("BUNDLE_BIN_PATH")
       ENV.delete("RUBYOPT")
+
+      # Use monkey patched method to remove existing bundler configuration.
+      Bundler.nuke_configuration
+
       yield
     ensure
       ENV.replace(original_env.to_hash)
@@ -50,6 +57,7 @@ module Mortar
       begin
         require 'bundler/cli'
         require 'bundler/friendly_errors'
+        require 'monkey_patch/bundler/bundler'
       rescue LoadError => e 
         raise <<-ERROR
 Unable to install this plugin. Make sure you have bundler installed:
@@ -61,14 +69,16 @@ ERROR
     end
 
     def self.install_bundle
-      # Raises error on failure
-      Mortar::Plugin.ensure_bundler_installed
 
       out = StringIO.new
       $stdout = out
       begin
+        # WARNING! These 4 lines are a monkey patch.
         Bundler.settings[:path] = "bundle"
         Bundler.settings[:disable_shared_gems] = '1'
+        Bundler.bundle_path = nil
+        Bundler.send(:configure_gem_home_and_path)
+
         bundle_def = Bundler.definition({})
 
         if Gem::Version.new(Bundler::VERSION) < Gem::Version.new("1.3.0")
@@ -84,6 +94,8 @@ ERROR
         })
         result = true
       rescue StandardError => e
+        puts e.message
+        puts e.backtrace
         out.write e.message
         result = false
       end
@@ -157,11 +169,11 @@ ERROR
     end
 
     def install_dependencies
-      Dir.chdir(path) do
-        Mortar::Plugin.without_bundler_env do
-          ENV["BUNDLE_GEMFILE"] = File.expand_path("Gemfile", path)
-          if File.exists? ENV["BUNDLE_GEMFILE"]
-            begin
+      begin
+        Dir.chdir(path) do
+          Mortar::Plugin.without_bundler_env do
+            ENV["BUNDLE_GEMFILE"] = File.expand_path("Gemfile", path)
+            if File.exists? ENV["BUNDLE_GEMFILE"]
               unless Mortar::Plugin.install_bundle 
                 FileUtils.rm_rf path
                 raise Mortar::Plugin::ErrorInstallingDependencies, <<-ERROR
@@ -170,12 +182,12 @@ ERROR
   Refer to the documentation for this plugin for help.
   ERROR
               end
-            rescue StandardError => e
-              FileUtils.rm_rf path
-              raise e
             end
           end
         end
+      rescue StandardError => e
+        FileUtils.rm_rf path
+        raise e
       end
     end
 
