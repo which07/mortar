@@ -16,6 +16,7 @@
 
 require "mortar/local/controller"
 require "mortar/command/base"
+require "mortar/generators/characterize_generator"
 
 # run select pig commands on your local machine
 #
@@ -101,11 +102,14 @@ class Mortar::Command::Local < Mortar::Command::Base
       error("No such directory #{project_root}")
     end
     Dir.chdir(project_root)
+    gen = Mortar::Generators::CharacterizeGenerator.new
+    gen.generate_characterize
 
     controlscript_name = "controlscripts/lib/characterize_control.py"
     script = validate_script!(controlscript_name)
     ctrl = Mortar::Local::Controller.new
     ctrl.run(script, pig_parameters)
+    gen.cleanup_characterize(project_root)
   end
 
   # local:illustrate PIGSCRIPT [ALIAS]
