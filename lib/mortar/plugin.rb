@@ -55,6 +55,7 @@ module Mortar
       # TODO: Deal with the bundler as a runtime dependency issue
       # before moving these require statements to the top.
       begin
+        require 'bundler'
         require 'bundler/cli'
         require 'bundler/friendly_errors'
         require 'monkey_patch/bundler/bundler'
